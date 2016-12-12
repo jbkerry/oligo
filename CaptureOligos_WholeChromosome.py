@@ -112,15 +112,14 @@ for seq_record in Sequence:
 Chr="chr"+chromosome
 StartSeq = 1
 StartSeq = StartSeq-1
-StopSeq = len(Sequence_dict[Chr])
+#StopSeq = len(Sequence_dict[Chr])
+StopSeq = 5000000
 posList = []
 p = re.compile(Cut_sequence)
 for m in p.finditer(Sequence_dict[Chr]):
     posList.append(m.start()+StartSeq)
 
 # Find all GATC sites
-
-
 
 ThisSite = 0
 p = re.compile(Cut_sequence)
@@ -131,7 +130,7 @@ for m in p.finditer(Complete_seq):
     Position = posList[ThisSite]
     
     LeftOligoStart = Position
-    LeftOligoStop = Position + 70
+    LeftOligoStop = Position + oligo_value
     if LeftOligoStop > StopSeq:
         LeftOligoStop=StopSeq
         
@@ -144,7 +143,7 @@ for m in p.finditer(Complete_seq):
     NextSite = ThisSite+1
     if NextSite<len(posList):
         NextPosition = posList[NextSite]
-        RightOligoStart = NextPosition-66
+        RightOligoStart = NextPosition-(oligo_value-4)
         if RightOligoStart < StartSeq:
             RightOligoStart=StartSeq
         RightOligoStop = NextPosition+4
