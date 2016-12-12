@@ -1,6 +1,49 @@
 #!usr/bin/python
 
-import re
+from Bio import SeqIO
+import re,getopt,sys
+
+def usage():
+    print("usage: CaptureOligos_WholeChromosome.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)>")
+    print("for extended help, type CaptureOligos_WholeChromosome.py -h")
+def help():
+    print("usage: CaptureOligos_WholeChromosome.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)>")
+    print("CaptureOligos_WholeChromosome.py generates oligos adjacent to every restriction site of the supplied enzyme for an entire chromosome.")
+    print("Genomes: choose from 'hg18', 'hg19', 'mm9' or 'mm10'")
+    print("Chromosome: supply the bare number of letter e.g. '7' or 'X'. Only one chromosome can be run at a time")
+    print("Oligo size: specify the size of the oligos to be generated adjacent to restriction sites. Supply the number of base pairs e.g. '70'")
+    
+genome = ""
+chromosome = ""
+enzyme = ""
+oligo_size = ""
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:], 'g:c:e:o:h',)
+except getopt.GetoptError:
+    usage()
+    sys.exit(2)
+    
+if not opts:
+    usage()
+    sys.exit(2)
+else:
+    for opt, arg in opts:
+        if opt == '-h':
+            usage()
+            sys.exit(2)
+        elif opt == '-g':
+            genome = arg
+        elif opt == '-c':
+            chromosome = arg
+        elif opt == '-e':
+            enzyme = arg
+        elif opt == '-o':
+            oligo_size = arg
+        else:
+            usage()
+            sys.exit(2)
+
 
 # Put sequence of chr1 into a single variable
 #chr1_file = "/t1-data1/WTSA_Dev/jkerry/CS_paper/Mus_musculus.NCBIM37.67.dna.chromosome.1.fa"
