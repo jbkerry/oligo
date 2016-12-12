@@ -5,13 +5,16 @@ import re,getopt,sys
 
 def usage():
     print("usage: CaptureOligos_WholeChromosome.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)>")
-    print("for extended help, type CaptureOligos_WholeChromosome.py -h")
-def help():
-    print("usage: CaptureOligos_WholeChromosome.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)>")
-    print("CaptureOligos_WholeChromosome.py generates oligos adjacent to every restriction site of the supplied enzyme for an entire chromosome.")
-    print("Genomes: choose from 'hg18', 'hg19', 'mm9' or 'mm10'")
-    print("Chromosome: supply the bare number of letter e.g. '7' or 'X'. Only one chromosome can be run at a time")
-    print("Oligo size: specify the size of the oligos to be generated adjacent to restriction sites. Supply the number of base pairs e.g. '70'")
+    print("For extended help: 'CaptureOligos_WholeChromosome.py -h'")
+def help_info():
+    print("usage: CaptureOligos_WholeChromosome.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)>\n")
+    print("-------------------------------------------------------------------------\n")
+    print("CaptureOligos_WholeChromosome.py generates oligos adjacent to every restriction site of the supplied enzyme for an entire chromosome.\n")
+    print("\tGenomes: choose from 'hg18', 'hg19', 'mm9' or 'mm10'\n")
+    print("\tChromosome: supply the bare number or letter of the chromosome e.g. '7' or 'X'. Only one chromosome can be run at a time\n")
+    print("\tRestriction enzymes: 'DpnII' (GATC) or 'NlaIII' (CATG)\n")
+    print("\tOligo size: specify the size of the oligos to be generated adjacent to restriction sites. Supply the number of base pairs e.g. '120'\n")
+    print("Example (70bp oligos for DpnII on chr11 of mouse build mm9): 'CaptureOligos_WholeChromosome.py -g mm9 -c 11 -e DpnII -o 70'\n")
     
 genome = ""
 chromosome = ""
@@ -30,7 +33,7 @@ if not opts:
 else:
     for opt, arg in opts:
         if opt == '-h':
-            usage()
+            help_info()
             sys.exit(2)
         elif opt == '-g':
             genome = arg
@@ -43,42 +46,84 @@ else:
         else:
             usage()
             sys.exit(2)
+            
+## Check for errors
 
+# Genome
+            
+KillScript = 0
+MaxChromosome = 19
+Organism = ""
+if (genome=="hg18") | (genome=="hg19"):
+    Organism="Homo_sapiens"
+    MaxChromosome = 22
+elif (genome=="mm9") | (genome=="mm10"):
+    Organism="Mus_musculus"
+    MaxChromosome = 19
+else:
+    print("Genome not recognised, please choose from hg18, hg19, mm9 or mm10 (case sensitive)")
+    KillScript=1
+    
+# Chromosome
+try:
+    chr_value = int(chromosome)
+    if (chr_value<1) | (chr_value>MaxChromosome):
+        print("Selected chromosome number does not exist for the specified genome build")
+        KillScript=1
+except ValueError:
+    if (chromosome!="X") & (chromosome!="Y") & (chromosome!="M"):
+        print("Selected chromosome number does not exist for the specified genome build (case sensitive for X, Y and M)")
+        KillScript=1
 
-# Put sequence of chr1 into a single variable
-#chr1_file = "/t1-data1/WTSA_Dev/jkerry/CS_paper/Mus_musculus.NCBIM37.67.dna.chromosome.1.fa"
-chr1_file = "/t1-data1/WTSA_Dev/jkerry/CS_paper/chr1.fa"
-fasta_file = open("chr1_DpnII_70bpOligos.fa","w")
-Complete_seq = ""
-chr1_lines = [chr1_line.rstrip('\n') for chr1_line in open(chr1_file)]
-for thisLine in chr1_lines[1:]:
-    Complete_seq = Complete_seq+""+thisLine.upper()
+# Restriction enzyme
+    
+Cut_sequence = ""
+if enzyme=="DpnII":
+    Cut_sequence="GATC"
+elif enzyme=="NlaIII":
+    Cut_sequence="CATG"
+else:
+    print("Restriction enzyme is not recognised, please choose from DpnII or NlaIII (case sensitive)")
+    KillScript=1
+    
+# Oligo size
+    
+try:
+    oligo_value = int(oligo_size)
+    if oligo_value<1:
+        print("Oligo size invalid, it must be an integer greater than 0")
+        KillScript=1
+except ValueError:
+    print("Oligo size invalid, it must be an integer greater than 0")
+    KillScript=1
+    
+if KillScript==1:
+    sys.exit(2)
+    
+## Store genome sequence in dictionary, by chromosome
 
-# re test
-#p = re.compile("GATC")
-#testSeq = "TAGCGAGAGTTGCAGGATCAGATGCGAGGTGCGAGTGCGATGGATGCGATCCAAAGCTGAGA"
-#for m in p.finditer(testSeq):
-#    print m.start(), m.group()
-#    Position = m.start()
-#    StartOligo = Position-10
-#    LeftOligo = testSeq[StartOligo:Position]
-#    print LeftOligo
+Sequence_dict = {}
+Sequence = SeqIO.parse("/databank/igenomes/"+Organism+"/UCSC/"+genome+"/Sequence/WholeGenomeFasta/genome.fa", "fasta")
+for seq_record in Sequence:
+    Sequence_dict[seq_record.name] = seq_record.seq.upper()
 
-# Log positions of GATC in array
-Chr="chr1"
+## Find positions of all restriction sites on the chromosome
+
+Chr="chr"+chromosome
 StartSeq = 1
 StartSeq = StartSeq-1
-StopSeq = 197195432
+StopSeq = len(Sequence_dict[Chr])
 posList = []
-p = re.compile("GATC")
-for m in p.finditer(Complete_seq):
+p = re.compile(Cut_sequence)
+for m in p.finditer(Sequence_dict[Chr]):
     posList.append(m.start()+StartSeq)
-#print posList
 
 # Find all GATC sites
 
+
+
 ThisSite = 0
-p = re.compile("GATC")
+p = re.compile(Cut_sequence)
 for m in p.finditer(Complete_seq):
     
     # Genereate oligo positions within sequence variable (70bp, including GATC site)
