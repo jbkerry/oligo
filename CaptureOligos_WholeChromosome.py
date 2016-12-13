@@ -12,7 +12,7 @@ def help_info():
     print("CaptureOligos_WholeChromosome.py generates oligos adjacent to every restriction site of the supplied enzyme for an entire chromosome.\n")
     print("\tGenomes: choose from 'hg18', 'hg19', 'mm9' or 'mm10'\n")
     print("\tChromosome: supply the bare number or letter of the chromosome e.g. '7' or 'X'. Only one chromosome can be run at a time\n")
-    print("\tRestriction enzymes: 'DpnII' (GATC) or 'NlaIII' (CATG)\n")
+    print("\tRestriction enzymes: 'DpnII' (GATC), 'NlaIII' (CATG) or 'HindIII' (AAGCTT)\n")
     print("\tOligo size: specify the size of the oligos to be generated adjacent to restriction sites. Supply the number of base pairs e.g. '120'\n")
     print("Example (70bp oligos for DpnII on chr11 of mouse build mm9): 'CaptureOligos_WholeChromosome.py -g mm9 -c 11 -e DpnII -o 70'\n")
     
@@ -75,15 +75,16 @@ except ValueError:
         print("Selected chromosome number does not exist for the specified genome build (case sensitive for X, Y and M)")
         KillScript=1
 
-# Restriction enzyme
-    
+# Restriction enzyme 
 Cut_sequence = ""
 if enzyme=="DpnII":
     Cut_sequence="GATC"
 elif enzyme=="NlaIII":
     Cut_sequence="CATG"
+elif enzyme=="HindIII":
+    Cut_sequence="AAGCTT"
 else:
-    print("Restriction enzyme is not recognised, please choose from DpnII or NlaIII (case sensitive)")
+    print("Restriction enzyme is not recognised, please choose from DpnII, NlaIII or HindIII (case sensitive)")
     KillScript=1
     
 # Oligo size
@@ -142,10 +143,10 @@ for m in p.finditer(str(Sequence_dict[Chr])):
     NextSite = ThisSite+1
     if NextSite<len(posList):
         NextPosition = posList[NextSite]
-        RightOligoStart = NextPosition-(oligo_value-4)
+        RightOligoStart = NextPosition-(oligo_value-len(Cut_sequence))
         if RightOligoStart < StartSeq:
             RightOligoStart=StartSeq
-        RightOligoStop = NextPosition+4
+        RightOligoStop = NextPosition+len(Cut_sequence)
         
         ReadRightStart = RightOligoStart-StartSeq
         ReadRightStop = RightOligoStop-StartSeq
@@ -156,7 +157,7 @@ for m in p.finditer(str(Sequence_dict[Chr])):
     # Check region is bigger than 70bp
     FragmentLeft=Position
     if NextSite<len(posList):
-        FragmentLength=posList[NextSite]-posList[ThisSite]+4
+        FragmentLength=posList[NextSite]-posList[ThisSite]+len(Cut_sequence)
         FragmentRight=FragmentLeft+FragmentLength
         FragmentCoor=str(FragmentLeft)+"-"+str(FragmentRight)
         
