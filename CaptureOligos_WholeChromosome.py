@@ -112,18 +112,17 @@ for seq_record in Sequence:
 Chr="chr"+chromosome
 StartSeq = 1
 StartSeq = StartSeq-1
-#StopSeq = len(Sequence_dict[Chr])
-StopSeq = 5000000
+StopSeq = len(Sequence_dict[Chr])
 posList = []
 p = re.compile(Cut_sequence)
-for m in p.finditer(Sequence_dict[Chr]):
+for m in p.finditer(str(Sequence_dict[Chr])):
     posList.append(m.start()+StartSeq)
 
 # Find all GATC sites
-
+fasta_file = open("Oligos_"+genome+"_chr"+chromosome+"_"+enzyme+"_"+oligo_size+"bp.fa","w")
 ThisSite = 0
 p = re.compile(Cut_sequence)
-for m in p.finditer(Complete_seq):
+for m in p.finditer(str(Sequence_dict[Chr])):
     
     # Genereate oligo positions within sequence variable (70bp, including GATC site)
     #Position = m.start()
@@ -137,7 +136,7 @@ for m in p.finditer(Complete_seq):
     ReadLeftStart = LeftOligoStart-StartSeq
     ReadLeftStop = LeftOligoStop-StartSeq
     
-    LeftOligo = Complete_seq[ReadLeftStart:ReadLeftStop]
+    LeftOligo = Sequence_dict[Chr][ReadLeftStart:ReadLeftStop]
     LeftCoor = Chr+":"+str(LeftOligoStart)+"-"+str(LeftOligoStop) # These coordinates match with the output from bedtools fastaFromBed but in WIG tracks they appear shifted 1bp to the left
     
     NextSite = ThisSite+1
@@ -151,7 +150,7 @@ for m in p.finditer(Complete_seq):
         ReadRightStart = RightOligoStart-StartSeq
         ReadRightStop = RightOligoStop-StartSeq
     
-        RightOligo = Complete_seq[ReadRightStart:ReadRightStop]
+        RightOligo = Sequence_dict[Chr][ReadRightStart:ReadRightStop]
         RightCoor = Chr+":"+str(RightOligoStart)+"-"+str(RightOligoStop) # These coordinates match with the output from bedtools fastaFromBed but in WIG tracks they appear shifted 1bp to the left
     
     # Check region is bigger than 70bp
@@ -164,8 +163,8 @@ for m in p.finditer(Complete_seq):
         # fragment number = NextSite
         # fragment length = FragmentLength
         
-        if FragmentLength>=70:
-            if FragmentLength>=140:
+        if FragmentLength>=oligo_value:
+            if FragmentLength>=(oligo_value*2):
                 fasta_file.write(">{0}-{1}-L\n{2}\n>{3}-{1}-R\n{4}\n".format(LeftCoor,FragmentCoor,LeftOligo,RightCoor,RightOligo))
             else:
                 fasta_file.write(">{0}-{1}-L\n{2}\n".format(LeftCoor,FragmentCoor,LeftOligo))
