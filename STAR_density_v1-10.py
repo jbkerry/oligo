@@ -114,7 +114,7 @@ for ThisOligo in AllOligos.keys():
 SSRLength_dict = {}
 SSRType_dict = {}
 #RM_file = "/t1-data1/WTSA_Dev/jkerry/CaptureC/WholeGenome/WholeChromosomes/mm9_chr11_DpnII_70bp/"+suffix+"/chr11_Oligos_"+suffix+".fa.out"
-RM_file = "./'+chr_name+'_Oligos_"+suffix+".fa.out"
+RM_file = "./"+chr_name+"_Oligos_"+suffix+".fa.out"
 #RM_file = "/t1-data1/WTSA_Dev/jkerry/CaptureC/WholeGenome/Promoters/RefSeq_data/GeneratedOligos.fa.out"
 RMlines = [RMline.rstrip('\n') for RMline in open(RM_file)]
 for ThisRMline in RMlines[3:]:
@@ -183,7 +183,7 @@ for ThisOligo in AllOligos.keys():
         RepeatType=SSRType_dict[ThisOligo]
     if Write==1:   
         #TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\t{12}\n".format(Chr,Start,Stop,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo],df[df['Coordinate']==ThisOligo].Energy.item()))
-        TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\t{12}\n".format(Chr,Start,Stop,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
+        TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\n".format(Chr,Start,Stop,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
         #TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6:.2f}\t{7}\t{8}\t{9:.2f}\t{10}\n".format(Chr,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo],df[df['Coordinate']==ThisOligo].Energy.item()))
         Written[OligoCoor] = 1
 TextOut.close()
