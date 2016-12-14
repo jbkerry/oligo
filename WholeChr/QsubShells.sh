@@ -16,12 +16,12 @@
 #qsub -cwd -o ./Logs/1-20000.out -e ./Logs/1-20000.err -N DG1 <./Shell_1-20000.sh
 #qsub -cwd -o ./Logs/20001-40000.out -e ./Logs/20001-40000.err -N DG2 <./Shell_20001-40000.sh
 
-Counter=600001
-TopCounter=620000
-Max=740000
+Counter=1
+TopCounter=20000
+Max=$1
 Increment=20000
 while [ $TopCounter -le $Max ]; do
-    qsub -cwd -o ./Logs/$Counter-$TopCounter""_density.out -e ./Logs/$Counter-$TopCounter""_density.err -N Den$Counter <./density_$Counter-$TopCounter.sh
+    qsub -cwd -o ./Logs/$Counter-$TopCounter"".out -e ./Logs/$Counter-$TopCounter"".err -N Oligo$Counter <./Shell_$Counter-$TopCounter.sh
     let Counter=Counter+Increment
     let TopCounter=TopCounter+Increment
 done
