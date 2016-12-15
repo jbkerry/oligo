@@ -7,6 +7,7 @@ OligoStop=20000
 OligoIncrement=20000
 #loopLimit=915661
 FastaName=$1
+ChrName=$(echo $FastaName | grep -o "chr[0-9]*[A-Z]*")
 DirName=${FastaName:7:$((${#FastaName}-10))}
 mkdir $DirName
 cd $DirName
@@ -17,7 +18,7 @@ FinalTop=$((($lines/$increment+1)*$increment))
 ## Set up a loop to generate fasta files for every 20,000 oligos (40,000 lines)
 
 while [ $topCounter -lt $loopLimit ]; do
-    awk 'FNR>='$counter' && FNR<='$topCounter ../$FastaName >chr16_Oligos_$OligoStart-$OligoStop.fa
+    awk 'FNR>='$counter' && FNR<='$topCounter ../$FastaName >$ChrName_Oligos_$OligoStart-$OligoStop.fa
     let counter=counter+increment
     let topCounter=topCounter+increment
     let OligoStart=OligoStart+OligoIncrement
