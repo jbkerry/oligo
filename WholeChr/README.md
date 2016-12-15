@@ -1,3 +1,12 @@
+<html>
+<head>
+<style>
+u {
+    text-decoration: underline;
+}
+</style>
+</head>
+<body>
 # Whole Chromosome Oligo Design
 
 <u>Description</u><br>
@@ -62,3 +71,5 @@ Below is a breakdown of the pipeline workflow.
         <td>Directory generated from SplitFA.sh e.g mm9_chr11_DpnII_70bp/</td>
     </tr>
 </table>
+</body>
+</html>
