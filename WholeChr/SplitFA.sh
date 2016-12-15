@@ -16,7 +16,10 @@ loopLimit=$(($lines+1))
 FinalTop=$((($lines/$increment+1)*$increment)) # This needs to be corrected for if the number of lines equals a number exactly divisible by 40000
 
 ## Set up a loop to generate fasta files for every 20,000 oligos (40,000 lines)
-
+if [ $topCounter -gt $loopLimit ]
+then
+    let topCounter=$lines
+fi
 while [ $topCounter -lt $loopLimit ]; do
     awk 'FNR>='$counter' && FNR<='$topCounter ../$FastaName >$ChrName""_Oligos_$OligoStart-$OligoStop.fa
     let counter=counter+increment
