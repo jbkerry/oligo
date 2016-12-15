@@ -1,12 +1,3 @@
-<html>
-<head>
-<style>
-u {
-    text-decoration: underline;
-}
-</style>
-</head>
-<body>
 # Whole Chromosome Oligo Design
 
 <u>Description</u><br>
@@ -26,7 +17,7 @@ Example run for 70bp oligos adjacent to DpnII restriction sites on mouse mm9 chr
 
 All supplied arguments are case sensitive.
 
-__Output__<br>
+`Output`<br>
 A file called <b>AllOligos_info.txt</b> will be generated in the directory created by the pipe for this run, named e.g. <b>mm9_chr11_DpnII_70bp/</b>. This will contain information about all of the oligos.
 
 <u>Under the hood</u><br>
