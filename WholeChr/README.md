@@ -4,10 +4,10 @@ This pipeline will generate all the unique oligos adjacent to a specified restri
 The pipeline provides the user with information about off-target binding, the presence of simple-sequence repeats and GC content for every oligo.
 
 The entire pipe can be run by simply supplying WholeChrPipe.sh with the variables <b>Genome</b>, <b>Chr</b>, <b>Enzyme</b> and <b>Oligo</b>.<br>
-Genome: select from <b>hg18</b>, <b>hg19</b>, <b>mm9</b> or <b>mm10</b><br>
-Chr: supply just the chromosome number or letter e.g. <b>7</b> or <b>X</b><br>
-Enzyme: choose from <b>DpnII</b> (GATC), <b>NlaIII</b> (CATG) or <b>HindIII</b> (AAGCTT)<br>
-Oligo: supply the number of bp for the required oligo length e.g. <b>70</b><br>
+<b>Genome</b>: select from <b>hg18</b>, <b>hg19</b>, <b>mm9</b> or <b>mm10</b><br>
+<b>Chr</b>: supply just the chromosome number or letter e.g. <b>7</b> or <b>X</b><br>
+<b>Enzyme</b>: choose from <b>DpnII</b> (GATC), <b>NlaIII</b> (CATG) or <b>HindIII</b> (AAGCTT)<br>
+<b>Oligo</b>: supply the number of bp for the required oligo length e.g. <b>70</b><br>
 
 Example run for 70bp oligos adjacent to DpnII restriction sites on mouse mm9 chromosome 11:
 
@@ -17,7 +17,7 @@ All supplied arguments are case sensitive.
 
 Below is a breakdown of the pipeline workflow.
 
-<b>Workflow:</b>
+<b>Workflow of WholeChrPipe.sh:</b>
 <table>
     <tr>
         <th>Order</th>
