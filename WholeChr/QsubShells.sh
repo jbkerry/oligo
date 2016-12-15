@@ -20,8 +20,18 @@ Counter=1
 TopCounter=20000
 Max=$1
 Increment=20000
+FileArray=()
 while [ $TopCounter -le $Max ]; do
     qsub -cwd -o ./Logs/$Counter-$TopCounter"".out -e ./Logs/$Counter-$TopCounter"".err -N Oligo$Counter <./Shell_$Counter-$TopCounter.sh
+    FileArray+=("./"$Counter"-"$TopCounter"/OligoInfo.txt")
     let Counter=Counter+Increment
     let TopCounter=TopCounter+Increment
 done
+for filename in ${FileArray[@]}
+do
+    while [ ! -f $filename ]
+    do
+        sleep 30
+    done
+done
+echo "All oligo info files found, merging files"
