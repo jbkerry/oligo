@@ -13,7 +13,7 @@ mkdir $DirName
 cd $DirName
 lines=$(wc -l < ../$FastaName) # store number of lines
 loopLimit=$(($lines+1))
-FinalTop=$((($lines/$increment+1)*$increment))
+FinalTop=$((($lines/$increment+1)*$increment)) # This needs to be corrected for if the number of lines equals a number exactly divisible by 40000
 
 ## Set up a loop to generate fasta files for every 20,000 oligos (40,000 lines)
 

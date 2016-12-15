@@ -1,5 +1,22 @@
 # Whole Chromosome Oligo Design
 
+This pipeline will generate all the unique oligos adjacent to a specified restriction site for a given chromosome. The user is required to specify the genome build, chromosome number, restricition enzyme and size of the oligos.
+The pipeline provides the user with information about off-target binding, the presence of simple-sequence repeats and GC content for every oligo.
+
+The entire pipe can be run by simply supplying WholeChrPipe.sh with the variables 'Genome', 'Chr', 'Enzyme' and 'Oligo'
+Genome: select from 'hg18', 'hg19', 'mm9' or 'mm10'
+Chr: supply just the chromosome number or letter e.g. '7' or 'X'
+Enzyme: choose from 'DpnII' (GATC), 'NlaIII' (CATG) or 'HindIII' (AAGCTT)
+Oligo: supply the number of bp for the required oligo length e.g. '70'
+
+Example run for 70bp oligos adjacent to DpnII restriction sites on mouse mm9 chromosome 11:
+
+bash WholeChrPipe.sh Genome=mm9,Chr=11,Enzyme=DpnII,Oligo=70
+
+All supplied arguments are case sensitive
+
+Below is a breakdown of the pipeline workflow
+
 <b>Workflow:</b>
 <table>
     <tr>
