@@ -18,7 +18,7 @@ FinalTop=$((($lines/$increment+1)*$increment))
 ## Set up a loop to generate fasta files for every 20,000 oligos (40,000 lines)
 
 while [ $topCounter -lt $loopLimit ]; do
-    awk 'FNR>='$counter' && FNR<='$topCounter ../$FastaName >$ChrName_Oligos_$OligoStart-$OligoStop.fa
+    awk 'FNR>='$counter' && FNR<='$topCounter ../$FastaName >$ChrName""_Oligos_$OligoStart-$OligoStop.fa
     let counter=counter+increment
     let topCounter=topCounter+increment
     let OligoStart=OligoStart+OligoIncrement
