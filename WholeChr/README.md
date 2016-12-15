@@ -1,8 +1,10 @@
+<head>
 <style>
 u {
     text-decoration: underlne;
 }
 </style>
+</head>
 
 # Whole Chromosome Oligo Design
 
