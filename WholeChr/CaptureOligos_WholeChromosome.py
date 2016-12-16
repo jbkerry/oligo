@@ -23,7 +23,7 @@ oligo_size = ""
 region = ""
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'g:c:e:o:h',)
+    opts, args = getopt.getopt(sys.argv[1:], 'g:c:e:o:r:h',)
 except getopt.GetoptError:
     usage()
     sys.exit(2)
@@ -118,8 +118,8 @@ StartSeq = 1
 StopSeq = len(Sequence_dict[Chr])
 if region!="":    
     StartSeq,StopSeq = region.split("-")
-StartSeq = StartSeq-1    
-
+StartSeq = int(StartSeq)-1    
+StopSeq = int(StopSeq)
 posList = []
 p = re.compile(Cut_sequence)
 for m in p.finditer(str(Sequence_dict[Chr][StartSeq:StopSeq])):
