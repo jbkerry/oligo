@@ -13,11 +13,11 @@ The entire pipe can be run by simply supplying ChrPipe.sh with the variables <b>
 
 Example run for 70bp oligos adjacent to DpnII restriction sites on mouse mm9 chromosome 11 (entire chromosome):
 
-<b>bash WholeChrPipe.sh Genome=mm9,Chr=11,Enzyme=DpnII,Oligo=70</b>
+<b>bash ChrPipe.sh Genome=mm9,Chr=11,Enzyme=DpnII,Oligo=70</b>
 
 Example run for 50bp oligos adjacent to HindIII restriction sites in the 10500000-12000000 region of human hg19 chromosome 5:
 
-<b>bash WholeChrPipe.sh Genome=mm9,Chr=11,Enzyme=DpnII,Oligo=70,Region=105000000-12000000</b>
+<b>bash ChrPipe.sh Genome=mm9,Chr=11,Enzyme=DpnII,Oligo=70,Region=105000000-12000000</b>
 
 All supplied arguments are case sensitive.
 
