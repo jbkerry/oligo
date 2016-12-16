@@ -1,6 +1,6 @@
 # Oligo Design - Chromosome
 `Description`<br>
-This pipeline will generate all the oligos adjacent to a specified restriction site for an entire chromosome or region within the chromosome. The user is required to specify the genome build, chromosome number, restricition enzyme, size of the oligos and the region of the chromosome, if applicable.
+This pipeline will generate all the oligos adjacent to a specified restriction site for an entire chromosome or region within the chromosome. The user is required to specify the genome build, chromosome number, restriction enzyme, size of the oligos and the region of the chromosome, if applicable.
 The pipeline provides the user with information about off-target binding, the presence of simple-sequence repeats and GC content for every oligo.
 
 `Input`<br>
