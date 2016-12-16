@@ -14,7 +14,9 @@ def help_info():
     print("\tChromosome: supply the bare number or letter of the chromosome e.g. '7' or 'X'. Only one chromosome can be run at a time\n")
     print("\tRestriction enzymes: 'DpnII' (GATC), 'NlaIII' (CATG) or 'HindIII' (AAGCTT)\n")
     print("\tOligo size: specify the size of the oligos to be generated adjacent to restriction sites. Supply the number of base pairs e.g. '120'\n")
-    print("Example (70bp oligos for DpnII on chr11 of mouse build mm9): 'CaptureOligos_WholeChromosome.py -g mm9 -c 11 -e DpnII -o 70'\n")
+    print("\tRegion: supply the coordinates of the region within which you want to generate the oligos. Must be in the format Start-Stop e.g. '550000-600000'. Omit this option to run the script on the whole chromosome.\n")
+    print("Example (70bp oligos for DpnII on chr11 of mouse build mm9): 'CaptureOligos_WholeChromosome.py -g mm9 -c 11 -e DpnII -o 70'")
+    print("Example (50bp oligos for HindIII within the 50000-100000 region on chrX of human build hg19): 'CaptureOligos_WholeChromosome.py -g hg19 -c X -e HindIII -o 50 -r 50000-100000'\n")
     
 genome = ""
 chromosome = ""
@@ -99,7 +101,7 @@ try:
         KillScript=1
 except ValueError:
     print("Oligo size invalid, it must be an integer greater than 0")
-    KillScript=1
+    KillScript=1    
     
 if KillScript==1:
     sys.exit(2)
@@ -114,12 +116,46 @@ for seq_record in Sequence:
 ## Find positions of all restriction sites on the chromosome
 
 Chr="chr"+chromosome
+ChrLen = len(Sequence_dict[Chr])
 StartSeq = 1
-StopSeq = len(Sequence_dict[Chr])
+StopSeq = ChrLen
+
 if region!="":    
-    StartSeq,StopSeq = region.split("-")
-StartSeq = int(StartSeq)-1    
-StopSeq = int(StopSeq)
+    try:
+        StartSeq,StopSeq = region.split("-")
+    except ValueError:
+        print("Coordinates invalid, they must be in the form 'Start-Stop' e.g. 1050000-2100000")
+        KillScript=1
+    
+    try:
+        Start_val = int(StartSeq)
+        if Start_val<=0:
+            print("Start coordinate invalid, it must be an integer greater than or equal to 0")
+            KillScript=1
+        elif Start_val>ChrLen:
+            print("Start coordinate invalid, it is beyond the length of the chromosome")
+            KillScript=1
+    except ValueError:
+        print("Start coordinate invalid, it must be an integer greater than or equal to 0")
+        KillScript=1
+    
+    try:
+        Stop_val = int(StopSeq)
+        if (Stop_val<=0) | (Stop_val<=Start_val):
+            print("Stop coordinate invalid, it must be an integer greater than 0 and greater than the start coordinate")
+            KillScript=1
+        elif Stop_val>ChrLen:
+            print("Stop coordinate invalid, it is beyond the length of the chromosome")
+            KillScript=1
+    except ValueError:
+        print("Stop coordinate invalid, it must be an integer greater than 0 and greater than the start coordinate")
+        KillScript=1
+        
+if KillScript==1:
+    sys.exit(2)
+        
+StartSeq = Start_val-1    
+StopSeq = Stop_val
 posList = []
 p = re.compile(Cut_sequence)
 for m in p.finditer(str(Sequence_dict[Chr][StartSeq:StopSeq])):
