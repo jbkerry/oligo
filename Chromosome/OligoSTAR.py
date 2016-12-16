@@ -52,7 +52,6 @@ Sequences = {}
 Groups = {}
 
 # Determine alignment matches and mismatches
-
 #SAMfile = '/t1-data1/WTSA_Dev/jkerry/CaptureC/WholeGenome/WholeChromosomes/mm9_chr11_DpnII_70bp/'+suffix+'/chr11_'+suffix+'_Aligned.out.sam'
 #SAMfile = '/t1-data1/WTSA_Dev/jkerry/CaptureC/WholeGenome/Promoters/RefSeq_data/GeneratedOligos_Aligned.out.sam'
 SAMfile = './'+chr_name+'_'+suffix+'_Aligned.out.sam'
@@ -67,7 +66,6 @@ for thisline in SAMlines:
         Sequence = parts[9]
          
         if OligoID not in AllOligos.keys():
-              
             NH = parts[11]
             NHparts = NH.split(":")
             AllOligos[OligoID] = NHparts[2]
