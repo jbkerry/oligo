@@ -4,7 +4,7 @@ from Bio import SeqIO
 import re,getopt,sys
 
 def usage():
-    print("usage: CaptureOligos_WholeChromosome.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)>")
+    print("usage: CaptureOligos_WholeChromosome.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)> -r <region of chromsome (optional)>")
     print("For extended help: 'CaptureOligos_WholeChromosome.py -h'")
 def help_info():
     print("usage: CaptureOligos_WholeChromosome.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)>\n")
@@ -20,6 +20,7 @@ genome = ""
 chromosome = ""
 enzyme = ""
 oligo_size = ""
+region = ""
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], 'g:c:e:o:h',)
@@ -43,6 +44,8 @@ else:
             enzyme = arg
         elif opt == '-o':
             oligo_size = arg
+        elif opt == '-r':
+            region = arg
         else:
             usage()
             sys.exit(2)
@@ -100,7 +103,7 @@ except ValueError:
     
 if KillScript==1:
     sys.exit(2)
-    
+
 ## Store genome sequence in dictionary, by chromosome
 
 Sequence_dict = {}
@@ -112,18 +115,25 @@ for seq_record in Sequence:
 
 Chr="chr"+chromosome
 StartSeq = 1
-StartSeq = StartSeq-1
 StopSeq = len(Sequence_dict[Chr])
+if region!="":    
+    StartSeq,StopSeq = region.split("-")
+StartSeq = StartSeq-1    
+
 posList = []
 p = re.compile(Cut_sequence)
-for m in p.finditer(str(Sequence_dict[Chr])):
+for m in p.finditer(str(Sequence_dict[Chr][StartSeq:StopSeq])):
     posList.append(m.start()+StartSeq)
 
 # Find all GATC sites
-fasta_file = open("Oligos_"+genome+"_chr"+chromosome+"_"+enzyme+"_"+oligo_size+"bp.fa","w")
+
+if region!="":
+    fasta_file = open("Oligos_"+genome+"_chr"+chromosome+"_"+region+"_"+enzyme+"_"+oligo_size+"bp.fa","w")
+else:
+    fasta_file = open("Oligos_"+genome+"_chr"+chromosome+"_"+enzyme+"_"+oligo_size+"bp.fa","w")
 ThisSite = 0
 p = re.compile(Cut_sequence)
-for m in p.finditer(str(Sequence_dict[Chr])):
+for m in p.finditer(str(Sequence_dict[Chr][StartSeq:StopSeq])):
     
     # Genereate oligo positions within sequence variable (70bp, including GATC site)
     #Position = m.start()
