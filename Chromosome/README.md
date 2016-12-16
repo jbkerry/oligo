@@ -1,9 +1,9 @@
 # Whole Chromosome Oligo Design
-'Description'<br>
+`Description`<br>
 This pipeline will generate all the unique oligos adjacent to a specified restriction site for a given chromosome. The user is required to specify the genome build, chromosome number, restricition enzyme and size of the oligos.
 The pipeline provides the user with information about off-target binding, the presence of simple-sequence repeats and GC content for every oligo.
 
-'Input'<br>
+`Input`<br>
 The entire pipe can be run by simply supplying WholeChrPipe.sh with the variables <b>Genome</b>, <b>Chr</b>, <b>Enzyme</b>, <b>Oligo</b> and <b>Region</b>.<br>
 <b>Genome</b>: select from <b>hg18</b>, <b>hg19</b>, <b>mm9</b> or <b>mm10</b><br>
 <b>Chr</b>: supply just the chromosome number or letter e.g. <b>7</b> or <b>X</b><br>
@@ -20,7 +20,7 @@ All supplied arguments are case sensitive.
 `Output`<br>
 A file called <b>AllOligos_info.txt</b> will be generated in the directory created by the pipe for this run, named e.g. <b>mm9_chr11_DpnII_70bp/</b>. This will contain information about all of the oligos.
 
-'Under the hood'<br>
+`Under the hood`<br>
 Below is a breakdown of the pipeline workflow. See the OligoDesign Wiki page for a more detailed description of what each script does.
 
 <b>Workflow of WholeChrPipe.sh:</b>
