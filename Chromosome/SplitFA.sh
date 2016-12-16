@@ -8,7 +8,8 @@ OligoIncrement=20000
 #loopLimit=915661
 FastaName=$1
 ChrName=$(echo $FastaName | grep -o "chr[0-9]*[A-Z]*")
-DirName=${FastaName:7:$((${#FastaName}-10))}
+TruncFasta=$(echo $FastaName | egrep -o "^[^.]+")
+DirName=${TruncFasta:7}
 mkdir $DirName
 cd $DirName
 lines=$(wc -l < ../$FastaName) # store number of lines

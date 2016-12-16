@@ -2,11 +2,14 @@
 if [ -z "$Region" ]
 then
     python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/OligoGen.py -g $Genome -c $Chr -e $Enzyme -o $Oligo
+    FastaName="Oligos_"$Genome"_chr"$Chr"_"$Enzyme"_"$Oligo"bp.fa"
 else
     python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/OligoGen.py -g $Genome -c $Chr -e $Enzyme -o $Oligo -r $Region
+    FastaName="Oligos_"$Genome"_chr"$Chr"_"$Region"_"$Enzyme"_"$Oligo"bp.fa"
 fi
-FastaName="Oligos_"$Genome"_chr"$Chr"_"$Enzyme"_"$Oligo"bp.fa"
-DirName=${FastaName:7:$((${#FastaName}-10))}
+TruncFasta=$(echo $FastaName | egrep -o "^[^.]+")
+DirName=${TruncFasta:7}
+#DirName=${FastaName:7:$((${#FastaName}-10))}
 lines=$(wc -l < $FastaName) # store number of lines
 Max=$((((($lines/2)/20000)+1)*20000)) # This needs to be corrected for if the number of lines/2 equals a number exactly divisible by 20000
 bash /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/SplitFA.sh $FastaName
