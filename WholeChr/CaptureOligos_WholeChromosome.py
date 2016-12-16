@@ -126,7 +126,7 @@ for m in p.finditer(str(Sequence_dict[Chr][StartSeq:StopSeq])):
     posList.append(m.start()+StartSeq)
 
 # Find all GATC sites
-
+#print("posList = "+str(posList))
 if region!="":
     fasta_file = open("Oligos_"+genome+"_chr"+chromosome+"_"+region+"_"+enzyme+"_"+oligo_size+"bp.fa","w")
 else:
@@ -144,8 +144,8 @@ for m in p.finditer(str(Sequence_dict[Chr][StartSeq:StopSeq])):
     if LeftOligoStop > StopSeq:
         LeftOligoStop=StopSeq
         
-    ReadLeftStart = LeftOligoStart-StartSeq
-    ReadLeftStop = LeftOligoStop-StartSeq
+    ReadLeftStart = LeftOligoStart
+    ReadLeftStop = LeftOligoStop
     
     LeftOligo = Sequence_dict[Chr][ReadLeftStart:ReadLeftStop]
     LeftCoor = Chr+":"+str(LeftOligoStart)+"-"+str(LeftOligoStop) # These coordinates match with the output from bedtools fastaFromBed but in WIG tracks they appear shifted 1bp to the left
@@ -158,8 +158,8 @@ for m in p.finditer(str(Sequence_dict[Chr][StartSeq:StopSeq])):
             RightOligoStart=StartSeq
         RightOligoStop = NextPosition+len(Cut_sequence)
         
-        ReadRightStart = RightOligoStart-StartSeq
-        ReadRightStop = RightOligoStop-StartSeq
+        ReadRightStart = RightOligoStart
+        ReadRightStop = RightOligoStop
     
         RightOligo = Sequence_dict[Chr][ReadRightStart:ReadRightStop]
         RightCoor = Chr+":"+str(RightOligoStart)+"-"+str(RightOligoStop) # These coordinates match with the output from bedtools fastaFromBed but in WIG tracks they appear shifted 1bp to the left
