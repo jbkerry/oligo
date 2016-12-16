@@ -4,12 +4,12 @@ from Bio import SeqIO
 import re,getopt,sys
 
 def usage():
-    print("usage: CaptureOligos_WholeChromosome.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)> -r <region of chromsome (optional)>")
-    print("For extended help: 'CaptureOligos_WholeChromosome.py -h'")
+    print("usage: OligoGen.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)> -r <region of chromsome (optional)>")
+    print("For extended help: 'OligoGen.py -h'")
 def help_info():
-    print("usage: CaptureOligos_WholeChromosome.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)>\n")
+    print("usage: OligoGen.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)>\n")
     print("-------------------------------------------------------------------------\n")
-    print("CaptureOligos_WholeChromosome.py generates oligos adjacent to every restriction site of the supplied enzyme for an entire chromosome.\n")
+    print("OligoGen.py generates oligos adjacent to every restriction site of the supplied enzyme for an entire chromosome.\n")
     print("\tGenomes: choose from 'hg18', 'hg19', 'mm9' or 'mm10'\n")
     print("\tChromosome: supply the bare number or letter of the chromosome e.g. '7' or 'X'. Only one chromosome can be run at a time\n")
     print("\tRestriction enzymes: 'DpnII' (GATC), 'NlaIII' (CATG) or 'HindIII' (AAGCTT)\n")
@@ -154,8 +154,8 @@ if region!="":
 if KillScript==1:
     sys.exit(2)
         
-StartSeq = Start_val-1    
-StopSeq = Stop_val
+StartSeq = int(StartSeq)-1    
+StopSeq = int(StopSeq)
 posList = []
 p = re.compile(Cut_sequence)
 for m in p.finditer(str(Sequence_dict[Chr][StartSeq:StopSeq])):

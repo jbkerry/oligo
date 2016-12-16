@@ -33,7 +33,7 @@ Below is a breakdown of the pipeline workflow.
     </tr>
     <tr>
         <td align="center">1</td>
-        <td>CaptureOligos_WholeChromosome.py</td>
+        <td>OligoGen.py</td>
         <td>BioPython: SeqIO</td>
         <td>Any</td>
     </tr>
@@ -51,13 +51,13 @@ Below is a breakdown of the pipeline workflow.
     </tr>
     <tr>
         <td align="center">4</td>
-        <td>QsubShells.sh</td>
-        <td>STAR; RepeatMasker; STAR_density_v1-10.py</td>
+        <td>RunShells.sh</td>
+        <td>STAR; RepeatMasker; OligoSTAR.py</td>
         <td>Directory generated from SplitFA.sh e.g mm9_chr11_DpnII_70bp/</td>
     </tr>
     <tr>
         <td align="center">5</td>
-        <td>cat_OligoInfo.sh</td>
+        <td>OligoMerge.sh</td>
         <td>n/a</td>
         <td>Directory generated from SplitFA.sh e.g mm9_chr11_DpnII_70bp/</td>
     </tr>
