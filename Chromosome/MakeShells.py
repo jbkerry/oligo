@@ -75,7 +75,7 @@ while Counterhigh<=int(upperLimit):
     #out_file.write("repeatmasker -noint -s -dir /t1-data1/WTSA_Dev/jkerry/CaptureC/WholeGenome/WholeChromosomes/mm9_chr11_DpnII_70bp/"+Suffix+"/ -species mouse ../chr11_Oligos_"+Suffix+".fa\n")
     out_file.write("repeatmasker -noint -s -dir ./ -species "+Species+" ../chr"+chromosome+"_Oligos_"+Suffix+".fa\n")
     #out_file.write("python /t1-home/nuffmed/jkerry/Python/STAR_depthGauge_v1-10.py -i "+Suffix+"\n")
-    out_file.write("python /t1-home/nuffmed/jkerry/Python/STAR_density_v1-10.py -i "+Suffix+" -c "+chromosome+"\n")
+    out_file.write("python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/OligoSTAR.py -i "+Suffix+" -c "+chromosome+"\n")
     #out_file.write("module load ucsctools\n")
     #out_file.write("wigToBigWig RM_plot_L_"+Suffix+".wig /databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/WholeGenomeFasta/chr_sizes.txt RM_plot_L_"+Suffix+".bw\nwigToBigWig RM_plot_R_"+Suffix+".wig /databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/WholeGenomeFasta/chr_sizes.txt RM_plot_R_"+Suffix+".bw\nwigToBigWig STAR_density_L_"+Suffix+".wig /databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/WholeGenomeFasta/chr_sizes.txt STAR_density_L_"+Suffix+".bw\nwigToBigWig STAR_density_R_"+Suffix+".wig /databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/WholeGenomeFasta/chr_sizes.txt STAR_density_R_"+Suffix+".bw\nwigToBigWig STAR_depthGauge_L_"+Suffix+".wig /databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/WholeGenomeFasta/chr_sizes.txt STAR_depthGauge_L_"+Suffix+".bw\nwigToBigWig STAR_depthGauge_L_"+Suffix+".wig /databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/WholeGenomeFasta/chr_sizes.txt STAR_depthGauge_L_"+Suffix+".bw\n")
     #out_file.write("mv *.bw /public/jkerry/\n")

@@ -15,8 +15,8 @@ def help_info():
     print("\tRestriction enzymes: 'DpnII' (GATC), 'NlaIII' (CATG) or 'HindIII' (AAGCTT)\n")
     print("\tOligo size: specify the size of the oligos to be generated adjacent to restriction sites. Supply the number of base pairs e.g. '120'\n")
     print("\tRegion: supply the coordinates of the region within which you want to generate the oligos. Must be in the format Start-Stop e.g. '550000-600000'. Omit this option to run the script on the whole chromosome.\n")
-    print("Example (70bp oligos for DpnII on chr11 of mouse build mm9): 'CaptureOligos_WholeChromosome.py -g mm9 -c 11 -e DpnII -o 70'")
-    print("Example (50bp oligos for HindIII within the 50000-100000 region on chrX of human build hg19): 'CaptureOligos_WholeChromosome.py -g hg19 -c X -e HindIII -o 50 -r 50000-100000'\n")
+    print("Example (70bp oligos for DpnII on chr11 of mouse build mm9): 'OligoGen.py -g mm9 -c 11 -e DpnII -o 70'")
+    print("Example (50bp oligos for HindIII within the 50000-100000 region on chrX of human build hg19): 'OligoGen.py -g hg19 -c X -e HindIII -o 50 -r 50000-100000'\n")
     
 genome = ""
 chromosome = ""
