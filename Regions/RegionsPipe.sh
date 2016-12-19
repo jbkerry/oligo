@@ -34,7 +34,7 @@ fi
 echo "Repeat masker..."
 repeatmasker -noint -s -species $species ./GeneratedOligos.fa
 
-perl ./DepthGauge.pl
+python ./DepthGauge.py
 python /t1-home/nuffmed/jkerry/Python/MergeGeneAssociation.py
 python /t1-home/nuffmed/jkerry/Python/CheckDoubledFrags.py
 echo "All done. Check stats.txt to see number of successful fragments and oligos"

@@ -18,24 +18,23 @@ MafLine = 0
 MafHeader = ""
 MafSeq = ""
 
-MafFile = "./GeneratedOligos.fa";
+MafFile = "./GeneratedOligos.fa"
 
 MafLines = [MafLineRead.rstrip('\n') for MafLineRead in open(MafFile)]
 for ThisMafLine in MafLines:    
     MafLine=MafLine+1
     if MafLine==1:
-        print()
         MafHeader = ThisMafLine
         MafHeader = re.sub('>','',MafHeader)
 
-        Mchr, Mstart, Mstop, Mfragstart, Mfragstop, Mside = re.split("\W+",MafHeader)
+        Mchr, Mstart, Mstop, Mfragstart, Mfragstop, Mside = re.split("\W+",MafHeader,5)
         if Mchr not in depthgauge.keys():
             depthgauge[Mchr] = {}
         if Mchr not in oligoCoverage.keys():
             oligoCoverage[Mchr] = {}
-        Mcounter = Mstart
+        Mcounter = int(Mstart)
         Maffed[MafHeader]=0
-        while Mcounter<=Mstop:
+        while Mcounter<=int(Mstop):
             if Mcounter not in depthgauge[Mchr].keys():
                 depthgauge[Mchr].update({Mcounter: 0})
             if Mcounter not in oligoCoverage[Mchr].keys():
@@ -60,8 +59,8 @@ for ThisBLATLine in BLATLines[5:]:
     if re.search('_',MafHeader)!=None:
         next
        
-    percent = qsize / 100      
-    percent_match = match / percent  
+    percent = int(qsize) / 100      
+    percent_match = int(match) / percent  
     if percent_match>=70:
         if query not in dup_counts.keys():
             dup_counts[query]=1
@@ -69,14 +68,15 @@ for ThisBLATLine in BLATLines[5:]:
             dup_counts[query]=dup_counts[query]+1
     
     if query not in qGapBases.keys():
-        qGapBases[query]=qgapbases
+        qGapBases[query]=int(qgapbases)
     else:
-        qGapBases[query]=qGapBases[query]+qgapbases
-    Oligochr, start, stop, fragstart, fragstop, side=re.split("\W+",query)            
+        qGapBases[query]=qGapBases[query]+int(qgapbases)
+    Oligochr, start, stop, fragstart, fragstop, side=re.split("\W+",query,5)            
         
     if query not in used.keys():
-        counter = start                   
-        while counter <= (start + qsize):
+        counter = int(start)
+        GoUntil = int(start)+int(qsize)
+        while counter <= GoUntil:
             oligoCoverage[Oligochr][counter]=oligoCoverage[Oligochr][counter]+1;
             counter=counter+1 
        
@@ -89,23 +89,23 @@ for ThisBLATLine in BLATLines[5:]:
        
     ### This is where it tots up all blat hits for a given oligo
        
-    loopstart = start + qstart
-    counter = qstart
+    loopstart = int(start) + int(qstart)
+    counter = int(qstart)
        
-    while counter<=qend:
+    while counter<=int(qend):
         depthgauge[Oligochr][loopstart]=depthgauge[Oligochr][loopstart]+1
         counter=counter+1
         loopstart=loopstart+1         
 
 
 for StoredID in Maffed.keys():   
-    storedchr, storedstr, storedstp, storedFragstr, storedFragstp, storedSide=re.split("\W+",StoredID); 
-    posCounter = storedstr
+    storedchr, storedstr, storedstp, storedFragstr, storedFragstp, storedSide=re.split("\W+",StoredID,5); 
+    posCounter = int(storedstr)
 
-    size = storedstp - storedstr;
-    OligoSize[StoredID]=size;
+    size = int(storedstp) - int(storedstr)
+    OligoSize[StoredID]=size
 
-    while posCounter <= storedstp:
+    while posCounter <= int(storedstp):
         if posCounter in depthgauge[storedchr].keys():
             OligoValue[StoredID]=OligoValue[StoredID]+depthgauge[storedchr][posCounter]
             posCounter=posCounter+1
@@ -119,7 +119,9 @@ for Did in sorted(OligoValue.keys()):
     density_round = float("{0:.2f}".format(density))
     if len(re.split("\W+",Did))==7:
         Dchr, Dstr, Dstp, Dfragstr, Dfragstp, Dgroup, Dside=re.split("\W+",Did)
-        FragCoor = Dchr+":"+Dfragst+"-"+Dfragstp
+        if Dgroup not in Groups.keys():
+            Groups[Dgroup] = {}
+        FragCoor = Dchr+":"+Dfragstr+"-"+Dfragstp
         if FragCoor in Groups[Dgroup].keys():
             Groups[Dgroup][FragCoor]=Groups[Dgroup][FragCoor]+density_round
         else:
@@ -146,7 +148,7 @@ LengthDict = {}
 RMscoreDict = {}
 SSRlengthDict = {}
 RM_file="GeneratedOligos.fa.out"
-RMLines in [RMLine.rstrip('\n') for RMLine in open(RM_file)]
+RMLines = [RMLine.rstrip('\n') for RMLine in open(RM_file)]
 for ThisRMLine in RMLines[3:]:
     RepeatLine = ThisRMLine
     whiteSpace, sw_score, perc_div, perc_del, perc_ins, Qname, Qstart, Qstop, Qleft, PlusSign, Rname, Rclass, Rstart, Rstop, Rleft, LineID = re.split("\s+",RepeatLine)
@@ -182,7 +184,7 @@ for Did in sorted(OligoValue.keys()):
     Write=0
     #$Dchr, $Dstr, $Dstp, $Dfragstr, $Dfragstp, $Dgroup, $Dside) = "";
     #OligoCoor = "";
-    if len(re.split("\W+",Qname))==7:
+    if len(re.split("\W+",Did))==7:
         Dchr, Dstr, Dstp, Dfragstr, Dfragstp, Dgroup, Dside=re.split("\W+", Did)
         #print "This equals, ".$Dgroup."\t".$Dside."\n";
         OligoCoor = Dchr+":"+Dstr+"-"+Dstp
@@ -201,10 +203,9 @@ for Did in sorted(OligoValue.keys()):
             Write=1
        
     if Write==1:
-        if (density_round<=30) & (LengthHash[OligoCoor]<=30):
-            PrintRepeats = "NA"
-            if OligoCoor in LengthDict.keys():
-                PrintRepeats = LengthHash[OligoCoor]
+        if OligoCoor not in LengthDict.keys():
+            LengthDict[OligoCoor]=0
+        if (density_round<=30) & (LengthDict[OligoCoor]<=30):
             #print OUTPUT $Dchr.":".$Dstr."-".$Dstp."-".$Dfragstr."-".$Dfragstp."-".$Dside."\t".$density_round."\t".$PrintRepeats."\t".$StoredSeq{$Did}."\n";
-            OUTPUT.write(Dchr+"\t"+Dstr+"\t"+Dstp+"\t"+Dfragstr+"\t"+Dfragstp+"\t"+Dside+"\t"+density_round+"\t"+PrintRepeats+"\t"+StoredSeq[Did]+"\n")
+            OUTPUT.write(Dchr+"\t"+Dstr+"\t"+Dstp+"\t"+Dfragstr+"\t"+Dfragstp+"\t"+Dside+"\t"+str(density_round)+"\t"+str(LengthDict[OligoCoor])+"\t"+StoredSeq[Did]+"\n")
             Written[OligoCoor]=1
