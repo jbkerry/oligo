@@ -14,9 +14,13 @@ elif [ $genome == "mm9" ] || [ $genome == "mm10" ]; then
     organism="Mus_musculus"
     species="mouse"
 fi
+DirName=$genome"_"$enzyme"_"$oligo"bp"
+
+mkdir $DirName
+cd $DirName
 
 echo "Generating fragments..."
-python ./FragExtract.py -b $bedfile -g $genome -e $enzyme -o $oligo
+python ../FragExtract.py -b $bedfile -g $genome -e $enzyme -o $oligo
 
 if [ $STARvar == 0 ]
 then
@@ -34,7 +38,7 @@ fi
 echo "Repeat masker..."
 repeatmasker -noint -s -species $species ./GeneratedOligos.fa
 
-python ./DepthGauge.py
-python ./MergeAssociation.py
-python ./DoubledFrag.py
+python ../DepthGauge.py
+python ../MergeAssociation.py
+python ../DoubledFrag.py
 echo "All done. Check stats.txt to see number of successful fragments and oligos"

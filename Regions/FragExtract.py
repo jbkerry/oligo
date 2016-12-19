@@ -28,7 +28,7 @@ else:
             usage()
             sys.exit(2)
         elif opt == '-b':
-            input_file = arg
+            input_file = "../"+arg
         elif opt == '-g':
             genome = arg
         elif opt == '-e':
