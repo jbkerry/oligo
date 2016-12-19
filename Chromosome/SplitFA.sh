@@ -33,3 +33,8 @@ while [ $topCounter -lt $loopLimit ]; do
     fi
 done
 
+TestVar="$(awk 'BEGIN { rounded = sprintf("%.0f", 40001/40000+0.49999999); print rounded }')"
+echo $TestVar # equals 2
+TestVar="$(awk 'BEGIN { rounded = sprintf("%.0f", 40000/40000+0.49999999); print rounded }')"
+echo $TestVar # equals 1
+
