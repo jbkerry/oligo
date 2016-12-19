@@ -55,7 +55,7 @@ close MAF;
 
 
 #my $file = "/t1-data1/WTSA_Dev/jkerry/CaptureC/WholeGenome/Promoters/RefSeq_data/Dec2016/GeneratedOligos.pslx";
-my $file = "./GeneratedOligos.pslx";
+my $file = "./GeneratedOligos.psl";
 my $linenumber = 0;
 open (BLAT, $file);	
 while (<BLAT>)
@@ -64,7 +64,7 @@ while (<BLAT>)
     $linenumber++;
     if ($linenumber <= 5) { next; }
 	
-    my ($match, $mismatch, $repmatch, $ns, $qgap, $qgapbases, $tgap, $tgapbases, $strand, $query, $qsize, $qstart, $qend, $tname, $tsize, $tstart, $tend, $blockcount, $blocksize, $qtarts, $tstarts, $matchSeq)=split(/\s+/);
+    my ($match, $mismatch, $repmatch, $ns, $qgap, $qgapbases, $tgap, $tgapbases, $strand, $query, $qsize, $qstart, $qend, $tname, $tsize, $tstart, $tend, $blockcount, $blocksize, $qtarts, $tstarts)=split(/\s+/);
     if ($tname =~ /_/g){next;}
 	
     my $percent = ($qsize / 100);	

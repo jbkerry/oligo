@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 
 from Bio import SeqIO
-import re,getopt,sys
+import re,getopt,sys,os
 
 # Functions
     
 def usage():
-    print("usage: CapSequm_FragExtract_Damien.py -b <bed file with coordinates> -g <genome build: hg18, hg19, mm9 or mm10>")
+    print("usage: FragExtract.py -b <bed file with coordinates> -g <genome build: hg18, hg19, mm9 or mm10> -e <restriction enzyme> -o <oligo size (bp)>")
 
-genome = ""
 input_file = ""
+genome = ""
+enzyme = ""
+oligo_size = 0
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'b:g:h',)
+    opts, args = getopt.getopt(sys.argv[1:], 'b:g:e:o:h',)
 except getopt.GetoptError:
     usage()
     sys.exit(2)
@@ -29,18 +31,51 @@ else:
             input_file = arg
         elif opt == '-g':
             genome = arg
+        elif opt == '-e':
+            enzyme = arg
+        elif opt == '-o':
+            oligo_size = arg
         else:
             usage()
             sys.exit(2)
 
 Sequence_dict = {}
+KillScript=0
+
+if os.path.isfile(input_file)==False:
+    print("Error: input file not recognised")
+    KillScript=1
+
 Organism = ""
 if (genome=="hg18") | (genome=="hg19"):
     Organism="Homo_sapiens"
 elif (genome=="mm9") | (genome=="mm10"):
     Organism="Mus_musculus"
 else:
-    print("Genome not recognised, please choose from hg18, hg19, mm9 or mm10")
+    print("Error: genome not recognised, please choose from hg18, hg19, mm9 or mm10")
+    KillScript=1
+    
+Cut_sequence = ""
+if enzyme=="DpnII":
+    Cut_sequence="GATC"
+elif enzyme=="NlaIII":
+    Cut_sequence="CATG"
+elif enzyme=="HindIII":
+    Cut_sequence="AAGCTT"
+else:
+    print("Error: restriction enzyme is not recognised, please choose from DpnII, NlaIII or HindIII (case sensitive)")
+    KillScript=1
+
+try:
+    oligo_value = int(oligo_size)
+    if oligo_value<1:
+        print("Oligo size invalid, it must be an integer greater than 0")
+        KillScript=1
+except ValueError:
+    print("Error: oligo size invalid, it must be an integer greater than 0")
+    KillScript=1
+    
+if KillScript==1:
     sys.exit(2)
 
 Sequence = SeqIO.parse("/databank/igenomes/"+Organism+"/UCSC/"+genome+"/Sequence/WholeGenomeFasta/genome.fa", "fasta")
@@ -51,63 +86,64 @@ for seq_record in Sequence:
 FragmentCoordinates = {}    
 def GenOligo(x,y,z):
     
-    SeqCheckUp = y-3
-    SeqCheckDown = z+3
+    MoveAmount = len(Cut_sequence)-1
+    
+    SeqCheckUp = y-MoveAmount
+    SeqCheckDown = z+MoveAmount
     Code = 0
     
-    LeftUp=z-3
+    LeftUp=z-MoveAmount
     LeftDown=z
     LeftSeq = 0
     LeftUpCoor = 0
     LeftDownCoor = 0
     
     RightUp = y
-    RightDown = y+3
+    RightDown = y+MoveAmount
     RightSeq = 0
     RightUpCoor = 0
     RightDownCoor = 0
     
     FragmentLength = 0
     
-    if re.search('GATC',str(Sequence_dict[Chr][SeqCheckUp:SeqCheckDown].upper())):
-        #print("in cutsite: {0}".format(Sequence_dict[Chr][SeqCheckUp:SeqCheckDown]))
+    if re.search(Cut_sequence,str(Sequence_dict[Chr][SeqCheckUp:SeqCheckDown].upper())):
         Code = 1 # A code of 1 means check fragments either side
         LeftUpCoor=SeqCheckUp
         RightDownCoor=SeqCheckDown
     else:
         
-        # Left oligo: walk left 1bp at a time until GATC or reach beginning of chromosome
-        while bool(re.search('GATC',str(Sequence_dict[x][LeftUp:LeftDown])))==False:
+        # Left oligo: walk left 1bp at a time until cut sequence or reach beginning of chromosome
+        while bool(re.search(Cut_sequence,str(Sequence_dict[x][LeftUp:LeftDown])))==False:
             LeftUp=LeftUp-1
             if LeftUp<0:
                 print("ran into start of chromosome")
                 Code = 2 # A code of 2 means check fragment to the right
                 break
-            elif re.search('GATC',str(Sequence_dict[x][LeftUp:LeftDown])):
+            elif re.search(Cut_sequence,str(Sequence_dict[x][LeftUp:LeftDown])):
                 LeftUpCoor = LeftUp
-                LeftDownCoor = LeftUpCoor + 120
+                LeftDownCoor = LeftUpCoor + oligo_value
                 LeftSeq = Sequence_dict[x][LeftUpCoor:LeftDownCoor]
                 Code = 4 # A code of 4 means fragment is fine
                 break
  
-        # Right oligo: walk right 1bp at a time until GATC or reach end of chromosome
-        while bool(re.search('GATC',str(Sequence_dict[x][RightUp:RightDown])))==False:
+        # Right oligo: walk right 1bp at a time until cut sequence or reach end of chromosome
+        while bool(re.search(Cut_sequence,str(Sequence_dict[x][RightUp:RightDown])))==False:
             RightDown=RightDown+1
             if RightDown>len(Sequence_dict[x]):
                 print("went over end of chromosome")
-                Code = 3 # A code of 3 means check fragemen to the left
+                Code = 3 # A code of 3 means check fragement to the left
                 break
-            elif re.search('GATC',str(Sequence_dict[x][RightUp:RightDown])):
+            elif re.search(Cut_sequence,str(Sequence_dict[x][RightUp:RightDown])):
                 RightDownCoor = RightDown
-                RightUpCoor = RightDownCoor-120
+                RightUpCoor = RightDownCoor-oligo_value
                 RightSeq = Sequence_dict[x][RightUpCoor:RightDownCoor]
                 if Code!=2:
                     Code = 4
                 break
         
-        # Check fragment length to exclude fragments < 120bp
+        # Check fragment length to exclude fragments < oligo size
         FragmentLength = RightDownCoor-LeftUpCoor
-        if FragmentLength<120:
+        if FragmentLength<oligo_value:
             if (Code!=2) & (Code!=3):
                 Code = 1
         
