@@ -14,7 +14,9 @@ mkdir $DirName
 cd $DirName
 lines=$(wc -l < ../$FastaName) # store number of lines
 loopLimit=$(($lines+1))
-FinalTop=$((($lines/$increment+1)*$increment)) # This needs to be corrected for if the number of lines equals a number exactly divisible by 40000
+#FinalTop=$((($lines/$increment+1)*$increment)) # This needs to be corrected for if the number of lines equals a number exactly divisible by 40000
+MidTop="$(awk 'BEGIN { rounded = sprintf("%.0f", '$lines'/'$increment'+0.4999999999); print rounded }')"
+FinalTop=$(($MidTop*$increment))
 
 ## Set up a loop to generate fasta files for every 20,000 oligos (40,000 lines)
 if [ $topCounter -gt $loopLimit ]
@@ -32,9 +34,3 @@ while [ $topCounter -lt $loopLimit ]; do
         let topCounter=$lines
     fi
 done
-
-TestVar="$(awk 'BEGIN { rounded = sprintf("%.0f", 40001/40000+0.49999999); print rounded }')"
-echo $TestVar # equals 2
-TestVar="$(awk 'BEGIN { rounded = sprintf("%.0f", 40000/40000+0.49999999); print rounded }')"
-echo $TestVar # equals 1
-

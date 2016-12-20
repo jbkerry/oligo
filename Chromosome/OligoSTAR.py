@@ -52,8 +52,6 @@ Sequences = {}
 Groups = {}
 
 # Determine alignment matches and mismatches
-#SAMfile = '/t1-data1/WTSA_Dev/jkerry/CaptureC/WholeGenome/WholeChromosomes/mm9_chr11_DpnII_70bp/'+suffix+'/chr11_'+suffix+'_Aligned.out.sam'
-#SAMfile = '/t1-data1/WTSA_Dev/jkerry/CaptureC/WholeGenome/Promoters/RefSeq_data/GeneratedOligos_Aligned.out.sam'
 SAMfile = './'+chr_name+'_'+suffix+'_Aligned.out.sam'
 SAMlines = [samline.rstrip('\n') for samline in open(SAMfile)]
 for thisline in SAMlines:
@@ -111,16 +109,13 @@ for ThisOligo in AllOligos.keys():
 
 SSRLength_dict = {}
 SSRType_dict = {}
-#RM_file = "/t1-data1/WTSA_Dev/jkerry/CaptureC/WholeGenome/WholeChromosomes/mm9_chr11_DpnII_70bp/"+suffix+"/chr11_Oligos_"+suffix+".fa.out"
 RM_file = "./"+chr_name+"_Oligos_"+suffix+".fa.out"
-#RM_file = "/t1-data1/WTSA_Dev/jkerry/CaptureC/WholeGenome/Promoters/RefSeq_data/GeneratedOligos.fa.out"
 RMlines = [RMline.rstrip('\n') for RMline in open(RM_file)]
 for ThisRMline in RMlines[3:]:
     parts = re.split("\s+",ThisRMline)
     Qname = parts[5]
     RepeatType = parts[10]
     Group=""
-    #Chr,Start,Stop,FragStart,FragEnd,Side = re.split("\W+",Qname)
     if len(re.split("\W+",Qname))==7:
         Chr,Start,Stop,FragStart,FragEnd,Group,Side = re.split("\W+",Qname)
     else:
@@ -142,23 +137,15 @@ for ThisRMline in RMlines[3:]:
         if SSRLength>SSRLength_dict[Qname]:
             SSRLength_dict[Qname]=SSRLength
             SSRType_dict[Qname] = RepeatType
-            
-# Secondary structure
-
-#df = pd.read_table("/t1-data1/WTSA_Dev/jkerry/CS_paper/"+suffix+"/OligoEnergy.txt",sep="\t",header=False)
-#df = pd.read_table("/t1-data1/WTSA_Dev/jkerry/CaptureC/WholeGenome/Promoters/RefSeq_data/OligoEnergy.txt",sep="\t",header=False)
-Written = {}
         
 # Write text file with oligo info
+Written = {}
 OligoFile = "OligoInfo.txt"
 #OligoFile = "OligoInfo_"+suffix+".txt"
 TextOut = open(OligoFile,"w")
-#TextOut.write("Chr\tStart\tStop\tFragment Start\tFragment Stop\tSide of fragment\tSequence\tTotal number of alignments\tDensity score\tRepeat length\tRepeat Class\tGC%\tdeltaG\n")
 TextOut.write("Chr\tStart\tStop\tFragment Start\tFragment Stop\tSide of fragment\tSequence\tTotal number of alignments\tDensity score\tRepeat length\tRepeat Class\tGC%\n")
 for ThisOligo in AllOligos.keys():
-    #Chr,Start,Stop,FragStart,FragEnd,Side = re.split("\W+",ThisOligo)
     Write = 0
-    
     if len(re.split("\W+",ThisOligo))==7:
         Chr,Start,Stop,FragStart,FragEnd,Group,Side = re.split("\W+",ThisOligo)
         OligoCoor = Chr+":"+Start+"-"+Stop
@@ -180,9 +167,7 @@ for ThisOligo in AllOligos.keys():
         RepeatLength=SSRLength_dict[ThisOligo]
         RepeatType=SSRType_dict[ThisOligo]
     if Write==1:   
-        #TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\t{12}\n".format(Chr,Start,Stop,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo],df[df['Coordinate']==ThisOligo].Energy.item()))
         TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\n".format(Chr,Start,Stop,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
-        #TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6:.2f}\t{7}\t{8}\t{9:.2f}\t{10}\n".format(Chr,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo],df[df['Coordinate']==ThisOligo].Energy.item()))
         Written[OligoCoor] = 1
 TextOut.close()
 
