@@ -1,13 +1,16 @@
 #!usr/bin/bash
-#if [ -z "$Region" ]
-#then
-#    python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/OligoGen.py -g $Genome -c $Chr -e $Enzyme -o $Oligo
-#    FastaName="Oligos_"$Genome"_chr"$Chr"_"$Enzyme"_"$Oligo"bp.fa"
-#else
-#    python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/OligoGen.py -g $Genome -c $Chr -e $Enzyme -o $Oligo -r $Region
-#    FastaName="Oligos_"$Genome"_chr"$Chr"_"$Region"_"$Enzyme"_"$Oligo"bp.fa"
-#fi
-FastaName="Oligos_mm9_chr2_HindIII_70bp_2.fa"
+if [ -z "$Region" ]
+then
+    python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/OligoGen.py -g $Genome -c $Chr -e $Enzyme -o $Oligo
+    FastaName="Oligos_"$Genome"_chr"$Chr"_"$Enzyme"_"$Oligo"bp.fa"
+else
+    python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/OligoGen.py -g $Genome -c $Chr -e $Enzyme -o $Oligo -r $Region
+    FastaName="Oligos_"$Genome"_chr"$Chr"_"$Region"_"$Enzyme"_"$Oligo"bp.fa"
+fi
+if [ -z "$BLAT" ]
+then
+    BLAT=0
+fi
 TruncFasta=$(echo $FastaName | egrep -o "^[^.]+")
 DirName=${TruncFasta:7}
 #DirName=${FastaName:7:$((${#FastaName}-10))}
@@ -17,7 +20,7 @@ MidMax="$(awk 'BEGIN { rounded = sprintf("%.0f", '$lines'/40000+0.4999999999); p
 Max=$(($MidMax*20000))
 bash /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/SplitFA.sh $FastaName
 cd $DirName
-python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/MakeShells.py -g $Genome -c $Chr -u $Max
+python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/MakeShells.py -g $Genome -c $Chr -u $Max -b $BLAT
 mkdir Logs
 bash /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/RunShells.sh $Max
 echo -e "Chr\tStart\tStop\tFragment Start\tFragment Stop\tSide of fragment\tSequence\tTotal number of alignments\tDensity score\tRepeat length\tRepeat Class\tGC%" >AllOligos_info.txt

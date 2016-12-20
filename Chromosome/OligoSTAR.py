@@ -14,6 +14,7 @@ def GCcontent(x):
 
 suffix = ""
 chr_num = ""
+BLAT=0
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], 'i:c:h',)
