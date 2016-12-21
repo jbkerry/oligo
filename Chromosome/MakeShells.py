@@ -63,6 +63,16 @@ except ValueError:
     if (chromosome!="X") & (chromosome!="Y") & (chromosome!="M"):
         print("Selected chromosome number does not exist for the specified genome build (case sensitive for X, Y and M)")
         KillScript=1
+        
+# BLAT value
+try:
+    BLAT_value = int(BLAT)
+    if (BLAT_value!=0) & (BLAT_value!=1):
+        print("BLAT option must be 0 (STAR) or 1 (BLAT)")
+        KillScript=1
+except ValueError:
+    print("BLAT option must be 0 (STAR) or 1 (BLAT)")
+    KillScript=1
     
 if KillScript==1:
     sys.exit(2)
@@ -74,15 +84,15 @@ while Counterhigh<=int(upperLimit):
     out_file = open("Shell_"+Suffix+".sh","w")
     out_file.write("mkdir "+Suffix+"\n")
     out_file.write("cd "+Suffix+"\n")
-    if BLAT==0:
+    if BLAT_value==0:
         out_file.write("/package/rna-star/2.5.1b/bin/STAR --runThreadN 4 --readFilesIn ../chr"+chromosome+"_Oligos_"+Suffix+".fa --genomeDir /databank/igenomes/"+Organism+"/UCSC/"+genome+"/Sequence/STAR/ --genomeLoad NoSharedMemory --outFilterMultimapScoreRange 1000 --outFilterMultimapNmax 100000 --outFilterMismatchNmax 110 --seedSearchStartLmax 4 --seedSearchLmax 20 --alignIntronMax 10 --seedPerWindowNmax 15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 --limitOutSAMoneReadBytes 300000 --outFileNamePrefix chr"+chromosome+"_"+Suffix+"_\n")
-    elif BLAT==1:
-        out_file.write("module load blat")
-        out_file.write("blat -stepSize=5 -minScore=10 -minIdentity=0 -repMatch=999999 /databank/igenomes/$organism/UCSC/$genome/Sequence/WholeGenomeFasta/genome.fa ../chr"+chromosome+"_Oligos_"+Suffix+".fa chr"+chromosome+"_"+Suffix+".psl")
+    elif BLAT_value==1:
+        out_file.write("module load blat\n")
+        out_file.write("blat -stepSize=5 -minScore=10 -minIdentity=0 -repMatch=999999 /databank/igenomes/"+Organism+"/UCSC/"+genome+"/Sequence/WholeGenomeFasta/genome.fa ../chr"+chromosome+"_Oligos_"+Suffix+".fa chr"+chromosome+"_"+Suffix+".psl\n")
     out_file.write("repeatmasker -noint -s -dir ./ -species "+Species+" ../chr"+chromosome+"_Oligos_"+Suffix+".fa\n")
-    if BLAT==0:
+    if BLAT_value==0:
         out_file.write("python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/OligoSTAR.py -i "+Suffix+" -c "+chromosome+"\n")
-    elif BLAT==1:
+    elif BLAT_value==1:
         out_file.write("python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Chromosome/OligoBLAT.py -i "+Suffix+" -c "+chromosome+"\n")
     CounterLow = CounterLow+20000
     Counterhigh = Counterhigh+20000
