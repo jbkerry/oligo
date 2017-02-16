@@ -38,7 +38,7 @@ def GCcontent(x):
 #            usage()
 #            sys.exit(2)
 
-chr_name = "chr"+chr_num
+#chr_name = "chr"+chr_num
 sys.stdout.write("Started running at: ")
 TimeNow = datetime.datetime.now().time()
 sys.stdout.write(str(TimeNow)+"\n")
@@ -110,7 +110,7 @@ for ThisOligo in AllOligos.keys():
 
 SSRLength_dict = {}
 SSRType_dict = {}
-RM_file = "./"+chr_name+"_Oligos_"+suffix+".fa.out"
+RM_file = "./GeneratedOligos.fa.out"
 RMlines = [RMline.rstrip('\n') for RMline in open(RM_file)]
 for ThisRMline in RMlines[3:]:
     parts = re.split("\s+",ThisRMline)
