@@ -151,7 +151,7 @@ RM_file="GeneratedOligos.fa.out"
 RMLines = [RMLine.rstrip('\n') for RMLine in open(RM_file)]
 for ThisRMLine in RMLines[3:]:
     RepeatLine = ThisRMLine
-    whiteSpace, sw_score, perc_div, perc_del, perc_ins, Qname, Qstart, Qstop, Qleft, PlusSign, Rname, Rclass, Rstart, Rstop, Rleft, LineID = re.split("\s+",RepeatLine)
+    whiteSpace, sw_score, perc_div, perc_del, perc_ins, Qname, Qstart, Qstop, Qleft, PlusSign, Rname, Rclass, Rstart, Rstop, Rleft, LineID, whiteSpace2 = re.split("\s+",RepeatLine)
     
     #OligoChr = OligoStart = OligoStop = FragStart = FragStop = Group = Side = "";
     if len(re.split("\W+",Qname))==7:
