@@ -20,7 +20,7 @@ mkdir $DirName
 cd $DirName
 
 echo "Generating fragments..."
-python ../FragExtract.py -b $bedfile -g $genome -e $enzyme -o $oligo
+python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Regions/FragExtract.py -b $bedfile -g $genome -e $enzyme -o $oligo
 
 if [ $STARvar == 0 ]
 then
@@ -40,11 +40,13 @@ repeatmasker -noint -s -species $species ./GeneratedOligos.fa
 
 if [ $STARvar == 0 ]
 then
-    python ../DepthGauge.py
-    python ../MergeAssociation.py
-    python ../DoubledFrag.py
+    python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Regions/DepthGauge.py  
 elif [ $STARvar == 1 ]
 then
-    python ../OligoSTAR.py
+    python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Regions/OligoSTAR.py
 fi
+
+python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Regions/MergeAssociation.py
+python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Regions/DoubledFrag.py
+
 echo "All done. Check stats.txt to see number of successful fragments and oligos"

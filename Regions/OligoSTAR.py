@@ -141,7 +141,7 @@ for ThisRMline in RMlines[3:]:
         
 # Write text file with oligo info
 Written = {}
-OligoFile = "OligoInfo.txt"
+OligoFile = "Oligos_filtered.txt"
 #OligoFile = "OligoInfo_"+suffix+".txt"
 TextOut = open(OligoFile,"w")
 TextOut.write("Chr\tStart\tStop\tFragment Start\tFragment Stop\tSide of fragment\tSequence\tTotal number of alignments\tDensity score\tRepeat length\tRepeat Class\tGC%\n")
