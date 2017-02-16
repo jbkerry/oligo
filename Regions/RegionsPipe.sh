@@ -38,7 +38,13 @@ fi
 echo "Repeat masker..."
 repeatmasker -noint -s -species $species ./GeneratedOligos.fa
 
-python ../DepthGauge.py
-python ../MergeAssociation.py
-python ../DoubledFrag.py
+if [ $STARvar == 0 ]
+then
+    python ../DepthGauge.py
+    python ../MergeAssociation.py
+    python ../DoubledFrag.py
+elif [ $STARvar == 1 ]
+then
+    python ../OligoSTAR.py
+fi
 echo "All done. Check stats.txt to see number of successful fragments and oligos"
