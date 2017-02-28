@@ -11,11 +11,16 @@ The pipeline can be run by supplying OT_Pipe.sh with the variables <b>-b</b> \<b
 <b>-s</b> choose the step size (in bp) to specify the distance between adjacent oligos that are generated<br>
 <b>-d</b> choose the maximum distance (in bp) away from the off-target site to design oligos<br>
 
+<b>-h</b> print extended help and exit script<br>
+
 Example run for 50bp oligos generated in a 10-bp stepwise manner no further than 200bp away from the off-target site, on either side (i.e. a maximum possible window of 400bp), for human hg19:<br><br>
 <b>bash OT_Pipe.sh -b OffTargetSites.bed -g hg19 -o 50 -s 10 -d 200</b><br><br>
 All supplied arguments are case sensitive
 
-`Under the hood`
+`Output`<br>
+A file called AllOligos_Info.txt will be generated in the directory from which the pipeline was run. This will contain information about the oligos, including density of STAR mapping, the presence of repeats, and the GC%.
+
+`Under the hood`<br>
 Below is a breakdown of the pipeline workflow.<br><br>
 <b>Workflow of OT_Pipe.sh</b>
 <table>
@@ -47,7 +52,7 @@ Below is a breakdown of the pipeline workflow.<br><br>
     <tr>
         <td align="center">5</td>
         <td>OT_STAR.py</td>
-        <td>Determines overall off-target binding potential and presence of repeats in the oligo sequences from step 2, using information from STAR and RepeatMasker, respectively.</td>
+        <td>Determines overall off-target binding potential of the oligo sequences from step 2, using information from STAR and RepeatMasker</td>
     </tr>
 </table>
 
