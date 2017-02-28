@@ -4,7 +4,7 @@ This pipeline will generate oligos for performing Capture-C adjacent to predicte
 the most efficient oligos within a required distance. The user can specify the oligo size, step size and maximum distance away from the cut site that the oligos are designed within.
 
 `Input`
-The pipeline can be run by supplying OT_Pipe.sh with the variables -b <bed file> -g <genome> -o <oligo size (bp)> -s <step size (bp)> and -d <maximum distance from cut site (bp)>.<br>
+The pipeline can be run by supplying OT_Pipe.sh with the variables -b [bed file] -g \<genome\> -o <oligo size (bp)> -s <step size (bp)> and -d <maximum distance from cut site (bp)>.<br>
 <b>-b</b> supply the file name of a 4-column (Chr, Start, Stop, Name) bed file containing predicted off-target sites<br>
 <b>-g</b> select from <b>hg18</b>, <b>hg19</b>, <b>hg38</b>, <b>mm9</b> and <b>mm10</b><br>
 <b>-o</b> choose the size of the oligos (in bp) to be generated<br>
