@@ -15,3 +15,39 @@ Example run for 50bp oligos generated in a 10-bp stepwise manner no further than
 <b>bash OT_Pipe.sh -b OffTargetSites.bed -g hg19 -o 50 -s 10 -d 200</b><br><br>
 All supplied arguments are case sensitive
 
+`Under the hood`
+Below is a breakdown of the pipeline workflow.<br><br>
+<b>Workflow of OT_Pipe.sh</b>
+<table>
+    <tr>
+        <th>Order</th>
+        <th>Script/Process</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td align="center">1</td>
+        <td>OT_OligoGen.py</td>
+        <td>Generates coordinates of oligos, walking out from predicted CRISPR off-target cut site, based on parameters supplied by the user</td>
+    </tr>
+    <tr>
+        <td align="center">2</td>
+        <td>fastaFromBed<br>(bedtools)</td>
+        <td>Extracts the sequences of the coordinates generated from OT_OligoGen.py and returns them in FASTA format</td>
+    </tr>
+    <tr>
+        <td align="center">3</td>
+        <td>STAR</td>
+        <td>Aligns FASTA sequences from step 2 against the reference genome</td>
+    </tr>
+    <tr>
+        <td align="center">4</td>
+        <td>RepeatMasker</td>
+        <td>Checks for the presence of simple sequence repeats in FASTA sequences from step 2</td>
+    </tr>
+    <tr>
+        <td align="center">5</td>
+        <td>OT_STAR.py</td>
+        <td>Determines overall off-target binding potential and presence of repeats in the oligo sequences from step 2, using information from STAR and RepeatMasker, respectively.</td>
+    </tr>
+</table>
+

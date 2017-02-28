@@ -31,7 +31,7 @@ then
     echo "Usage is: bash OT_Pipe.sh -b <bed file> -g <genome> -o <oligo size (bp)> -s <step size (bp)> -d <maximum distance (bp)>"
     echo "For more information type: bash OT_Pipe.sh -h"
     exit 1
-elif [ $Help -eq 1 ]
+elif [ -n "$Help" ]
 then
     echo -e "\nOligo Design - CRISPR off-target\n"
     echo -e "-------------------------------------------------------\n"
@@ -43,10 +43,15 @@ then
     echo -e "-o choose the size of the oligos (in bp) to be generated"
     echo -e "-s choose the step size (in bp) to specify the distance between adjacent oligos that are generated"
     echo -e "-d choose the maximum distance (in bp) away from the off-target site to design oligos\n"
+    echo -e "-h print help and exit script\n"
     
     echo -e "Example run for 50bp oligos generated in a 10-bp stepwise manner no further than 200bp away from the off-target site, on either side (i.e. a maximum possible window of 400bp), for human hg19:\n"
     echo -e "bash OT_Pipe.sh -b OffTargetSites.bed -g hg19 -o 50 -s 10 -d 200\n"
     echo -e "All supplied arguments are case sensitive\n"
+    exit 1
+fi
+if egrep -q '%|_' TSSCoors.bed; then
+    echo "percent symbols (%) and underscores (_) are not allowed in gene names or coordinates"
     exit 1
 fi
 organism=""
@@ -64,4 +69,8 @@ echo "Extracting oligo sequences..."
 fastaFromBed -fi /databank/igenomes/$organism/UCSC/$Genome/Sequence/WholeGenomeFasta/genome.fa -bed ./OToligoCoor.bed -name -fo OT_seqs.fa
 echo "Running sequences through STAR..."
 /package/rna-star/2.5.1b/bin/STAR --runThreadN 4 --readFilesIn ./OT_seqs.fa --genomeDir /databank/igenomes/$organism/UCSC/$Genome/Sequence/STAR/ --genomeLoad NoSharedMemory --outFilterMultimapScoreRange 1000 --outFilterMultimapNmax 100000 --outFilterMismatchNmax 110 --seedSearchStartLmax 4 --seedSearchLmax 20 --alignIntronMax 10 --seedPerWindowNmax 15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 --limitOutSAMoneReadBytes 300000 --outFileNamePrefix OT_Oligos_
+echo "Checking for repeats..."
+repeatmasker -noint -s -species $species ./OT_seqs.fa
+echo "Selecting most efficient oligos..."
+python /t1-data1/WTSA_Dev/jkerry/OligoDesign/CRISPR-OT/OT_STAR.py
 #/package/rna-star/2.5.1b/bin/STAR --runThreadN 4 --readFilesIn ./OT_seqs.fa --genomeDir /databank/igenomes/Homo_sapiens/UCSC/hg19/Sequence/STAR/ --genomeLoad NoSharedMemory --outFilterMultimapScoreRange 1000 --outFilterMultimapNmax 100000 --outFilterMismatchNmax 110 --seedSearchStartLmax 4 --seedSearchLmax 20 --alignIntronMax 10 --seedPerWindowNmax 15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 --limitOutSAMoneReadBytes 300000 --outFileNamePrefix OT_Oligos_
