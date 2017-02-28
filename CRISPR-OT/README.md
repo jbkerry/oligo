@@ -3,7 +3,7 @@
 This pipeline will generate oligos for performing Capture-C adjacent to predicted off-target cut sites of CRISPR. The user supplies a bed file containing the predicted off-target sites and oligos are generated in a step-wise manner walking away from the cut site in order to obtain
 the most efficient oligos within a required distance. The user can specify the oligo size, step size and maximum distance away from the cut site that the oligos are designed within.
 
-`Input`
+`Input`<br>
 The pipeline can be run by supplying OT_Pipe.sh with the variables <b>-b</b> \<bed file\> <b>-g</b> \<genome\> <b>-o</b> \<oligo size (bp)\> <b>-s</b> \<step size (bp)\> and <b>-d</b> \<maximum distance from cut site (bp)\>.<br>
 <b>-b</b> supply the file name of a 4-column (Chr, Start, Stop, Name) bed file containing predicted off-target sites<br>
 <b>-g</b> select from <b>hg18</b>, <b>hg19</b>, <b>hg38</b>, <b>mm9</b> and <b>mm10</b><br>

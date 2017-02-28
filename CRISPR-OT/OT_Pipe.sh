@@ -2,7 +2,7 @@
 module load python
 module load bedtools
 
-while getopts ":b:g:o:s:d:" opt; do
+while getopts ":b:g:o:s:d:h" opt; do
   case $opt in
     b) Bed="$OPTARG"
     ;;
@@ -14,11 +14,41 @@ while getopts ":b:g:o:s:d:" opt; do
     ;;
     d) MaxDist="$OPTARG"
     ;;
+    h) Help=1
+    ;;
     \?) echo "Invalid option -$OPTARG" >&2
+    exit 1
+    ;;
+    :) echo "Option -$OPTARG requires an argument." >&2
+    exit 1
     ;;
   esac
 done
-
+##echo $Help
+if [ -z "$Bed" ] || [ -z "$Genome" ] || [ -z "$Oligo" ] || [ -z "$Step" ] || [ -z "$MaxDist" ] && [ -z "$Help" ]
+then
+    echo "ERROR: All arguments must be supplied"
+    echo "Usage is: bash OT_Pipe.sh -b <bed file> -g <genome> -o <oligo size (bp)> -s <step size (bp)> -d <maximum distance (bp)>"
+    echo "For more information type: bash OT_Pipe.sh -h"
+    exit 1
+elif [ $Help -eq 1 ]
+then
+    echo -e "\nOligo Design - CRISPR off-target\n"
+    echo -e "-------------------------------------------------------\n"
+    echo -e "This pipeline will generate oligos for performing Capture-C adjacent to predicted off-target cut sites of CRISPR. The user supplies a bed file containing the predicted off-target sites and oligos are generated in a step-wise manner walking away from the cut site in order to obtain the most efficient oligos within a required distance. The user can specify the oligo size, step size and maximum distance away from the cut site that the oligos are designed within.\n"
+    
+    echo -e "The pipeline can be run by supplying OT_Pipe.sh with the variables -b <bed file> -g <genome> -o <oligo size (bp)> -s <step size (bp)> and -d <maximum distance from cut site (bp)>."
+    echo -e "-b supply the file name of a 4-column (Chr, Start, Stop, Name) bed file containing predicted off-target sites"
+    echo -e "-g select from hg18, hg19, hg38, mm9 and mm10"
+    echo -e "-o choose the size of the oligos (in bp) to be generated"
+    echo -e "-s choose the step size (in bp) to specify the distance between adjacent oligos that are generated"
+    echo -e "-d choose the maximum distance (in bp) away from the off-target site to design oligos\n"
+    
+    echo -e "Example run for 50bp oligos generated in a 10-bp stepwise manner no further than 200bp away from the off-target site, on either side (i.e. a maximum possible window of 400bp), for human hg19:\n"
+    echo -e "bash OT_Pipe.sh -b OffTargetSites.bed -g hg19 -o 50 -s 10 -d 200\n"
+    echo -e "All supplied arguments are case sensitive\n"
+    exit 1
+fi
 organism=""
 species=""
 if [ $Genome == "hg18" ] || [ $Genome == "hg19" ] || [ $Genome == "hg38" ]; then
