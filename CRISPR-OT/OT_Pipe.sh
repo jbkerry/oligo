@@ -1,5 +1,24 @@
+#!usr/bin/bash
 module load python
 module load bedtools
+
+while getopts ":b:g:o:s:d:" opt; do
+  case $opt in
+    b) Bed="$OPTARG"
+    ;;
+    g) Genome="$OPTARG"
+    ;;
+    o) Oligo="$OPTARG"
+    ;;
+    s) Step="$OPTARG"
+    ;;
+    d) MaxDist="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    ;;
+  esac
+done
+
 organism=""
 species=""
 if [ $Genome == "hg18" ] || [ $Genome == "hg19" ] || [ $Genome == "hg38" ]; then
