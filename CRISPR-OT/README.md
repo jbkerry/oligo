@@ -18,7 +18,7 @@ Example run for 50bp oligos generated in a 10-bp stepwise manner no further than
 All supplied arguments are case sensitive
 
 `Output`<br>
-A file called AllOligos_Info.txt will be generated in the directory from which the pipeline was run. This will contain information about the oligos, including density of STAR mapping, the presence of repeats, and the GC%.
+A file called <b>AllOligos_Info.txt</b> will be generated in the directory from which the pipeline was run. This will contain information about the oligos, including density of STAR mapping, the presence of repeats, and the GC%.
 
 `Under the hood`<br>
 Below is a breakdown of the pipeline workflow.<br><br>
