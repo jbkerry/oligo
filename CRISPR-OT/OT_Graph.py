@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+from __future__ import division
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import matplotlib.patches as mpatches
 import re,getopt,sys
 
 def usage():
@@ -47,7 +49,7 @@ for i in group_df.get_group(key).index.values:
 
 
 fig, ax = plt.subplots()
-ColourList = np.where(group_df.get_group(key)['Repeat length']<(len(group_df.get_group(key)['Sequence'])/4),'b','r')
+ColourList = np.where(group_df.get_group(key)['Repeat length']<(len(group_df.get_group(key).reset_index()['Sequence'][0])/4),'b','r')
 plt.scatter(SiteList,group_df.get_group(key)['Density score'],c=ColourList,s=[x+10 for x in group_df.get_group(key)['Repeat length']])
 
 ax.set_xlabel('Distance from cut site (bp)')
@@ -67,6 +69,10 @@ ax.set_ylim(0,max(group_df.get_group(key)['Density score'])+10)
 plt.plot([100,100],[0,max(group_df.get_group(key)['Density score'])+10], 'k--', lw=1)
 plt.plot([-100,-100],[0,max(group_df.get_group(key)['Density score'])+10], 'k--', lw=1)
 plt.plot([min(SiteList)-10,max(SiteList)+10],[50,50], 'r--', lw=1)
+#red_patch = mpatches.Patch(color='red',label='Repeat length>=cutoff')
+#blue_patch = mpatches.Patch(color='blue',label='Repeat length<cutoff')
+#first_legend = plt.legend(handles=[red_patch,blue_patch],loc=2,bbox_to_anchor=(1.01,1),borderaxespad=0.)
+#plt.gca().add_artist(first_legend)
 for i, txt in enumerate(group_df.get_group(key)['Location']):
     ax.annotate(txt,(SiteList[i],group_df.get_group(key).reset_index()['Density score'][i]), fontsize=11)
 plt.subplots_adjust(bottom=0.15) 
