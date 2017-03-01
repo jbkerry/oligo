@@ -75,6 +75,6 @@ plt.plot([min(SiteList)-10,max(SiteList)+10],[50,50], 'r--', lw=1)
 #plt.gca().add_artist(first_legend)
 for i, txt in enumerate(group_df.get_group(key)['Location']):
     ax.annotate(txt,(SiteList[i],group_df.get_group(key).reset_index()['Density score'][i]), fontsize=8)
-plt.subplots_adjust(bottom=0.15) 
+plt.subplots_adjust(bottom=0.1) 
 #plt.show()
 plt.savefig("ExampleGraph.png")
