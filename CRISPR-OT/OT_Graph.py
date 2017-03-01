@@ -52,7 +52,7 @@ fig, ax = plt.subplots()
 ColourList = np.where(group_df.get_group(key)['Repeat length']<(len(group_df.get_group(key).reset_index()['Sequence'][0])/4),'b','r')
 plt.scatter(SiteList,group_df.get_group(key)['Density score'],c=ColourList,s=[x+10 for x in group_df.get_group(key)['Repeat length']])
 
-ax.set_xlabel('Distance from cut site (bp)')
+ax.set_xlabel('Distance from off-target site (bp)')
 ax.set_ylabel('STAR Density Score',rotation=0)
 
 ax.spines['left'].set_position('zero')
