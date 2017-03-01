@@ -5,38 +5,34 @@ import getopt,sys,re,datetime,pandas as pd
 
 # Functions
     
-#def usage():
-#    print("usage: OligoSTAR.py -i <oligo numbers> -c <chromosome number>")
+def usage():
+    print("usage: OT_STAR.py -b <bed file>")
     
 def GCcontent(x):
     gc_perc = (x.count('C') + x.count('G'))/len(x)
     return gc_perc
 
-#suffix = ""
-#chr_num = ""
-#BLAT=0
-#
-#try:
-#    opts, args = getopt.getopt(sys.argv[1:], 'i:c:h',)
-#except getopt.GetoptError:
-#    usage()
-#    sys.exit(2)
-#    
-#if not opts:
-#    usage()
-#    sys.exit(2)
-#else:
-#    for opt, arg in opts:
-#        if opt == '-h':
-#            usage()
-#            sys.exit(2)
-#        elif opt == '-i':
-#            suffix = arg
-#        elif opt == '-c':
-#            chr_num = arg
-#        else:
-#            usage()
-#            sys.exit(2)
+bedfile = ""
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:], 'b:h',)
+except getopt.GetoptError:
+    usage()
+    sys.exit(2)
+    
+if not opts:
+    usage()
+    sys.exit(2)
+else:
+    for opt, arg in opts:
+        if opt == '-h':
+            usage()
+            sys.exit(2)
+        elif opt == '-b':
+            bedfile = arg
+        else:
+            usage()
+            sys.exit(2)
 
 #chr_name = "chr"+chr_num
 sys.stdout.write("Started running at: ")
@@ -119,24 +115,47 @@ for ThisRMline in RMlines[3:]:
         if SSRLength>SSRLength_dict[Qname]:
             SSRLength_dict[Qname]=SSRLength
             SSRType_dict[Qname] = RepeatType
+            
+# Grab coordinate of each site
+
+SiteDict = {}
+BedLines = [BedLine.rstrip('\n') for BedLine in open(bedfile)]
+for ThisBedLine in BedLines:
+    Chr, Start, Stop, Site = ThisBedLine.split('\t')
+    if Site not in SiteDict.keys():
+        SiteDict[Site] = Start
+    else:
+        print("Caution: the site name \'{0}\' has been given to multiple coordinates. The first location was assigned to this site name.".format())
         
 # Write text file with oligo info
 Written = {}
 OligoFile = "OT_OligoInfo.txt"
+FilterFile = "OT_OligoInfo_filtered.txt"
 #OligoFile = "OligoInfo_"+suffix+".txt"
 TextOut = open(OligoFile,"w")
-TextOut.write("Chr\tStart\tStop\tSite\tLocation\tSequence\tTotal number of alignments\tDensity score\tRepeat length\tRepeat Class\tGC%\n")
+FilteredOut = open(FilterFile,"w")
+TextOut.write("Chr\tStart\tStop\tSite\tLocation\tDistance from site (bp)\tSequence\tTotal number of alignments\tDensity score\tRepeat length\tRepeat Class\tGC%\n")
+FilteredOut.write("Chr\tStart\tStop\tSite\tLocation\tDistance from site (bp)\tSequence\tTotal number of alignments\tDensity score\tRepeat length\tRepeat Class\tGC%\n")
 for ThisOligo in AllOligos.keys():
     Coor,Name = ThisOligo.split("%")
     Chr,Start,Stop = re.split("\W+",Coor)
     Site,Location = Name.split("_")
     RepeatLength = 0
     RepeatType = "NA"
+    Distance=0
+    if int(Start)<int(SiteDict[Site]):
+        Distance = int(SiteDict[Site])-int(Stop)
+    else:
+        Distance = int(Start)-int(SiteDict[Site])
     if ThisOligo in SSRLength_dict.keys():
         RepeatLength=SSRLength_dict[ThisOligo]
         RepeatType=SSRType_dict[ThisOligo]
-    TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7:.2f}\t{8}\t{9}\t{10:.2f}\n".format(Chr,Start,Stop,Site,Location,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
+        
+    if (RepeatLength<=len(Sequences[ThisOligo])/4) & (DensityDict[ThisOligo]<50):
+        FilteredOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\n".format(Chr,Start,Stop,Site,Location,Distance,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
+    TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\n".format(Chr,Start,Stop,Site,Location,Distance,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
 TextOut.close()
+FilteredOut.close()
 
 sys.stdout.write("Finished running at: ")
 TimeNow = datetime.datetime.now().time()
