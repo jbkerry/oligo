@@ -74,6 +74,6 @@ repeatmasker -noint -s -species $species ./OT_seqs.fa
 echo "Selecting most efficient oligos..."
 python /t1-data1/WTSA_Dev/jkerry/OligoDesign/CRISPR-OT/OT_STAR.py -b $Bed
 sort -k1,1 -k2,2n OT_OligoInfo.txt >AllOligos_Info.txt
-sort -k1,1 -k2,2n OT_OligoInfo_filtered.txt >AllOligos_Info_filtered.txt
+sort -k1,1 -k2,2n OT_OligoInfo_filtered.txt >FilteredOligos_Info.txt
 rm -f OT_OligoInfo.txt
 rm -f OT_OligoInfo_filtered.txt
