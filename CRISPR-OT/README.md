@@ -26,7 +26,7 @@ As an example:<br><br>
 This will generate a graph displaying the STAR density score of each oligo for that off-target site (only the ones that pass the filter if FilteredOligos_Info.txt is supplied to the script), against the distance from the off-target site.
 The repeat length is represented by the size of the plotted point: a bigger data point represents a sequence with a longer repeat sequence in it. Oligos where the repeat sequence is longer than the filter cut-off are displayed in red as opposed to blue.
 The graphical display provides an easier way for the user to select the most efficient oligos for a given off-target site, taking into account these three important properties.<br>
-<img src="ExampleGraph.png">
+<img src="ExampleGraph.png"><br>
 The recommended STAR density cut-off is represented by the horizontal dashed red line. The predicted maximum region for a deletion in a single-cut CRISPR experiment (up to 100bp away from the cut-site on either side) is delineated by the vertical dashed black lines.
 
 `Under the hood`<br>
