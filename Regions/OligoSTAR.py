@@ -101,6 +101,8 @@ for ThisOligo in AllOligos.keys():
     
     if len(re.split("\W+",ThisOligo))==7:
         Chr,Start,Stop,FragStart,FragEnd,Group,Side = re.split("\W+",ThisOligo)
+        ###The 4 lines below are completely inefficient. See DepthGauge.py for actual coding
+        
         if Group not in Groups.keys():
             Groups[Group]=Density
         elif Density<Groups[Group]:
@@ -142,9 +144,12 @@ for ThisRMline in RMlines[3:]:
 # Write text file with oligo info
 Written = {}
 OligoFile = "Oligos_filtered.txt"
+OligoFileAll = "Oligos_all.txt"
 #OligoFile = "OligoInfo_"+suffix+".txt"
 TextOut = open(OligoFile,"w")
+AllTextOut = open(OligoFileAll,"w")
 TextOut.write("Chr\tStart\tStop\tFragment Start\tFragment Stop\tSide of fragment\tSequence\tTotal number of alignments\tDensity score\tRepeat length\tRepeat Class\tGC%\n")
+AllTextOut.write("Chr\tStart\tStop\tFragment Start\tFragment Stop\tSide of fragment\tSequence\tTotal number of alignments\tDensity score\tRepeat length\tRepeat Class\tGC%\n")
 for ThisOligo in AllOligos.keys():
     Write = 0
     if len(re.split("\W+",ThisOligo))==7:
@@ -155,8 +160,10 @@ for ThisOligo in AllOligos.keys():
             if (Group in Groups.keys()):
                 if (DensityDict[ThisOligo]==Groups[Group]):
                     Write=1
+                    print("WRITE: oligo key = {0}, item = {1}".format(ThisOligo,AllOligos[ThisOligo]))
                 else:
                     Write=0
+                    print("NOPE: oligo key = {0}, item = {1}".format(ThisOligo,AllOligos[ThisOligo]))
     else:
         Chr,Start,Stop,FragStart,FragEnd,Side = re.split("\W+",ThisOligo)
         OligoCoor = Chr+":"+Start+"-"+Stop
@@ -168,9 +175,12 @@ for ThisOligo in AllOligos.keys():
         RepeatLength=SSRLength_dict[ThisOligo]
         RepeatType=SSRType_dict[ThisOligo]
     if Write==1:   
-        TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\n".format(Chr,Start,Stop,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
+        AllTextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\n".format(Chr,Start,Stop,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
+        if (DensityDict[ThisOligo]<=50) & (RepeatLength<=len(Sequences[ThisOligo])):
+            TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\n".format(Chr,Start,Stop,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
         Written[OligoCoor] = 1
 TextOut.close()
+AllTextOut.close()
 
 sys.stdout.write("Finished running at: ")
 TimeNow = datetime.datetime.now().time()

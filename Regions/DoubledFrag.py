@@ -15,4 +15,4 @@ for ThisOligoLine in OligoLines[1:]:
         FragCounter = FragCounter+1
     else:
         DoubleCounter=DoubleCounter+1
-out_file.write("Following BLAT and RM filter there are "+str(FragCounter)+" fragments in total, "+str(DoubleCounter)+" of which have two oligos")
+out_file.write("Following density score and repeat filters there are "+str(FragCounter)+" fragments in total, "+str(DoubleCounter)+" of which have two oligos")
