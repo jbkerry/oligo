@@ -6,7 +6,7 @@ import getopt,sys,re,datetime,pandas as pd
 # Functions
     
 def usage():
-    print("usage: OligoSTAR.py -i <oligo numbers> -c <chromosome number>")
+    print("usage: OligoBLAT.py -i <oligo numbers> -c <chromosome number>")
     
 def GCcontent(x):
     gc_perc = (x.count('C') + x.count('G'))/len(x)

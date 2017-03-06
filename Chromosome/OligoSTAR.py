@@ -14,7 +14,6 @@ def GCcontent(x):
 
 suffix = ""
 chr_num = ""
-BLAT=0
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], 'i:c:h',)
@@ -98,13 +97,6 @@ for ThisOligo in AllOligos.keys():
         TotalScore=TotalScore-Deletions[ThisOligo]
     Density = TotalScore/len(Sequences[ThisOligo]) # Normalise number of matches to length of oligo
     DensityDict[ThisOligo] = Density
-    
-    if len(re.split("\W+",ThisOligo))==7:
-        Chr,Start,Stop,FragStart,FragEnd,Group,Side = re.split("\W+",ThisOligo)
-        if Group not in Groups.keys():
-            Groups[Group]=Density
-        elif Density<Groups[Group]:
-            Groups[Group]=Density
 
 # Repeat Masker
 
@@ -116,17 +108,11 @@ for ThisRMline in RMlines[3:]:
     parts = re.split("\s+",ThisRMline)
     Qname = parts[5]
     RepeatType = parts[10]
-    Group=""
-    if len(re.split("\W+",Qname))==7:
-        Chr,Start,Stop,FragStart,FragEnd,Group,Side = re.split("\W+",Qname)
-    else:
-        Chr,Start,Stop,FragStart,FragEnd,Side = re.split("\W+",Qname)
+    Chr,Start,Stop,FragStart,FragEnd,Side = re.split("\W+",Qname)
     
     if len(Side)>1: # This is for oligos that have more than one repeat in them
         Side=Side[0]
         Qname = Chr+":"+Start+"-"+Stop+"-"+FragStart+"-"+FragEnd+"-"+Side
-        if Group!="":
-            Qname = Chr+":"+Start+"-"+Stop+"-"+FragStart+"-"+FragEnd+"-"+Group+"-"+Side
         
     Qstart = int(parts[6])
     Qstop = int(parts[7])
@@ -147,21 +133,10 @@ TextOut = open(OligoFile,"w")
 TextOut.write("Chr\tStart\tStop\tFragment Start\tFragment Stop\tSide of fragment\tSequence\tTotal number of alignments\tDensity score\tRepeat length\tRepeat Class\tGC%\n")
 for ThisOligo in AllOligos.keys():
     Write = 0
-    if len(re.split("\W+",ThisOligo))==7:
-        Chr,Start,Stop,FragStart,FragEnd,Group,Side = re.split("\W+",ThisOligo)
-        OligoCoor = Chr+":"+Start+"-"+Stop
-        if OligoCoor not in Written.keys():
-            Write=1
-            if (Group in Groups.keys()):
-                if (DensityDict[ThisOligo]==Groups[Group]):
-                    Write=1
-                else:
-                    Write=0
-    else:
-        Chr,Start,Stop,FragStart,FragEnd,Side = re.split("\W+",ThisOligo)
-        OligoCoor = Chr+":"+Start+"-"+Stop
-        if OligoCoor not in Written.keys():
-            Write=1
+    Chr,Start,Stop,FragStart,FragEnd,Side = re.split("\W+",ThisOligo)
+    OligoCoor = Chr+":"+Start+"-"+Stop
+    if OligoCoor not in Written.keys():
+        Write=1
     RepeatLength = 0
     RepeatType = "NA"
     if ThisOligo in SSRLength_dict.keys():
@@ -170,6 +145,8 @@ for ThisOligo in AllOligos.keys():
     if Write==1:   
         TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\n".format(Chr,Start,Stop,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
         Written[OligoCoor] = 1
+    else:
+        print("Didn't write oligo {0}".format(OligoCoor)) ##Remove this later
 TextOut.close()
 
 sys.stdout.write("Finished running at: ")

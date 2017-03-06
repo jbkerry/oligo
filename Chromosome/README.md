@@ -10,7 +10,7 @@ The pipeline can be run by supplying ChrPipe.sh with the variables <b>Genome</b>
 <b>Enzyme</b>: choose from <b>DpnII</b> (GATC), <b>NlaIII</b> (CATG) or <b>HindIII</b> (AAGCTT)<br>
 <b>Oligo</b>: supply the number of bp for the required oligo length e.g. <b>70</b><br>
 <b>Region</b> (optional): supply coordinates to only generate oligos within a specific region of the chromosome (must be in the format Start-Stop) e.g. <b>3050000-5000000</b>. Omit this option to run the pipe on the entire chromosome.<br>
-<b>Blat</b> (optional): choose whether to test for off-target binding using either STAR or BLAT. Select either <b>0</b> (to run STAR) or <b>1</b> (to run BLAT). If this option is omitted, the pipeline will run STAR by default. BLAT is not recommended for large designs, particularly on the human genome, because it becomes incredibly slow.<br>
+<b>Blat</b> (optional): choose whether to test for off-target binding using either STAR or BLAT. Select <b>0</b> (to run STAR) or <b>1</b> (to run BLAT). If this option is omitted, the pipeline will run STAR by default. BLAT is not recommended for large designs, particularly on the human genome, because it becomes incredibly slow.<br>
 
 Example run for 70bp oligos adjacent to DpnII restriction sites on mouse mm9 chromosome 11 (entire chromosome), checking off-target binding using BLAT:
 
