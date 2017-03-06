@@ -172,10 +172,10 @@ for ThisOligo in AllOligos.keys():
             if Group in LowestGroup.keys():
                 if Groups[Group][FragCoor]==LowestGroup[Group]:
                     Write=1
-                    print("WRITE: oligo key = {0}, item = {1}, density = {2}".format(ThisOligo,AllOligos[ThisOligo],DensityDict[ThisOligo]))
+                    #print("WRITE: oligo key = {0}, item = {1}, density = {2}".format(ThisOligo,AllOligos[ThisOligo],DensityDict[ThisOligo]))
                 else:
                     Write=0
-                    print("NOPE: oligo key = {0}, item = {1}, density = {2}".format(ThisOligo,AllOligos[ThisOligo],DensityDict[ThisOligo]))
+                    #print("NOPE: oligo key = {0}, item = {1}, density = {2}".format(ThisOligo,AllOligos[ThisOligo],DensityDict[ThisOligo]))
     else:
         Chr,Start,Stop,FragStart,FragEnd,Side = re.split("\W+",ThisOligo)
         OligoCoor = Chr+":"+Start+"-"+Stop

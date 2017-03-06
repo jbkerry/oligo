@@ -48,5 +48,6 @@ fi
 
 python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Regions/MergeAssociation.py
 python /t1-data1/WTSA_Dev/jkerry/OligoDesign/Regions/DoubledFrag.py
-
+rm -f Oligos_filtered.txt
+rm -f Oligos_all.txt
 echo "All done. Check stats.txt to see number of successful fragments and oligos"

@@ -145,8 +145,8 @@ for ThisOligo in AllOligos.keys():
     if Write==1:   
         TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\n".format(Chr,Start,Stop,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
         Written[OligoCoor] = 1
-    else:
-        print("Didn't write oligo {0}".format(OligoCoor)) ##Remove this later
+    #else:
+        #print("Didn't write oligo {0}".format(OligoCoor)) ##Remove this later
 TextOut.close()
 
 sys.stdout.write("Finished running at: ")
