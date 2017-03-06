@@ -15,8 +15,8 @@ for ThisGeneLine in GeneLines[1:]:
     Gene_dict[Coor] = Genes
 
 #output = open("Oligos_nonDHS.txt","w")
-output = open("AllOligos.txt","w")
-filtoutput = open("FilteredOligos.txt","w")
+alloutput = open("AllOligos.txt","w")
+output = open("FilteredOligos.txt","w")
 OligoLines = [OligoLine.rstrip('\n') for OligoLine in open(OligoFile)]
 #output.write("Chr\tOligo Start\tOligo Stop\tFragment Start\tFragment Stop\tSide of Fragment\tDensity\tRepeat Length\tSequence\tAssociated genes\n")
 output.write(OligoLines[0]+"\tAssociated genes\n")
@@ -25,4 +25,13 @@ for ThisOligoLine in OligoLines[1:]:
     FragCoor = parts[0]+":"+parts[3]+"-"+parts[4]
     output.write(ThisOligoLine+"\t"+Gene_dict[FragCoor]+"\n")
 output.close()
-filtoutput.close()
+
+
+AllOligoLines = [AllOligoLine.rstrip('\n') for AllOligoLine in open(OligoAllFile)]
+#output.write("Chr\tOligo Start\tOligo Stop\tFragment Start\tFragment Stop\tSide of Fragment\tDensity\tRepeat Length\tSequence\tAssociated genes\n")
+alloutput.write(AllOligoLines[0]+"\tAssociated genes\n")
+for ThisAllOligoLine in AllOligoLines[1:]:
+    parts = ThisAllOligoLine.split('\t')
+    FragCoor = parts[0]+":"+parts[3]+"-"+parts[4]
+    alloutput.write(ThisAllOligoLine+"\t"+Gene_dict[FragCoor]+"\n")
+alloutput.close()

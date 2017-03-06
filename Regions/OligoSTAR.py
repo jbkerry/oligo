@@ -50,7 +50,6 @@ AllOligos = {}
 Deletions = {}
 Matches = {}
 Sequences = {}
-Groups = {}
 
 # Determine alignment matches and mismatches
 SAMfile = './GeneratedOligos_Aligned.out.sam'
@@ -89,6 +88,7 @@ for thisline in SAMlines:
 
 # Calculate density score
 
+Groups = {}
 DensityDict = {}
 for ThisOligo in AllOligos.keys():
     TotalScore = 0
@@ -101,12 +101,23 @@ for ThisOligo in AllOligos.keys():
     
     if len(re.split("\W+",ThisOligo))==7:
         Chr,Start,Stop,FragStart,FragEnd,Group,Side = re.split("\W+",ThisOligo)
-        ###The 4 lines below are completely inefficient. See DepthGauge.py for actual coding
         
         if Group not in Groups.keys():
-            Groups[Group]=Density
-        elif Density<Groups[Group]:
-            Groups[Group]=Density
+            Groups[Group] = {}
+        FragCoor = Chr+":"+FragStart+"-"+FragEnd
+        if FragCoor in Groups[Group].keys():
+            Groups[Group][FragCoor]+=Density
+        else:
+            Groups[Group].update({FragCoor: Density})
+            
+LowestGroup = {}
+for key in sorted(Groups.keys()):
+    for subkey in Groups[key].keys():
+        if key in LowestGroup.keys():
+            if Groups[key][subkey]<LowestGroup[key]:
+                LowestGroup[key]=Groups[key][subkey]
+        else:
+            LowestGroup[key]=Groups[key][subkey]
 
 # Repeat Masker
 
@@ -155,15 +166,16 @@ for ThisOligo in AllOligos.keys():
     if len(re.split("\W+",ThisOligo))==7:
         Chr,Start,Stop,FragStart,FragEnd,Group,Side = re.split("\W+",ThisOligo)
         OligoCoor = Chr+":"+Start+"-"+Stop
+        FragCoor = Chr+":"+FragStart+"-"+FragEnd
         if OligoCoor not in Written.keys():
             Write=1
-            if (Group in Groups.keys()):
-                if (DensityDict[ThisOligo]==Groups[Group]):
+            if Group in LowestGroup.keys():
+                if Groups[Group][FragCoor]==LowestGroup[Group]:
                     Write=1
-                    print("WRITE: oligo key = {0}, item = {1}".format(ThisOligo,AllOligos[ThisOligo]))
+                    print("WRITE: oligo key = {0}, item = {1}, density = {2}".format(ThisOligo,AllOligos[ThisOligo],DensityDict[ThisOligo]))
                 else:
                     Write=0
-                    print("NOPE: oligo key = {0}, item = {1}".format(ThisOligo,AllOligos[ThisOligo]))
+                    print("NOPE: oligo key = {0}, item = {1}, density = {2}".format(ThisOligo,AllOligos[ThisOligo],DensityDict[ThisOligo]))
     else:
         Chr,Start,Stop,FragStart,FragEnd,Side = re.split("\W+",ThisOligo)
         OligoCoor = Chr+":"+Start+"-"+Stop
@@ -176,7 +188,7 @@ for ThisOligo in AllOligos.keys():
         RepeatType=SSRType_dict[ThisOligo]
     if Write==1:   
         AllTextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\n".format(Chr,Start,Stop,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
-        if (DensityDict[ThisOligo]<=50) & (RepeatLength<=len(Sequences[ThisOligo])):
+        if (DensityDict[ThisOligo]<=50) & (RepeatLength<=(len(Sequences[ThisOligo])/4)):
             TextOut.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8:.2f}\t{9}\t{10}\t{11:.2f}\n".format(Chr,Start,Stop,FragStart,FragEnd,Side,Sequences[ThisOligo],AllOligos[ThisOligo],DensityDict[ThisOligo],RepeatLength,RepeatType,GC_dict[ThisOligo]))
         Written[OligoCoor] = 1
 TextOut.close()

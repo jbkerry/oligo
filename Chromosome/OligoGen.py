@@ -200,7 +200,7 @@ for m in p.finditer(str(Sequence_dict[Chr][StartSeq:StopSeq])):
         RightOligo = Sequence_dict[Chr][ReadRightStart:ReadRightStop]
         RightCoor = Chr+":"+str(RightOligoStart)+"-"+str(RightOligoStop) # These coordinates match with the output from bedtools fastaFromBed but in WIG tracks they appear shifted 1bp to the left
     
-    # Check region is bigger than 70bp
+    # Check region is bigger than or equal to oligo size
     FragmentLeft=Position
     if NextSite<len(posList):
         FragmentLength=posList[NextSite]-posList[ThisSite]+len(Cut_sequence)
@@ -211,7 +211,7 @@ for m in p.finditer(str(Sequence_dict[Chr][StartSeq:StopSeq])):
         # fragment length = FragmentLength
         
         if FragmentLength>=oligo_value:
-            if FragmentLength>=(oligo_value*2):
+            if FragmentLength>oligo_value:
                 fasta_file.write(">{0}-{1}-L\n{2}\n>{3}-{1}-R\n{4}\n".format(LeftCoor,FragmentCoor,LeftOligo,RightCoor,RightOligo))
             else:
                 fasta_file.write(">{0}-{1}-L\n{2}\n".format(LeftCoor,FragmentCoor,LeftOligo))
