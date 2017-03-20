@@ -205,7 +205,7 @@ for Did in sorted(OligoValue.keys()):
     if Write==1:
         if OligoCoor not in LengthDict.keys():
             LengthDict[OligoCoor]=0
-        if (density_round<=30) & (LengthDict[OligoCoor]<=30):
+        if (density_round<=30) & (LengthDict[OligoCoor]<=(len(StoredSeq[Did])/4)):
             #print OUTPUT $Dchr.":".$Dstr."-".$Dstp."-".$Dfragstr."-".$Dfragstp."-".$Dside."\t".$density_round."\t".$PrintRepeats."\t".$StoredSeq{$Did}."\n";
             OUTPUT.write(Dchr+"\t"+Dstr+"\t"+Dstp+"\t"+Dfragstr+"\t"+Dfragstp+"\t"+Dside+"\t"+str(density_round)+"\t"+str(LengthDict[OligoCoor])+"\t"+StoredSeq[Did]+"\n")
             Written[OligoCoor]=1

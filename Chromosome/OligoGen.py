@@ -7,7 +7,7 @@ def usage():
     print("usage: OligoGen.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)> -r <region of chromsome (optional)>")
     print("For extended help: 'OligoGen.py -h'")
 def help_info():
-    print("usage: OligoGen.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)>\n")
+    print("\nusage: OligoGen.py -g <genome build> -c <chromosome number> -e <restriction enzyme> -o <oligo size (bp)> -r <region of chromsome (optional)>\n")
     print("-------------------------------------------------------------------------\n")
     print("OligoGen.py generates oligos adjacent to every restriction site of the supplied enzyme for an entire chromosome.\n")
     print("\tGenomes: choose from 'hg18', 'hg19', 'mm9' or 'mm10'\n")
