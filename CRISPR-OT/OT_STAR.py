@@ -125,7 +125,7 @@ for ThisBedLine in BedLines:
     if Site not in SiteDict.keys():
         SiteDict[Site] = Start
     else:
-        print("Caution: the site name \'{0}\' has been given to multiple coordinates. The first location was assigned to this site name.".format())
+        print("Caution: the site name \'{0}\' has been given to multiple coordinates. The first location was assigned to this site name.".format(Site))
         
 # Write text file with oligo info
 Written = {}
