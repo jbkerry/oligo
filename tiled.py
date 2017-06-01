@@ -38,7 +38,9 @@ class Capture(object):
         
         '''
         
-        _sequence = SeqIO.parse('/databank/igenomes/{0}/UCSC/{1}/Sequence/WholeGenomeFasta/genome.fa'.format(org_dict[self.genome], self.genome), 'fasta')
+        _sequence = SeqIO.parse('/databank/igenomes/{0}/UCSC/{1}/Sequence/' \
+                                'WholeGenomeFasta/genome.fa'.format(org_dict[self.genome], self.genome),
+                                'fasta')
         _sequence_dict = {}
         for seq_record in _sequence:
             _sequence_dict[seq_record.name] = seq_record.seq.upper()
@@ -48,4 +50,10 @@ class Capture(object):
             _stop_seq = len(self._sequence_dict[chromosome])
         else:
             _start_seq, _stop_seq = region.split("-")
+            try:
+                _start_seq = int(_start_seq)
+                _stop_seq = int(_stop_seq)
+            except ValueError:
+                print("Chromosome coordinates must be integers")
+                raise
         
