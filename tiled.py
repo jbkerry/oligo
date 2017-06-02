@@ -9,6 +9,10 @@ org_dict = {'mm9': 'Mus_musculus',
             'hg19': 'Homo_sapiens',
             'hg38': 'Homo_sapiens'}
 
+rs_dict = {'DpnII': 'GATC',
+           'NlaIII': 'CATG',
+           'HindIII': 'AAGCTT'}
+
 class Capture(object):
     '''Designs oligos for capture from adjacent restriction sites within a
     user-specified region
@@ -38,22 +42,33 @@ class Capture(object):
         
         '''
         
-        _sequence = SeqIO.parse('/databank/igenomes/{0}/UCSC/{1}/Sequence/' \
-                                'WholeGenomeFasta/genome.fa'.format(org_dict[self.genome], self.genome),
-                                'fasta')
-        _sequence_dict = {}
+        sequence = SeqIO.parse('/databank/igenomes/{0}/UCSC/{1}/Sequence/' \
+            'WholeGenomeFasta/genome.fa'.format(org_dict[self.genome],
+                                                self.genome), 'fasta')
+        sequence_dict = {}
         for seq_record in _sequence:
-            _sequence_dict[seq_record.name] = seq_record.seq.upper()
+            sequence_dict[seq_record.name] = seq_record.seq.upper()
             
         if not region:
-            _start_seq = 0
-            _stop_seq = len(self._sequence_dict[chromosome])
+            start_seq = 0
+            stop_seq = len(sequence_dict[chromosome])
         else:
-            _start_seq, _stop_seq = region.split("-")
-            try:
-                _start_seq = int(_start_seq)
-                _stop_seq = int(_stop_seq)
-            except ValueError:
-                print("Chromosome coordinates must be integers")
-                raise
+            start_seq, stop_seq = list(map(int, region.split('-')))
+            
+        p = re.compile(rs_dict[enzyme])
+        pos_list = []
+        for m in p.finditer:
+            pos_list.append(m.start()+start_seq)
+            
+        for i in range(len(pos_list)):
+            j = i + 1
+            if (j<len(pos_list)) & (pos_list[j]-pos_list[i]>=oligo):
+                left_start = pos_list[i]
+                left_stop = left_start+oligo
+                left_seq = sequence_dict[chromosome][left_start:left_stop]
+                
+                right_stop = pos_list[j]
+                right_start = right_stop-oligo
+                right_seq = sequence_dict[chromosome][right_start:right_stop]
+                
         
