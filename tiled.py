@@ -46,47 +46,46 @@ class Capture(object):
         
         '''
         
-        sequence = SeqIO.parse('/databank/igenomes/{0}/UCSC/{1}/Sequence/' \
-            'WholeGenomeFasta/genome.fa'.format(org_dict[self.genome],
-                                                self.genome), 'fasta')
-        seq_dict = {}
-        for seq_record in sequence:
-            seq_dict[seq_record.name] = seq_record.seq.upper()
+        chr_name = 'chr'+str(chromosome)
+        seq = SeqIO.read('/databank/igenomes/{0}/UCSC/{1}/Sequence/' \
+            'Chromosomes/{2}.fa'.format(org_dict[self.genome],
+                                        self.genome,
+                                        chr_name), 'fasta').seq.upper()
             
         if not region:
-            start = 0
-            stop = len(seq_dict[chromosome])
+            start = 0; stop = len(seq)
         else:
             start, stop = list(map(int, region.split('-')))
-            
+        
         p = re.compile(rs_dict[enzyme])
         pos_list = []
-        for m in p.finditer(seq_dict[chromosome][start:stop]):
+        for m in p.finditer(str(seq[start:stop])):
             pos_list.append(m.start()+start)
         
+        cut_size = len(rs_dict[enzyme])
         fa = open('oligo_seqs.fa', 'w')    
-        for i in range(len(pos_list)):
+        for i in range(len(pos_list)-1):
             j = i + 1
-            frag_len = pos_list[j]-pos_list[i]
-            if (j<len(pos_list)) & (frag_len>=oligo):
+            frag_len = pos_list[j]-pos_list[i]+cut_size
+            if (frag_len>=oligo):
                 l_start = pos_list[i]
                 l_stop = l_start+oligo
-                l_seq = seq_dict[chromosome][l_start:l_stop]
+                l_seq = seq[l_start:l_stop]
                 
-                r_stop = pos_list[j]
+                r_stop = pos_list[j]+cut_size
                 r_start = r_stop-oligo
-                r_seq = seq_dict[chromosome][r_start:r_stop]
+                r_seq = seq[r_start:r_stop]
                 
-                fa.write('>{0}:{1}-{2}-{1}-{3}-L\n{4}\n'.format(chromosome,
-                                                                   l_start,
-                                                                   l_stop,
-                                                                   pos_list[j],
-                                                                   l_seq))
-                if fragment_length>oligo:
-                    fa.write('>{0}:{1}-{2}-{3}-{2}-L\n{4}\n'.format(chromosome,
+                fa.write('>{0}:{1}-{2}-{1}-{3}-L\n{4}\n'.format(chr_name,
+                                                                l_start,
+                                                                l_stop,
+                                                                r_stop,
+                                                                l_seq))
+                if frag_len>oligo:
+                    fa.write('>{0}:{1}-{2}-{3}-{2}-R\n{4}\n'.format(chr_name,
                                                                     r_start,
                                                                     r_stop,
-                                                                    pos_list[i],
+                                                                    l_start,
                                                                     r_seq))
         fa.close()
         
