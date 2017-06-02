@@ -63,7 +63,8 @@ class Capture(object):
             pos_list.append(m.start()+start)
         
         cut_size = len(rs_dict[enzyme])
-        fa = open('oligo_seqs.fa', 'w')    
+        self.fa_name = 'oligo_seqs.fa'
+        fa = open(self.fa_name, 'w')    
         for i in range(len(pos_list)-1):
             j = i + 1
             frag_len = pos_list[j]-pos_list[i]+cut_size
@@ -90,3 +91,6 @@ class Capture(object):
         fa.close()
         
         return "Wrote oligos to oligo_seqs.fa"
+    
+    def _split_fa(self):
+        pass
