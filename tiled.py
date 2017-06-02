@@ -39,6 +39,10 @@ class Capture(object):
         region: the region of the chromosome to design oligos, must be in the
             format start-stop, e.g. 10000-20000. Omit this option to design
             oligos over the entire chromosome
+            
+        Output
+        ------
+        oligo_seqs.fa: a FASTA file containing sequences of all the oligos
         
         '''
         
@@ -46,7 +50,7 @@ class Capture(object):
             'WholeGenomeFasta/genome.fa'.format(org_dict[self.genome],
                                                 self.genome), 'fasta')
         sequence_dict = {}
-        for seq_record in _sequence:
+        for seq_record in sequence:
             sequence_dict[seq_record.name] = seq_record.seq.upper()
             
         if not region:
@@ -59,10 +63,12 @@ class Capture(object):
         pos_list = []
         for m in p.finditer:
             pos_list.append(m.start()+start_seq)
-            
+        
+        fasta = open('oligo_seqs.fa', 'w')    
         for i in range(len(pos_list)):
             j = i + 1
-            if (j<len(pos_list)) & (pos_list[j]-pos_list[i]>=oligo):
+            fragement_length = pos_list[j]-pos_list[i]
+            if (j<len(pos_list)) & (fragment_length>=oligo):
                 left_start = pos_list[i]
                 left_stop = left_start+oligo
                 left_seq = sequence_dict[chromosome][left_start:left_stop]
@@ -71,4 +77,18 @@ class Capture(object):
                 right_start = right_stop-oligo
                 right_seq = sequence_dict[chromosome][right_start:right_stop]
                 
+                fasta.write('>{0}:{1}-{2}-{1}-{3}-L\n{4}\n'.format(chromosome,
+                                                                   left_start,
+                                                                   left_stop,
+                                                                   pos_list[j],
+                                                                   left_seq))
+                if fragment_length>oligo:
+                    fasta.write('>{0}:{1}-{2}-{3}-{2}-L\n{4}\n'.format(
+                                                                chromosome,
+                                                                right_start,
+                                                                right_stop,
+                                                                pos_list[i],
+                                                                right_seq))
+        fasta.close()
         
+        return "Wrote oligos to oligo_seqs.fa"
