@@ -49,46 +49,45 @@ class Capture(object):
         sequence = SeqIO.parse('/databank/igenomes/{0}/UCSC/{1}/Sequence/' \
             'WholeGenomeFasta/genome.fa'.format(org_dict[self.genome],
                                                 self.genome), 'fasta')
-        sequence_dict = {}
+        seq_dict = {}
         for seq_record in sequence:
-            sequence_dict[seq_record.name] = seq_record.seq.upper()
+            seq_dict[seq_record.name] = seq_record.seq.upper()
             
         if not region:
-            start_seq = 0
-            stop_seq = len(sequence_dict[chromosome])
+            start = 0
+            stop = len(seq_dict[chromosome])
         else:
-            start_seq, stop_seq = list(map(int, region.split('-')))
+            start, stop = list(map(int, region.split('-')))
             
         p = re.compile(rs_dict[enzyme])
         pos_list = []
-        for m in p.finditer:
-            pos_list.append(m.start()+start_seq)
+        for m in p.finditer(seq_dict[chromosome][start:stop]):
+            pos_list.append(m.start()+start)
         
-        fasta = open('oligo_seqs.fa', 'w')    
+        fa = open('oligo_seqs.fa', 'w')    
         for i in range(len(pos_list)):
             j = i + 1
-            fragement_length = pos_list[j]-pos_list[i]
-            if (j<len(pos_list)) & (fragment_length>=oligo):
-                left_start = pos_list[i]
-                left_stop = left_start+oligo
-                left_seq = sequence_dict[chromosome][left_start:left_stop]
+            frag_len = pos_list[j]-pos_list[i]
+            if (j<len(pos_list)) & (frag_len>=oligo):
+                l_start = pos_list[i]
+                l_stop = l_start+oligo
+                l_seq = seq_dict[chromosome][l_start:l_stop]
                 
-                right_stop = pos_list[j]
-                right_start = right_stop-oligo
-                right_seq = sequence_dict[chromosome][right_start:right_stop]
+                r_stop = pos_list[j]
+                r_start = r_stop-oligo
+                r_seq = seq_dict[chromosome][r_start:r_stop]
                 
-                fasta.write('>{0}:{1}-{2}-{1}-{3}-L\n{4}\n'.format(chromosome,
-                                                                   left_start,
-                                                                   left_stop,
+                fa.write('>{0}:{1}-{2}-{1}-{3}-L\n{4}\n'.format(chromosome,
+                                                                   l_start,
+                                                                   l_stop,
                                                                    pos_list[j],
-                                                                   left_seq))
+                                                                   l_seq))
                 if fragment_length>oligo:
-                    fasta.write('>{0}:{1}-{2}-{3}-{2}-L\n{4}\n'.format(
-                                                                chromosome,
-                                                                right_start,
-                                                                right_stop,
-                                                                pos_list[i],
-                                                                right_seq))
-        fasta.close()
+                    fa.write('>{0}:{1}-{2}-{3}-{2}-L\n{4}\n'.format(chromosome,
+                                                                    r_start,
+                                                                    r_stop,
+                                                                    pos_list[i],
+                                                                    r_seq))
+        fa.close()
         
         return "Wrote oligos to oligo_seqs.fa"
