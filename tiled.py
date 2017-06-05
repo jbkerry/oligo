@@ -19,12 +19,12 @@ class Capture(object):
     
     Parameters
     ----------
-    genome: hg18, hg19, hg38, mm9 or mm10
+    fa: path to reference genome/chromsome fasta
     blat: boolean, check off-targets using BLAT instead of STAR, default=False
     '''
     
-    def __init__(self, genome, blat=False):
-        self.genome = genome.lower()
+    def __init__(self, fa, blat=False):
+        self.fa = fa
         self.blat = blat
     
     def generate_oligos(self, chromosome, enzyme='DpnII', oligo=70, region=''):
@@ -47,10 +47,11 @@ class Capture(object):
         '''
         
         chr_name = 'chr'+str(chromosome)
-        seq = SeqIO.read('/databank/igenomes/{0}/UCSC/{1}/Sequence/' \
-            'Chromosomes/{2}.fa'.format(org_dict[self.genome],
-                                        self.genome,
-                                        chr_name), 'fasta').seq.upper()
+        
+        print('Loading reference fasta file...')
+        seq_dict = SeqIO.to_dict(SeqIO.parse(self.fa, 'fasta'))
+        seq = seq_dict[chr_name].seq.upper()
+        print('Fasta file loaded. Generating oligos...')
             
         if not region:
             start = 0; stop = len(seq)
@@ -63,8 +64,7 @@ class Capture(object):
             pos_list.append(m.start()+start)
         
         cut_size = len(rs_dict[enzyme])
-        self.fa_name = 'oligo_seqs.fa'
-        fa = open(self.fa_name, 'w')    
+        fa_w = open('oligo_seqs.fa', 'w')    
         for i in range(len(pos_list)-1):
             j = i + 1
             frag_len = pos_list[j]-pos_list[i]+cut_size
@@ -77,18 +77,18 @@ class Capture(object):
                 r_start = r_stop-oligo
                 r_seq = seq[r_start:r_stop]
                 
-                fa.write('>{0}:{1}-{2}-{1}-{3}-L\n{4}\n'.format(chr_name,
-                                                                l_start,
-                                                                l_stop,
-                                                                r_stop,
-                                                                l_seq))
+                fa_w.write('>{0}:{1}-{2}-{1}-{3}-L\n{4}\n'.format(chr_name,
+                                                                  l_start,
+                                                                  l_stop,
+                                                                  r_stop,
+                                                                  l_seq))
                 if frag_len>oligo:
-                    fa.write('>{0}:{1}-{2}-{3}-{2}-R\n{4}\n'.format(chr_name,
-                                                                    r_start,
-                                                                    r_stop,
-                                                                    l_start,
-                                                                    r_seq))
-        fa.close()
+                    fa_w.write('>{0}:{1}-{2}-{3}-{2}-R\n{4}\n'.format(chr_name,
+                                                                      r_start,
+                                                                      r_stop,
+                                                                      l_start,
+                                                                      r_seq))
+        fa_w.close()
         
         return "Wrote oligos to oligo_seqs.fa"
     
