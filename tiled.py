@@ -92,9 +92,10 @@ class Capture(object):
         
         return "Wrote oligos to oligo_seqs.fa"
     
-    def _split_fa(split=40000):
+    def _split_fa():
         f = open('oligo_seqs.fa')
         file_content = f.readlines()
+        split = 40000
         start = 1
         stop = 20000
         for lines in range(0, len(file_content), split):
@@ -104,3 +105,7 @@ class Capture(object):
             start+=20000; stop+=20000
             
         return 'Split files per 20,000 oligos'
+    
+    def check_off_target(self, ):
+        pass
+     
