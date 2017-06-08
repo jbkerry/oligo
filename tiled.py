@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import re
+import os
+import subprocess
 from Bio import SeqIO
 
 org_dict = {'mm9': 'Mus_musculus',
@@ -13,6 +15,14 @@ rs_dict = {'DpnII': 'GATC',
            'NlaIII': 'CATG',
            'HindIII': 'AAGCTT'}
 
+blat_param = '-stepSize=5 -minScore=10 -minIdentity=0 -repMatch=999999'
+star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
+             '--outFilterMultimapScoreRange 1000 --outFilterMultimapNmax ' \
+             '100000 --outFilterMismatchNmax 110 --seedSearchStartLmax 4 ' \
+             '--seedSearchLmax 20 --alignIntronMax 10 --seedPerWindowNmax ' \
+             '15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 ' \
+             '--limitOutSAMoneReadBytes 300000 --outFileNamePrefix tiled_'
+
 class Capture(object):
     '''Designs oligos for capture from adjacent restriction sites within a
     user-specified region
@@ -20,7 +30,8 @@ class Capture(object):
     Parameters
     ----------
     fa: path to reference genome/chromsome fasta
-    blat: boolean, check off-targets using BLAT instead of STAR, default=False
+    blat: boolean, check off-targets using BLAT instead of STAR (not
+    recommended for large designs), default=False
     '''
     
     def __init__(self, fa, blat=False):
@@ -106,6 +117,70 @@ class Capture(object):
             
         return 'Split files per 20,000 oligos'
     
-    def check_off_target(self, ):
+    def check_off_target(species, o_fa, s_idx=''):
+        '''Checks for repeat sequences in oligos generated from generate_oligos()
+        using RepeatMasker and checks for off-target binding using either BLAT
+        or STAR
+        
+        Parameters
+        ----------
+        species: the general name of the species e.g. human or mouse. From the
+            RepeatMasker help page:
+            
+            ############
+            
+            The species name must be a valid NCBI Taxonomy Database species
+            name and be contained in the RepeatMasker repeat database.
+            Some examples are:
+    
+              human
+              mouse
+              rattus
+              "ciona savignyi"
+              arabidopsis
+    
+            Other commonly used species:
+    
+            mammal, carnivore, rodentia, rat, cow, pig, cat, dog, chicken,
+            fugu, danio, "ciona intestinalis" drosophila, anopheles, elegans,
+            diatoaea, artiodactyl, arabidopsis, rice, wheat, and maize
+            
+            ############
+            
+        o_fa: the oligo fasta file generated from generate_oligos()
+        s_idx: the directory containing the STAR index for this genome (not
+            required if blat=True)
+            
+        Output
+        ------
+        oligo_seq.fa.out: RepeatMasker output file
+        tiled_Aligned.out.sam (STAR): alignment file from STAR
+        blat_out.psl (BLAT): off-target binding file from BLAT
+        *a number of other files are produced from these programs but are not
+            required in this pipeline. They are not deleted in case the user is
+            interested in their contents.
+            
+        '''
+        
+        rm_path = os.path.join(path_dict['RM_PATH'], 'RepeatMasker')
+        print('Checking for repeat sequences in oligos...')
+        subprocess.run('{} -noint -s -species {} {}'.format(rm_path, species,
+                                                            o_fa), shell=True)
+        
+        if self.blat:
+            path = os.path.join(path_dict['BLAT_PATH'], 'blat')
+            print("Checking off-target binding with BLAT...")
+            subprocess.run('{} {} {} {} blat_out.psl'
+                           .format(path, blat_param, self.fa, o_fa),
+                           shell=True)
+        else:
+            path = os.path.join(path_dict['STAR_PATH'], 'STAR')
+            print("Checking off-target binding with STAR...")
+            subprocess.run('{} --readFilesIn {} --genomeDir {} {}'
+                           .format(path, o_fa, s_idx, star_param), shell=True)
+            
+        return 'Off-target detection completed'
+    
+    def get_density(self):
         pass
      
