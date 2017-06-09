@@ -192,11 +192,6 @@ class Capture(object):
             pass
         else:
             all_oligos = {}
-            gc_dict = {}
-            sequences = {}
-            matches = {}
-            deletions = {}
-            density_dict = {}
             sf = pysam.AlignmentFile(sam, 'r')
             for r in sf.fetch(until_eof=True):
                 if r.query_name not in all_oligos:
