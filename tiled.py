@@ -3,7 +3,9 @@
 import re
 import os
 import subprocess
+import pysam
 from Bio import SeqIO
+from Bio.Seq import Seq
 
 org_dict = {'mm9': 'Mus_musculus',
             'mm10': 'Mus_musculus',
@@ -181,6 +183,43 @@ class Capture(object):
             
         return 'Off-target detection completed'
     
-    def get_density(self):
+    def _get_gc(x):
+        gc_perc = (x.count('C') + x.count('G'))/len(x)
+        return gc_perc
+    
+    def get_density(sam='tiled_Aligned.out.sam', blat=0):
+        if blat:
+            pass
+        else:
+            all_oligos = {}
+            gc_dict = {}
+            sequences = {}
+            matches = {}
+            deletions = {}
+            density_dict = {}
+            sf = pysam.AlignmentFile(sam, 'r')
+            for r in sf.fetch(until_eof=True):
+                if r.query_name not in all_oligos:
+                    # seq, gc, nh, matches, deletions, density
+                    seq = r.query_sequence
+                    if r.is_reverse:
+                        seq = str(Seq(seq).reverse_complement())
+                    gc_perc = _get_gc(seq)
+                    all_oligos[r.query_name] = [seq,gc_perc,r.get_tag('NH'),0,0,0]
+                        
+                for block in r.cigartuples:
+                    if block[0]==0:
+                        all_oligos[r.query_name][3]+=block[1]
+                    elif (block[0]==1) | (block[0]==2):
+                        all_oligos[r.query_name][4]+=block[1]
+            
+            for o in all_oligos:
+                score = all_oligos[o][3]-all_oligos[o][4]
+                density = score/len(all_oligos[o][0])
+                all_oligos[o][5] = density
+                
+            return all_oligos
+        
+    def check_repeats():
         pass
-     
+    
