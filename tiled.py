@@ -185,22 +185,40 @@ class Capture(object):
     
     def _get_gc(x):
         gc_perc = (x.count('C') + x.count('G'))/len(x)
+        gc_perc = float("{0:.2f}".format(gc_perc))
         return gc_perc
     
-    def get_density(sam='tiled_Aligned.out.sam', blat=0):
-        if blat:
-            pass
+    def get_density(sam='tiled_Aligned.out.sam', fa='oligo_seqs.fa',
+                    blat_file='blat_out.psl'):
+        # seq, gc, nh, matches, gaps, density
+        all_oligos = {}
+        if self.blat:
+            
+            with open(fa) as f:
+                for x in f:
+                    header = re.sub('>', '', x.rstrip('\n'))
+                    seq = next(f).rstrip('\n')
+                    all_oligos[header] = [seq, _get_gc(seq), 0, 0, 0, 0]
+                    
+            with open(blat_file) as f[5:]:
+                for x in f:
+                    parts = re.split("\s+", x.rstrip('\n'))
+                    qgapbases, qstart, qend = int(parts[5]), int(parts[11]), 
+                    int(parts[12])
+    
+                    all_oligos[query][2]+=1
+                    all_oligos[query][3]+=(int(qend)-int(qstart))+1
+                    all_oligos[query][4]+=int(qgapbases)  
         else:
             all_oligos = {}
             sf = pysam.AlignmentFile(sam, 'r')
             for r in sf.fetch(until_eof=True):
                 if r.query_name not in all_oligos:
-                    # seq, gc, nh, matches, deletions, density
                     seq = r.query_sequence
                     if r.is_reverse:
                         seq = str(Seq(seq).reverse_complement())
-                    gc_perc = _get_gc(seq)
-                    all_oligos[r.query_name] = [seq,gc_perc,r.get_tag('NH'),0,0,0]
+                    all_oligos[r.query_name] = [seq, _get_gc(seq), r.get_tag('NH'),
+                                                0, 0, 0]
                         
                 for block in r.cigartuples:
                     if block[0]==0:
@@ -208,12 +226,12 @@ class Capture(object):
                     elif (block[0]==1) | (block[0]==2):
                         all_oligos[r.query_name][4]+=block[1]
             
-            for o in all_oligos:
-                score = all_oligos[o][3]-all_oligos[o][4]
-                density = score/len(all_oligos[o][0])
-                all_oligos[o][5] = density
-                
-            return all_oligos
+        for o in all_oligos:
+            score = all_oligos[o][3]-all_oligos[o][4]
+            density = score/len(all_oligos[o][0])
+            all_oligos[o][5] = float("{0:.2f}".format(density))      
+        
+        return all_oligos   
         
     def check_repeats():
         pass
