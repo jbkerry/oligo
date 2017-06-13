@@ -8,11 +8,11 @@ import argparse
 from Bio import SeqIO
 from Bio.Seq import Seq
 
-org_dict = {'mm9': 'Mus_musculus',
-            'mm10': 'Mus_musculus',
-            'hg18': 'Homo_sapiens',
-            'hg19': 'Homo_sapiens',
-            'hg38': 'Homo_sapiens'}
+spe_dict = {'mm9': 'mouse',
+            'mm10': 'mouse',
+            'hg18': 'human',
+            'hg19': 'human',
+            'hg38': 'human'}
 
 rs_dict = {'DpnII': 'GATC',
            'NlaIII': 'CATG',
@@ -38,6 +38,7 @@ class Tiled(object):
     fa: path to reference genome fasta
     blat: boolean, check off-targets using BLAT instead of STAR (not
     recommended for large designs), default=False
+    
     '''
     
     def __init__(self, fa, blat=False):
@@ -46,6 +47,8 @@ class Tiled(object):
         self.o_fa = 'oligo_seqs.fa'
         # seq, gc, nh, matches, gaps, density, rep_length, rep_type
         self.all_oligos = {}
+        self.sam = 'tiled_Aligned.out.sam'
+        self.blat_file = 'blat_out.psl'
     
     def generate_oligos(self, chromosome, enzyme='DpnII', oligo=70, region=''):
         '''Generates fasta file containing the oligos for a specific
@@ -174,21 +177,41 @@ class Tiled(object):
         
         rm_path = os.path.join(path_dict['RM_PATH'], 'RepeatMasker')
         print('Checking for repeat sequences in oligos...')
-        subprocess.run('{} -noint -s -species {} {}'.format(rm_path, species,
-                                                        self.o_fa), shell=True)
+        rm_out = open('rm_log.txt', 'w')
+        subprocess.run(
+            '{} -noint -s -species {} {}'.format(rm_path, species, self.o_fa),
+            shell = True,
+            stdout = rm_out,
+            stderr = rm_out,
+        )
+        rm_out.close()
         
         if self.blat:
             path = os.path.join(path_dict['BLAT_PATH'], 'blat')
             print("Checking off-target binding with BLAT...")
-            subprocess.run('{} {} {} {} blat_out.psl'
-                           .format(path, blat_param, self.fa, self.o_fa),
-                           shell=True)
+            blat_out = open('blat_log.txt', 'w')
+            subprocess.run(
+                '{} {} {} {} blat_out.psl'.format(path, blat_param,
+                                                  self.fa, self.o_fa),
+                shell=True,
+                stdout = blat_out,
+                stderr = blat_out,
+            )
+            blat_out.close()
         else:
             path = os.path.join(path_dict['STAR_PATH'], 'STAR')
             print("Checking off-target binding with STAR...")
-            subprocess.run('{} --readFilesIn {} --genomeDir {} {}'
-                           .format(path, self.o_fa, s_idx, star_param),
-                                                                shell=True)
+            star_out = open('star_log.txt', 'w')
+            subprocess.run(
+                '{} --readFilesIn {} --genomeDir {} {}'.format(path,
+                                                               self.o_fa,
+                                                               s_idx,
+                                                               star_param),
+                shell = True,
+                stdout = star_out,
+                stderr = star_out,
+            )
+            star_out.close()
             
         return 'Off-target detection completed'
     
@@ -197,8 +220,7 @@ class Tiled(object):
         gc_perc = float("{0:.2f}".format(gc_perc))
         return gc_perc
     
-    def get_density(self, sam='tiled_Aligned.out.sam', ### here
-                    blat_file='blat_out.psl'):
+    def get_density(self):
         with open(self.o_fa) as f:
             for x in f:
                 header = re.sub('>', '', x.rstrip('\n'))
@@ -206,7 +228,7 @@ class Tiled(object):
                 self.all_oligos[header] = [seq, self._get_gc(seq), 0, 0,
                                            0, 0, 0, 'NA']
         if self.blat:        
-            with open(blat_file) as f:
+            with open(self.blat_file) as f:
                 for _ in range(5):
                     next(f)
                 for x in f:
@@ -218,7 +240,7 @@ class Tiled(object):
                     self.all_oligos[query][3]+=(int(qend)-int(qstart))+1
                     self.all_oligos[query][4]+=int(qgapbases)  
         else:
-            sf = pysam.AlignmentFile(sam, 'r')
+            sf = pysam.AlignmentFile(self.sam, 'r')
             for r in sf.fetch(until_eof=True):
                 if self.all_oligos[r.query_name][2] == 0:
                      self.all_oligos[r.query_name][2] = r.get_tag('NH')
@@ -278,4 +300,79 @@ class Tiled(object):
         return 'Oligo data written to '+file_name
 
 if __name__ == '__main__':
-    pass
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-f',
+        '--fasta',
+        type = str,
+        help = 'Path to reference genome fasta.',
+        required = True,
+    )
+    parser.add_argument(
+        '-g',
+        '--genome',
+        type = str,
+        help = 'Genome build e.g. \'mm10\' or \'hg38\'.',
+        required = True,
+    )
+    parser.add_argument(
+        '-c',
+        '--chr',
+        type = str,
+        help = 'Chromosome number/letter on which to design the oligos.',
+        required = True,
+    )
+    parser.add_argument(
+        '-e',
+        '--enzyme',
+        type = str,
+        help = 'Name of restriction enzyme, default=DpnII.',
+        default = 'DpnII',
+        required = False,
+    )
+    parser.add_argument(
+        '-o',
+        '--oligo',
+        type = int,
+        help = 'The size (in bp) of the oligo to design, default=70',
+        default = 70,
+        required = False,
+    )
+    parser.add_argument(
+        '-r',
+        '--region',
+        type = str,
+        help = 'The region in which to design the oligos; must be in the ' \
+             'format \'start-stop\' e.g. \'10000-20000\'. Omit this option ' \
+             'to design oligos across the entire chromosome.',
+        required = False,
+    )
+    parser.add_argument(
+        '-s',
+        '--star_index',
+        type = str,
+        help = 'Path to STAR index directory, omit this if running with ' \
+               'BLAT (--blat)',
+        required = False,
+    )
+    parser.add_argument(
+        '--blat',
+        action = 'store_true',
+        help = 'Detect off-targets using BLAT instead of STAR.',
+        required = False,
+    )
+    args = parser.parse_args()
+    
+    t = Tiled(fa=args.fasta, blat=args.blat)
+    t.generate_oligos(
+        chromosome = args.chr,
+        enzyme = args.enzyme,
+        oligo = args.oligo,
+        region = args.region
+    )
+    t.check_off_target(
+        species = spe_dict[args.genome.lower()],
+        s_idx = args.star_index,
+    )
+    t.get_density()
+    t.write_file()
