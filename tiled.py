@@ -4,6 +4,7 @@ import re
 import os
 import subprocess
 import pysam
+import argparse
 from Bio import SeqIO
 from Bio.Seq import Seq
 
@@ -28,7 +29,7 @@ star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 ' \
              '--limitOutSAMoneReadBytes 300000 --outFileNamePrefix tiled_'
 
-class Capture(object):
+class Tiled(object):
     '''Designs oligos for capture from adjacent restriction sites within a
     user-specified region
     
@@ -42,6 +43,9 @@ class Capture(object):
     def __init__(self, fa, blat=False):
         self.fa = fa
         self.blat = blat
+        self.o_fa = 'oligo_seqs.fa'
+        # seq, gc, nh, matches, gaps, density, rep_length, rep_type
+        self.all_oligos = {}
     
     def generate_oligos(self, chromosome, enzyme='DpnII', oligo=70, region=''):
         '''Generates fasta file containing the oligos for a specific
@@ -80,7 +84,7 @@ class Capture(object):
             pos_list.append(m.start()+start)
         
         cut_size = len(rs_dict[enzyme])
-        self.o_fa = 'oligo_seqs.fa'
+        
         fa_w = open(self.o_fa, 'w')    
         for i in range(len(pos_list)-1):
             j = i + 1
@@ -123,10 +127,10 @@ class Capture(object):
             
         return 'Split files per 20,000 oligos'
     
-    def check_off_target(species, s_idx=''):
-        '''Checks for repeat sequences in oligos generated from generate_oligos()
-        using RepeatMasker and checks for off-target binding using either BLAT
-        or STAR
+    def check_off_target(self, species, s_idx=''):
+        '''Checks for repeat sequences in oligos generated from
+        generate_oligos() using RepeatMasker and checks for off-target binding
+        using either BLAT or STAR
         
         Parameters
         ----------
@@ -171,7 +175,7 @@ class Capture(object):
         rm_path = os.path.join(path_dict['RM_PATH'], 'RepeatMasker')
         print('Checking for repeat sequences in oligos...')
         subprocess.run('{} -noint -s -species {} {}'.format(rm_path, species,
-                                                            self.o_fa), shell=True)
+                                                        self.o_fa), shell=True)
         
         if self.blat:
             path = os.path.join(path_dict['BLAT_PATH'], 'blat')
@@ -183,24 +187,24 @@ class Capture(object):
             path = os.path.join(path_dict['STAR_PATH'], 'STAR')
             print("Checking off-target binding with STAR...")
             subprocess.run('{} --readFilesIn {} --genomeDir {} {}'
-                           .format(path, self.o_fa, s_idx, star_param), shell=True)
+                           .format(path, self.o_fa, s_idx, star_param),
+                                                                shell=True)
             
         return 'Off-target detection completed'
     
-    def _get_gc(x):
+    def _get_gc(self, x):
         gc_perc = (x.count('C') + x.count('G'))/len(x)
         gc_perc = float("{0:.2f}".format(gc_perc))
         return gc_perc
     
     def get_density(self, sam='tiled_Aligned.out.sam', ### here
                     blat_file='blat_out.psl'):
-        # seq, gc, nh, matches, gaps, density, rep_length, rep_type
-        self.all_oligos = {}
         with open(self.o_fa) as f:
             for x in f:
                 header = re.sub('>', '', x.rstrip('\n'))
                 seq = next(f).rstrip('\n')
-                self.all_oligos[header] = [seq, _get_gc(seq), 0, 0, 0, 0, 0, 'NA']
+                self.all_oligos[header] = [seq, self._get_gc(seq), 0, 0,
+                                           0, 0, 0, 'NA']
         if self.blat:        
             with open(blat_file) as f:
                 for _ in range(5):
@@ -230,28 +234,34 @@ class Capture(object):
             density = score/len(self.all_oligos[o][0])
             self.all_oligos[o][5] = float("{0:.2f}".format(density))      
         
-        return self.all_oligos   
+        msg = self._get_repeats()
+        print(msg)
+        return 'Density scores calculated'  
         
-    def get_repeats(self):
-        rm_file = self.o_fa+".out"
-        with open(rm_file) as f:
-            for _ in range(3):
-                next(f)
-            for x in f:
-                parts = re.split("\s+", x)
-                qname = parts[5]
-                rep_type = parts[10]
-                chr_name, start, stop, fragstart, fragend, side = re.split(
+    def _get_repeats(self):
+        with open(self.o_fa+".out") as f:
+            if len(f.readlines())>1:
+                f.seek(0)
+                for _ in range(3):
+                    next(f)
+                for x in f:
+                    parts = re.split("\s+", x.rstrip('\n'))
+                    qname = parts[5]
+                    rep_type = parts[10]
+                    chr_name, start, stop, fragstart, fragend, side = re.split(
                                                                 "\W+", qname)
-                if len(side)>1:
-                    qname, dup = re.split('_', qname)
+                    if len(side)>1:
+                        qname, dup = re.split('_', qname)
                     
-                qstart, qstop = map(int, (parts[6:8]))
-                length = (qstop - qstart)+1
-                if length>self.all_oligos[qname][6]:
-                    self.all_oligos[qname][6:] = length, rep_type
+                    qstart, qstop = map(int, (parts[6:8]))
+                    length = (qstop - qstart)+1
+                    if length>self.all_oligos[qname][6]:
+                        self.all_oligos[qname][6:] = length, rep_type
+                msg = 'Repeat scores calculated'
+            else:
+                msg = 'No repeats detected'
         
-        return all_oligos
+        return msg
     
     def write_file(self, file_name='oligo_info.txt'):
         with open(file_name, 'w') as f:
@@ -264,4 +274,8 @@ class Capture(object):
                 f.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
                             chr_name, start, stop, fragstart, fragstop, side,
                             idx[0], idx[2], idx[5], idx[6], idx[7], idx[1]))
-    
+        
+        return 'Oligo data written to '+file_name
+
+if __name__ == '__main__':
+    pass
