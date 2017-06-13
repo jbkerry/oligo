@@ -234,6 +234,28 @@ class Capture(object):
         
         return all_oligos   
         
-    def check_repeats():
-        pass
+    def get_repeats():
+        rm_dict = {}
+        rm_file = "./oligo_seqs.fa.out"
+        rm_lines = [x.rstrip('\n') for x in open(rm_file)]
+        with open(rm_file) as f:
+            for _ in range(3):
+                next(f)
+            for x in f:
+                parts = re.split("\s+", x)
+                qname = parts[5]
+                rep_type = parts[10]
+                chr_name, start, stop, fragstart, fragend, side = re.split(
+                                                                "\W+", qname)
+                if len(side)>1:
+                    side = side[0]
+                    qname = '{}:{}-{}-{}-{}-{}'.format(chr_name, start, stop,
+                                                   fragstart, fragend, side)
+                qstart, qstop = map(int, (parts[6:8]))
+                length = (qstop - qstart)+1
+                str_length = rm_dict.get(qname, [0, ''])[0]
+                if length>str_length:
+                    rm_dict[qname] = [length, rep_type]
+        
+        return rm_dict
     
