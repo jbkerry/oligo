@@ -190,15 +190,14 @@ class Capture(object):
     
     def get_density(sam='tiled_Aligned.out.sam', fa='oligo_seqs.fa',
                     blat_file='blat_out.psl'):
-        # seq, gc, nh, matches, gaps, density
+        # seq, gc, nh, matches, gaps, density, rep_length, rep_type
         all_oligos = {}
-        if self.blat:
-            with open(fa) as f:
-                for x in f:
-                    header = re.sub('>', '', x.rstrip('\n'))
-                    seq = next(f).rstrip('\n')
-                    all_oligos[header] = [seq, _get_gc(seq), 0, 0, 0, 0]
-                    
+        with open(fa) as f:
+            for x in f:
+                header = re.sub('>', '', x.rstrip('\n'))
+                seq = next(f).rstrip('\n')
+                all_oligos[header] = [seq, _get_gc(seq), 0, 0, 0, 0, 0, '']
+        if self.blat:        
             with open(blat_file) as f:
                 for _ in range(5):
                     next(f)
@@ -206,20 +205,15 @@ class Capture(object):
                     parts = re.split("\s+", x.rstrip('\n'))
                     query = parts[9]
                     qgapbases, qstart, qend = map(int, (parts[5], parts[11], 
-                                                        parts[12]))
+                                                           parts[12]))
                     all_oligos[query][2]+=1
                     all_oligos[query][3]+=(int(qend)-int(qstart))+1
                     all_oligos[query][4]+=int(qgapbases)  
         else:
-            all_oligos = {}
             sf = pysam.AlignmentFile(sam, 'r')
             for r in sf.fetch(until_eof=True):
-                if r.query_name not in all_oligos:
-                    seq = r.query_sequence
-                    if r.is_reverse:
-                        seq = str(Seq(seq).reverse_complement())
-                    all_oligos[r.query_name] = [seq, _get_gc(seq), r.get_tag('NH'),
-                                                0, 0, 0]
+                if all_oligos[r.query_name][2] == 0:
+                     all_oligos[r.query_name][2] = r.get_tag('NH')
                         
                 for block in r.cigartuples:
                     if block[0]==0:
@@ -234,10 +228,8 @@ class Capture(object):
         
         return all_oligos   
         
-    def get_repeats():
-        rm_dict = {}
+    def get_repeats(oligo_dict):
         rm_file = "./oligo_seqs.fa.out"
-        rm_lines = [x.rstrip('\n') for x in open(rm_file)]
         with open(rm_file) as f:
             for _ in range(3):
                 next(f)
@@ -248,14 +240,12 @@ class Capture(object):
                 chr_name, start, stop, fragstart, fragend, side = re.split(
                                                                 "\W+", qname)
                 if len(side)>1:
-                    side = side[0]
-                    qname = '{}:{}-{}-{}-{}-{}'.format(chr_name, start, stop,
-                                                   fragstart, fragend, side)
+                    qname, dup = re.split('_', qname)
+                    
                 qstart, qstop = map(int, (parts[6:8]))
                 length = (qstop - qstart)+1
-                str_length = rm_dict.get(qname, [0, ''])[0]
-                if length>str_length:
-                    rm_dict[qname] = [length, rep_type]
+                if length>oligo_dict[qname][6]:
+                    oligo_dict[qname][6:] = length, rep_type
         
-        return rm_dict
+        return oligo_dict
     
