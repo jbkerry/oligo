@@ -193,19 +193,20 @@ class Capture(object):
         # seq, gc, nh, matches, gaps, density
         all_oligos = {}
         if self.blat:
-            
             with open(fa) as f:
                 for x in f:
                     header = re.sub('>', '', x.rstrip('\n'))
                     seq = next(f).rstrip('\n')
                     all_oligos[header] = [seq, _get_gc(seq), 0, 0, 0, 0]
                     
-            with open(blat_file) as f[5:]:
+            with open(blat_file) as f:
+                for _ in range(5):
+                    next(f)
                 for x in f:
                     parts = re.split("\s+", x.rstrip('\n'))
-                    qgapbases, qstart, qend = int(parts[5]), int(parts[11]), 
-                    int(parts[12])
-    
+                    query = parts[9]
+                    qgapbases, qstart, qend = map(int, (parts[5], parts[11], 
+                                                        parts[12]))
                     all_oligos[query][2]+=1
                     all_oligos[query][3]+=(int(qend)-int(qstart))+1
                     all_oligos[query][4]+=int(qgapbases)  
