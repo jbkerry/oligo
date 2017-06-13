@@ -196,7 +196,7 @@ class Capture(object):
             for x in f:
                 header = re.sub('>', '', x.rstrip('\n'))
                 seq = next(f).rstrip('\n')
-                all_oligos[header] = [seq, _get_gc(seq), 0, 0, 0, 0, 0, '']
+                all_oligos[header] = [seq, _get_gc(seq), 0, 0, 0, 0, 0, 'NA']
         if self.blat:        
             with open(blat_file) as f:
                 for _ in range(5):
@@ -228,7 +228,7 @@ class Capture(object):
         
         return all_oligos   
         
-    def get_repeats(oligo_dict):
+    def get_repeats(all_oligos):
         rm_file = "./oligo_seqs.fa.out"
         with open(rm_file) as f:
             for _ in range(3):
@@ -244,8 +244,20 @@ class Capture(object):
                     
                 qstart, qstop = map(int, (parts[6:8]))
                 length = (qstop - qstart)+1
-                if length>oligo_dict[qname][6]:
-                    oligo_dict[qname][6:] = length, rep_type
+                if length>all_oligos[qname][6]:
+                    all_oligos[qname][6:] = length, rep_type
         
-        return oligo_dict
+        return all_oligos
+    
+    def write_file(all_oligos, file_name='oligo_info.txt'):
+        with open(file_name, 'w') as f:
+            f.write('Chr\tStart\tStop\tFragment Start\tFragment Stop\t' \
+                    'Side of fragment\tSequence\tTotal number of alignments\t' \
+                    'Density score\tRepeat length\tRepeat Class\tGC%\n')
+            for key, idx in all_oligos.items():
+                chr_name, start, stop, fragstart, fragstop, side = re.split(
+                                                                    '\W+', key)
+                f.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
+                            chr_name, start, stop, fragstart, fragstop, side,
+                            idx[0], idx[2], idx[5], idx[6], idx[7], idx[1]))
     
