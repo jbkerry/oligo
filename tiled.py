@@ -17,6 +17,9 @@ rs_dict = {'DpnII': 'GATC',
            'NlaIII': 'CATG',
            'HindIII': 'AAGCTT'}
 
+path_list = [x.rstrip('\n') for x in open('config.txt')]
+path_dict = dict(item.split(' = ') for item in path_list)
+
 blat_param = '-stepSize=5 -minScore=10 -minIdentity=0 -repMatch=999999'
 star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '--outFilterMultimapScoreRange 1000 --outFilterMultimapNmax ' \
@@ -31,7 +34,7 @@ class Capture(object):
     
     Parameters
     ----------
-    fa: path to reference genome/chromsome fasta
+    fa: path to reference genome fasta
     blat: boolean, check off-targets using BLAT instead of STAR (not
     recommended for large designs), default=False
     '''
@@ -77,7 +80,8 @@ class Capture(object):
             pos_list.append(m.start()+start)
         
         cut_size = len(rs_dict[enzyme])
-        fa_w = open('oligo_seqs.fa', 'w')    
+        self.o_fa = 'oligo_seqs.fa'
+        fa_w = open(self.o_fa, 'w')    
         for i in range(len(pos_list)-1):
             j = i + 1
             frag_len = pos_list[j]-pos_list[i]+cut_size
@@ -105,8 +109,8 @@ class Capture(object):
         
         return "Wrote oligos to oligo_seqs.fa"
     
-    def _split_fa():
-        f = open('oligo_seqs.fa')
+    def _split_fa(self):
+        f = open(self.o_fa)
         file_content = f.readlines()
         split = 40000
         start = 1
@@ -119,7 +123,7 @@ class Capture(object):
             
         return 'Split files per 20,000 oligos'
     
-    def check_off_target(species, o_fa, s_idx=''):
+    def check_off_target(species, s_idx=''):
         '''Checks for repeat sequences in oligos generated from generate_oligos()
         using RepeatMasker and checks for off-target binding using either BLAT
         or STAR
@@ -167,19 +171,19 @@ class Capture(object):
         rm_path = os.path.join(path_dict['RM_PATH'], 'RepeatMasker')
         print('Checking for repeat sequences in oligos...')
         subprocess.run('{} -noint -s -species {} {}'.format(rm_path, species,
-                                                            o_fa), shell=True)
+                                                            self.o_fa), shell=True)
         
         if self.blat:
             path = os.path.join(path_dict['BLAT_PATH'], 'blat')
             print("Checking off-target binding with BLAT...")
             subprocess.run('{} {} {} {} blat_out.psl'
-                           .format(path, blat_param, self.fa, o_fa),
+                           .format(path, blat_param, self.fa, self.o_fa),
                            shell=True)
         else:
             path = os.path.join(path_dict['STAR_PATH'], 'STAR')
             print("Checking off-target binding with STAR...")
             subprocess.run('{} --readFilesIn {} --genomeDir {} {}'
-                           .format(path, o_fa, s_idx, star_param), shell=True)
+                           .format(path, self.o_fa, s_idx, star_param), shell=True)
             
         return 'Off-target detection completed'
     
@@ -188,15 +192,15 @@ class Capture(object):
         gc_perc = float("{0:.2f}".format(gc_perc))
         return gc_perc
     
-    def get_density(sam='tiled_Aligned.out.sam', fa='oligo_seqs.fa',
+    def get_density(self, sam='tiled_Aligned.out.sam', ### here
                     blat_file='blat_out.psl'):
         # seq, gc, nh, matches, gaps, density, rep_length, rep_type
-        all_oligos = {}
-        with open(fa) as f:
+        self.all_oligos = {}
+        with open(self.o_fa) as f:
             for x in f:
                 header = re.sub('>', '', x.rstrip('\n'))
                 seq = next(f).rstrip('\n')
-                all_oligos[header] = [seq, _get_gc(seq), 0, 0, 0, 0, 0, 'NA']
+                self.all_oligos[header] = [seq, _get_gc(seq), 0, 0, 0, 0, 0, 'NA']
         if self.blat:        
             with open(blat_file) as f:
                 for _ in range(5):
@@ -206,30 +210,30 @@ class Capture(object):
                     query = parts[9]
                     qgapbases, qstart, qend = map(int, (parts[5], parts[11], 
                                                            parts[12]))
-                    all_oligos[query][2]+=1
-                    all_oligos[query][3]+=(int(qend)-int(qstart))+1
-                    all_oligos[query][4]+=int(qgapbases)  
+                    self.all_oligos[query][2]+=1
+                    self.all_oligos[query][3]+=(int(qend)-int(qstart))+1
+                    self.all_oligos[query][4]+=int(qgapbases)  
         else:
             sf = pysam.AlignmentFile(sam, 'r')
             for r in sf.fetch(until_eof=True):
-                if all_oligos[r.query_name][2] == 0:
-                     all_oligos[r.query_name][2] = r.get_tag('NH')
+                if self.all_oligos[r.query_name][2] == 0:
+                     self.all_oligos[r.query_name][2] = r.get_tag('NH')
                         
                 for block in r.cigartuples:
                     if block[0]==0:
-                        all_oligos[r.query_name][3]+=block[1]
+                        self.all_oligos[r.query_name][3]+=block[1]
                     elif (block[0]==1) | (block[0]==2):
-                        all_oligos[r.query_name][4]+=block[1]
+                        self.all_oligos[r.query_name][4]+=block[1]
             
-        for o in all_oligos:
-            score = all_oligos[o][3]-all_oligos[o][4]
-            density = score/len(all_oligos[o][0])
-            all_oligos[o][5] = float("{0:.2f}".format(density))      
+        for o in self.all_oligos:
+            score = self.all_oligos[o][3]-self.all_oligos[o][4]
+            density = score/len(self.all_oligos[o][0])
+            self.all_oligos[o][5] = float("{0:.2f}".format(density))      
         
-        return all_oligos   
+        return self.all_oligos   
         
-    def get_repeats(all_oligos):
-        rm_file = "./oligo_seqs.fa.out"
+    def get_repeats(self):
+        rm_file = self.o_fa+".out"
         with open(rm_file) as f:
             for _ in range(3):
                 next(f)
@@ -244,17 +248,17 @@ class Capture(object):
                     
                 qstart, qstop = map(int, (parts[6:8]))
                 length = (qstop - qstart)+1
-                if length>all_oligos[qname][6]:
-                    all_oligos[qname][6:] = length, rep_type
+                if length>self.all_oligos[qname][6]:
+                    self.all_oligos[qname][6:] = length, rep_type
         
         return all_oligos
     
-    def write_file(all_oligos, file_name='oligo_info.txt'):
+    def write_file(self, file_name='oligo_info.txt'):
         with open(file_name, 'w') as f:
             f.write('Chr\tStart\tStop\tFragment Start\tFragment Stop\t' \
                     'Side of fragment\tSequence\tTotal number of alignments\t' \
                     'Density score\tRepeat length\tRepeat Class\tGC%\n')
-            for key, idx in all_oligos.items():
+            for key, idx in self.all_oligos.items():
                 chr_name, start, stop, fragstart, fragstop, side = re.split(
                                                                     '\W+', key)
                 f.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
