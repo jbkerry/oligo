@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+import sys
 import re
 import argparse
 from Bio import SeqIO
+import tools
 
 spe_dict = {'mm9': 'mouse',
             'mm10': 'mouse',
@@ -13,29 +15,6 @@ spe_dict = {'mm9': 'mouse',
 rs_dict = {'DpnII': 'GATC',
            'NlaIII': 'CATG',
            'HindIII': 'AAGCTT'}
-
-
-
-#class Tiled(object):
-#    '''Designs oligos for capture from adjacent restriction sites within a
-#    user-specified region
-#    
-#    Parameters
-#    ----------
-#    fa: path to reference genome fasta
-#    blat: boolean, check off-targets using BLAT instead of STAR (not
-#    recommended for large designs), default=False
-#    
-#    '''
-#    
-#    def __init__(self, fa, blat=False):
-#        self.fa = fa
-#        self.blat = blat
-#        self.o_fa = 'oligo_seqs.fa'
-#        # seq, gc, nh, matches, gaps, density, rep_length, rep_type
-#        self.all_oligos = {}
-#        self.sam = 'tiled_Aligned.out.sam'
-#        self.blat_file = 'blat_out.psl'
     
 def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
     '''Generates fasta file containing the oligos for a specific
@@ -61,7 +40,7 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
     print('Loading reference fasta file...')
     seq_dict = SeqIO.to_dict(SeqIO.parse(fa, 'fasta'))
     seq = seq_dict[chr_name].seq.upper()
-    print('Fasta file loaded. Generating oligos...')
+    print('\t...complete\nGenerating oligos...')
         
     if not region:
         start = 0; stop = len(seq)
@@ -101,10 +80,10 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
                                                                   r_seq))
     fa_w.close()
     
-    return "Wrote oligos to oligo_seqs.fa"
+    print('\t...wrote oligos to oligo_seqs.fa')
     
-def _split_fa(self):
-    f = open(self.o_fa)
+def split_fa():
+    f = open('oligo_seqs.fa')
     file_content = f.readlines()
     split = 40000
     start = 1
@@ -115,9 +94,7 @@ def _split_fa(self):
             f_out.write(''.join(output_data))
         start+=20000; stop+=20000
         
-    return 'Split files per 20,000 oligos'
-
-
+    print('Split files per 20,000 oligos')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -183,16 +160,17 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
     
-    t = Tiled(fa=args.fasta, blat=args.blat)
-    t.generate_oligos(
+    gen_oligos_capture(
+        fa = args.fasta,
         chromosome = args.chr,
         enzyme = args.enzyme,
         oligo = args.oligo,
         region = args.region
     )
-    t.check_off_target(
+    tools.check_off_target(
         species = spe_dict[args.genome.lower()],
+        fa = args.fasta,
         s_idx = args.star_index,
+        blat=args.blat
     )
-    t.get_density()
-    t.write_file()
+    tools.get_density(blat=args.blat)

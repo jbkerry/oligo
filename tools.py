@@ -16,7 +16,7 @@ star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 ' \
              '--limitOutSAMoneReadBytes 300000 --outFileNamePrefix tiled_'
 
-def check_off_target(fa, species, s_idx='', blat=False):
+def check_off_target(species, fa='', s_idx='', blat=False):
     '''Checks for repeat sequences in oligos generated from
     generate_oligos() using RepeatMasker and checks for off-target binding
     using either BLAT or STAR
@@ -71,14 +71,15 @@ def check_off_target(fa, species, s_idx='', blat=False):
         stderr = rm_out,
     )
     rm_out.close()
+    print('\t...comlete')
     
     if blat:
         path = os.path.join(path_dict['BLAT_PATH'], 'blat')
-        print("Checking off-target binding with BLAT...")
+        print('Checking off-target binding with BLAT...')
         blat_out = open('blat_log.txt', 'w')
         subprocess.run(
             '{} {} {} {} blat_out.psl'.format(path, blat_param,
-                                              fa, 'oligo_seq.fa'),
+                                              fa, 'oligo_seqs.fa'),
             shell=True,
             stdout = blat_out,
             stderr = blat_out,
@@ -86,7 +87,7 @@ def check_off_target(fa, species, s_idx='', blat=False):
         blat_out.close()
     else:
         path = os.path.join(path_dict['STAR_PATH'], 'STAR')
-        print("Checking off-target binding with STAR...")
+        print('Checking off-target binding with STAR...')
         star_out = open('star_log.txt', 'w')
         subprocess.run(
             '{} --readFilesIn {} --genomeDir {} {}'.format(path,
@@ -99,12 +100,7 @@ def check_off_target(fa, species, s_idx='', blat=False):
         )
         star_out.close()
         
-    return 'Off-target detection completed'
-
-def _get_gc(x):
-    gc_perc = (x.count('C') + x.count('G'))/len(x)
-    gc_perc = float("{0:.2f}".format(gc_perc))
-    return gc_perc
+    print('\t...complete')
 
 def get_density(sam='tiled_Aligned.out.sam',
                 blat_file='blat_out.psl', blat=False):
@@ -144,11 +140,16 @@ def get_density(sam='tiled_Aligned.out.sam',
         density = score/len(all_oligos[o][0])
         all_oligos[o][5] = float("{0:.2f}".format(density))      
     
+    print('Density scores calculated')
     rm_msg = _get_repeats(all_oligos=all_oligos)
-    write_msg = _write_file(all_oligos=all_oligos)
-    return 'Density scores calculated'
     print(rm_msg)
+    write_msg = _write_file(all_oligos=all_oligos)
     print(write_msg)
+    
+def _get_gc(x):
+    gc_perc = (x.count('C') + x.count('G'))/len(x)
+    gc_perc = float("{0:.2f}".format(gc_perc))
+    return gc_perc
     
 def _get_repeats(all_oligos):
     with open('oligo_seqs.fa.out') as f:
