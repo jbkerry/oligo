@@ -8,6 +8,12 @@ import re
 path_list = [x.rstrip('\n') for x in open('config.txt')]
 path_dict = dict(item.split(' = ') for item in path_list)
 
+spe_dict = {'mm9': 'mouse',
+            'mm10': 'mouse',
+            'hg18': 'human',
+            'hg19': 'human',
+            'hg38': 'human'}
+
 blat_param = '-stepSize=5 -minScore=10 -minIdentity=0 -repMatch=999999'
 star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '--outFilterMultimapScoreRange 1000 --outFilterMultimapNmax ' \
@@ -16,39 +22,19 @@ star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 ' \
              '--limitOutSAMoneReadBytes 300000 --outFileNamePrefix tiled_'
 
-def check_off_target(species, fa='', s_idx='', blat=False):
+def check_off_target(genome, fa='', s_idx='', blat=False):
     '''Checks for repeat sequences in oligos generated from
     generate_oligos() using RepeatMasker and checks for off-target binding
     using either BLAT or STAR
     
     Parameters
     ----------
-    species: the general name of the species e.g. human or mouse. From the
-        RepeatMasker help page:
-        
-        ############
-        
-        The species name must be a valid NCBI Taxonomy Database species
-        name and be contained in the RepeatMasker repeat database.
-        Some examples are:
-
-          human
-          mouse
-          rattus
-          "ciona savignyi"
-          arabidopsis
-
-        Other commonly used species:
-
-        mammal, carnivore, rodentia, rat, cow, pig, cat, dog, chicken,
-        fugu, danio, "ciona intestinalis" drosophila, anopheles, elegans,
-        diatoaea, artiodactyl, arabidopsis, rice, wheat, and maize
-        
-        ############
-        
-    o_fa: the oligo fasta file generated from generate_oligos()
+    genome: genome build e.g. mm10 or hg38
+    fa: path to reference genome fasta
     s_idx: the directory containing the STAR index for this genome (not
         required if blat=True)
+    blat: boolean. Check off-target binding using BLAT instead of STAR (not
+        recommended for large designs), default=False
         
     Output
     ------
@@ -65,13 +51,15 @@ def check_off_target(species, fa='', s_idx='', blat=False):
     print('Checking for repeat sequences in oligos...')
     rm_out = open('rm_log.txt', 'w')
     subprocess.run(
-        '{} -noint -s -species {} {}'.format(rm_path, species, 'oligo_seqs.fa'),
+        '{} -noint -s -species {} {}'.format(rm_path,
+                                             spe_dict[genome.lower()],
+                                             'oligo_seqs.fa'),
         shell = True,
         stdout = rm_out,
         stderr = rm_out,
     )
     rm_out.close()
-    print('\t...comlete')
+    print('\t...complete')
     
     if blat:
         path = os.path.join(path_dict['BLAT_PATH'], 'blat')
@@ -104,13 +92,14 @@ def check_off_target(species, fa='', s_idx='', blat=False):
 
 def get_density(sam='tiled_Aligned.out.sam',
                 blat_file='blat_out.psl', blat=False):
+    #all_oligos[oligo] = [sequence, nh, density, rep_len,
+    #                     rep_type, gc_perc, matches, mismatches]
     all_oligos = {}
     with open('oligo_seqs.fa') as f:
         for x in f:
             header = re.sub('>', '', x.rstrip('\n'))
             seq = next(f).rstrip('\n')
-            all_oligos[header] = [seq, _get_gc(seq), 0, 0,
-                                       0, 0, 0, 'NA']
+            all_oligos[header] = [seq, 0, 0, 0, 'NA', _get_gc(seq), 0, 0]
     if blat:        
         with open(blat_file) as f:
             for _ in range(5):
@@ -120,25 +109,25 @@ def get_density(sam='tiled_Aligned.out.sam',
                 query = parts[9]
                 qgapbases, qstart, qend = map(int, (parts[5], parts[11], 
                                                        parts[12]))
-                all_oligos[query][2]+=1
-                all_oligos[query][3]+=(int(qend)-int(qstart))+1
-                all_oligos[query][4]+=int(qgapbases)  
+                all_oligos[query][1]+=1
+                all_oligos[query][6]+=(int(qend)-int(qstart))+1
+                all_oligos[query][7]+=int(qgapbases)  
     else:
         sf = pysam.AlignmentFile(sam, 'r')
         for r in sf.fetch(until_eof=True):
-            if all_oligos[r.query_name][2] == 0:
-                 all_oligos[r.query_name][2] = r.get_tag('NH')
+            if all_oligos[r.query_name][1] == 0:
+                 all_oligos[r.query_name][1] = r.get_tag('NH')
                     
             for block in r.cigartuples:
                 if block[0]==0:
-                    all_oligos[r.query_name][3]+=block[1]
+                    all_oligos[r.query_name][6]+=block[1]
                 elif (block[0]==1) | (block[0]==2):
-                    all_oligos[r.query_name][4]+=block[1]
+                    all_oligos[r.query_name][7]+=block[1]
         
     for o in all_oligos:
-        score = all_oligos[o][3]-all_oligos[o][4]
+        score = all_oligos[o][6]-all_oligos[o][7]
         density = score/len(all_oligos[o][0])
-        all_oligos[o][5] = float("{0:.2f}".format(density))      
+        all_oligos[o][2] = float("{0:.2f}".format(density))      
     
     print('Density scores calculated')
     rm_msg = _get_repeats(all_oligos=all_oligos)
@@ -149,6 +138,7 @@ def get_density(sam='tiled_Aligned.out.sam',
 def _get_gc(x):
     gc_perc = (x.count('C') + x.count('G'))/len(x)
     gc_perc = float("{0:.2f}".format(gc_perc))
+    
     return gc_perc
     
 def _get_repeats(all_oligos):
@@ -168,24 +158,22 @@ def _get_repeats(all_oligos):
                 
                 qstart, qstop = map(int, (parts[6:8]))
                 length = (qstop - qstart)+1
-                if length>all_oligos[qname][6]:
-                    all_oligos[qname][6:] = length, rep_type
+                if length>all_oligos[qname][3]:
+                    all_oligos[qname][3:5] = length, rep_type
             msg = 'Repeat scores calculated'
         else:
             msg = 'No repeats detected'
     
     return msg
 
-def _write_file(all_oligos, file_name='oligo_info.txt'):
-    with open(file_name, 'w') as f:
+def _write_file(all_oligos):
+    with open('oligo_info.txt', 'w') as f:
         f.write('Chr\tStart\tStop\tFragment Start\tFragment Stop\t' \
                 'Side of fragment\tSequence\tTotal number of alignments\t' \
                 'Density score\tRepeat length\tRepeat Class\tGC%\n')
         for key, idx in all_oligos.items():
-            chr_name, start, stop, fragstart, fragstop, side = re.split(
-                                                                '\W+', key)
-            f.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
-                        chr_name, start, stop, fragstart, fragstop, side,
-                        idx[0], idx[2], idx[5], idx[6], idx[7], idx[1]))
+            write_list = re.split('\W+', key)+idx[:-2]
+            write_list = map(str, write_list)
+            f.write('\t'.join(write_list)+'\n')
     
     return 'Oligo data written to '+file_name

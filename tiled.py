@@ -6,12 +6,6 @@ import argparse
 from Bio import SeqIO
 import tools
 
-spe_dict = {'mm9': 'mouse',
-            'mm10': 'mouse',
-            'hg18': 'human',
-            'hg19': 'human',
-            'hg38': 'human'}
-
 rs_dict = {'DpnII': 'GATC',
            'NlaIII': 'CATG',
            'HindIII': 'AAGCTT'}
@@ -22,6 +16,7 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
     
     Parameters
     ----------
+    fa: path to reference genome fasta
     chromosome: chromosome number/letter e.g. 7 or X
     enzyme: DpnII (GATC), NlaIII (CATG) or HindIII (AAGCTT), default=DpnII
     oligo: the length of the oligo to design (bp), default=70
@@ -158,6 +153,7 @@ if __name__ == '__main__':
         help = 'Detect off-targets using BLAT instead of STAR.',
         required = False,
     )
+    
     args = parser.parse_args()
     
     gen_oligos_capture(
@@ -165,12 +161,12 @@ if __name__ == '__main__':
         chromosome = args.chr,
         enzyme = args.enzyme,
         oligo = args.oligo,
-        region = args.region
+        region = args.region,
     )
     tools.check_off_target(
-        species = spe_dict[args.genome.lower()],
+        genome = args.genome,
         fa = args.fasta,
         s_idx = args.star_index,
-        blat=args.blat
+        blat=args.blat,
     )
     tools.get_density(blat=args.blat)
