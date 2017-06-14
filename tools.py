@@ -154,7 +154,7 @@ def _get_repeats(all_oligos):
                 chr_name, start, stop, fragstart, fragend, side = re.split(
                                                             "\W+", qname)
                 if len(side)>1:
-                    qname, dup = re.split('_', qname)
+                    qname, dup = qname.split('_')
                 
                 qstart, qstop = map(int, (parts[6:8]))
                 length = (qstop - qstart)+1
@@ -173,7 +173,8 @@ def _write_file(all_oligos):
                 'Density score\tRepeat length\tRepeat Class\tGC%\n')
         for key, idx in all_oligos.items():
             write_list = re.split('\W+', key)+idx[:-2]
-            write_list = map(str, write_list)
-            f.write('\t'.join(write_list)+'\n')
+            if write_list[3:6]==['000', '000', 'X']:
+                write_list[3:6] = '.'*3
+            f.write('\t'.join(map(str, write_list))+'\n')
     
-    return 'Oligo data written to '+file_name
+    return 'Oligo data written to oligo_info.txt'
