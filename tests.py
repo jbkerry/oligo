@@ -9,9 +9,9 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import _verify_alphabet
 
-fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
-                  'Chromosomes/chr18.fa'
-full_chr = SeqIO.read(fa, 'fasta')
+#fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
+#                  'Chromosomes/chr18.fa'
+#full_chr = SeqIO.read(fa, 'fasta')
 
 class OligoGenTest(unittest.TestCase):
     
@@ -19,10 +19,10 @@ class OligoGenTest(unittest.TestCase):
         self.fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
                   'Chromosomes/chr18.fa'
         self.oligo = 30
-        #self.start = 44455000
-        #self.stop = 44555000
-        self.start = 0
-        self.stop = len(full_chr)
+        self.start = 44455000
+        self.stop = 44555000
+        #self.start = 0
+        #self.stop = len(full_chr)
         self.enzyme = 'HindIII'
         self.res_site = tiled.rs_dict[self.enzyme]
         tiled.gen_oligos_capture(
@@ -30,7 +30,7 @@ class OligoGenTest(unittest.TestCase):
             chromosome = 18,
             enzyme = self.enzyme,
             oligo = self.oligo,
-            #region = '{}-{}'.format(self.start, self.stop)
+            region = '{}-{}'.format(self.start, self.stop)
         )
         with open('oligo_seqs.fa') as f:
             self.lines = [x.rstrip('\n') for x in f]
