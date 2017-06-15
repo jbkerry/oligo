@@ -5,8 +5,13 @@ import os
 import tiled
 import re
 import pybedtools
+from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import _verify_alphabet
+
+fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
+                  'Chromosomes/chr18.fa'
+full_chr = SeqIO.read(fa, 'fasta')
 
 class OligoGenTest(unittest.TestCase):
     
@@ -14,8 +19,10 @@ class OligoGenTest(unittest.TestCase):
         self.fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
                   'Chromosomes/chr18.fa'
         self.oligo = 30
-        self.start = 44455000
-        self.stop = 44555000
+        #self.start = 44455000
+        #self.stop = 44555000
+        self.start = 0
+        self.stop = len(full_chr)
         self.enzyme = 'HindIII'
         self.res_site = tiled.rs_dict[self.enzyme]
         tiled.gen_oligos_capture(
@@ -23,13 +30,14 @@ class OligoGenTest(unittest.TestCase):
             chromosome = 18,
             enzyme = self.enzyme,
             oligo = self.oligo,
-            region = '{}-{}'.format(self.start, self.stop)
+            #region = '{}-{}'.format(self.start, self.stop)
         )
         with open('oligo_seqs.fa') as f:
             self.lines = [x.rstrip('\n') for x in f]
     
     def tearDown(self):
-        os.remove('oligo_seqs.fa')
+        #os.remove('oligo_seqs.fa')
+        pass
     
     def test_oligo_fasta_created(self):
         self.assertTrue(os.path.exists('oligo_seqs.fa'))
@@ -82,7 +90,12 @@ class OligoGenTest(unittest.TestCase):
         self.assertListEqual(oligo_stops, frag_stops)
         
     def test_oligo_is_inside_fragment(self):
-        pass
+        coor_list = [x.strip('>') for x in self.lines[::2]]
+        full_list = [list(map(int, re.split('\W+', x)[1:5])) \
+                     for x in coor_list]
+        self.assertTrue(
+            all((x[0]>=x[2]) & (x[1]<=x[3]) for x in full_list)
+        )
         
     def test_there_are_no_duplicate_coordinates(self):
         name_list = self.lines[::2]
@@ -96,14 +109,14 @@ class OligoGenTest(unittest.TestCase):
         coor_list = [x.strip('>') for x in self.lines[::2]]
         oligo_start_list = [int(re.split('\W+', x)[1]) for x in coor_list]
         self.assertTrue(
-            all(x >= self.start & x<=self.stop for x in oligo_start_list),
+            all((x >= self.start) & (x <= self.stop) for x in oligo_start_list),
         )
         
     def test_all_oligo_stop_coordinates_are_within_specified_range(self):
         coor_list = [x.strip('>') for x in self.lines[::2]]
         oligo_stop_list = [int(re.split('\W+', x)[2]) for x in coor_list]
         self.assertTrue(
-            all(x >= self.start & x<=self.stop for x in oligo_stop_list),
+            all((x >= self.start) & (x <= self.stop) for x in oligo_stop_list),
         )
         
     def test_all_left_oligos_start_with_restriction_site(self):
@@ -136,8 +149,6 @@ class OligoGenTest(unittest.TestCase):
             first_seq
         )
         f.close()
-        
-    
 
 if __name__ == '__main__':
     unittest.main()
