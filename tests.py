@@ -36,8 +36,7 @@ class OligoGenTest(unittest.TestCase):
             self.lines = [x.rstrip('\n') for x in f]
     
     def tearDown(self):
-        #os.remove('oligo_seqs.fa')
-        pass
+        os.remove('oligo_seqs.fa')
     
     def test_oligo_fasta_created(self):
         self.assertTrue(os.path.exists('oligo_seqs.fa'))
