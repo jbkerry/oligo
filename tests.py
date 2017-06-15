@@ -5,6 +5,8 @@ import os
 import tiled
 import re
 import pybedtools
+import argparse
+import sys
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import _verify_alphabet
@@ -17,6 +19,8 @@ from Bio.Alphabet import _verify_alphabet
 
 class OligoGenTest(unittest.TestCase):
     
+    #fish=0
+       
     def setUp(self,
               fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
                    'Chromosomes/chr18.fa',
@@ -24,6 +28,7 @@ class OligoGenTest(unittest.TestCase):
               oligo=30,
               region = '44455000-44555000',
               chromosome = 18):
+        self.fish = 0
         self.fa = fa
         self.enzyme = enzyme
         self.res_site = tiled.rs_dict[enzyme]
@@ -31,7 +36,6 @@ class OligoGenTest(unittest.TestCase):
         self.chromosome = chromosome
         self.region = region
         self.start, self.stop = map(int, region.split('-'))
-        
         tiled.gen_oligos_capture(
             fa = self.fa,
             chromosome = self.chromosome,
@@ -79,6 +83,7 @@ class OligoGenTest(unittest.TestCase):
                for x, y in zip(oligo_starts, oligo_stops))
         )
     
+    @unittest.skipIf(fish == 1, 'this design is fragment-independent')
     def test_fragment_start_equals_oligo_start(self):
         coor_list = [x.strip('>') for x in self.lines[::2]]
         oligo_starts = [re.split('\W+', x)[1] for x in coor_list \
@@ -87,6 +92,7 @@ class OligoGenTest(unittest.TestCase):
                        if re.split('\W+', x)[5]=='L']
         self.assertListEqual(oligo_starts, frag_starts)
     
+    @unittest.skipIf(fish == 1, 'this design is fragment-independent')
     def test_fragment_stop_equals_oligo_stop(self):
         coor_list = [x.strip('>') for x in self.lines[::2]]
         oligo_stops = [re.split('\W+', x)[2] for x in coor_list \
@@ -94,7 +100,8 @@ class OligoGenTest(unittest.TestCase):
         frag_stops = [re.split('\W+', x)[4] for x in coor_list \
                         if re.split('\W+', x)[5]=='R']
         self.assertListEqual(oligo_stops, frag_stops)
-        
+    
+    @unittest.skipIf(fish == 1, 'this design is fragment-independent')    
     def test_oligo_is_inside_fragment(self):
         coor_list = [x.strip('>') for x in self.lines[::2]]
         full_list = [list(map(int, re.split('\W+', x)[1:5])) \
@@ -124,7 +131,9 @@ class OligoGenTest(unittest.TestCase):
         self.assertTrue(
             all((x >= self.start) & (x <= self.stop) for x in oligo_stop_list),
         )
-        
+    
+    @unittest.skipIf(fish == 1,
+                     'this design is restriction enzyme-independent')    
     def test_all_left_oligos_start_with_restriction_site(self):
         left_seqs = []; i = 0
         for x in self.lines[::2]:
@@ -134,6 +143,8 @@ class OligoGenTest(unittest.TestCase):
             all(x[0:len(self.res_site)] == self.res_site for x in left_seqs),
         )
     
+    @unittest.skipIf(fish == 1,
+                     'this design is restriction enzyme-independent')
     def test_all_right_oligos_end_with_restriction_site(self):
         right_seqs = []; i = 0
         for x in self.lines[::2]:
@@ -155,6 +166,38 @@ class OligoGenTest(unittest.TestCase):
             first_seq
         )
         f.close()
+        
+class OligoGenTest_FISH(OligoGenTest):
+    fish = 1
+       
+    def setUp(self,
+              fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
+                   'Chromosomes/chr18.fa',
+              step=30,
+              oligo=30,
+              region = '44455000-44555000',
+              chromosome = 18):
+        
+        #super(OligoGenTest_FISH).fish=1
+        self.fa = fa
+        self.step = step
+        self.oligo = oligo
+        self.chromosome = chromosome
+        self.region = region
+        self.start, self.stop = map(int, region.split('-'))
+        tiled.gen_oligos_fish(
+            fa = self.fa,
+            chromosome = self.chromosome,
+            step = self.step,
+            oligo = self.oligo,
+            region = self.region,
+        )
+        with open('oligo_seqs.fa') as f:
+            self.lines = [x.rstrip('\n') for x in f]
+    
+    def tearDown(self):
+        pass
+        os.remove('oligo_seqs.fa')
 
 if __name__ == '__main__':
     unittest.main()
