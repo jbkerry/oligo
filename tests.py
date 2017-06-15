@@ -81,6 +81,9 @@ class OligoGenTest(unittest.TestCase):
                         if re.split('\W+', x)[5]=='R']
         self.assertListEqual(oligo_stops, frag_stops)
         
+    def test_oligo_is_inside_fragment(self):
+        pass
+        
     def test_there_are_no_duplicate_coordinates(self):
         name_list = self.lines[::2]
         self.assertEqual(len(name_list), len(set(name_list)))
