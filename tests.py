@@ -19,15 +19,16 @@ from Bio.Alphabet import _verify_alphabet
 
 
 class OligoGenTest(unittest.TestCase):
-       
-    def setUp(self,
+    
+    @classmethod   
+    def setUpClass(self,
               fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
                    'Chromosomes/chr18.fa',
               enzyme='DpnII',
               oligo=30,
               region = '44455000-44555000',
               chromosome = 18):
-        self.fish = 0
+        self.fish = False
         self.fa = fa
         self.enzyme = enzyme
         self.res_site = tiled.rs_dict[enzyme]
@@ -45,7 +46,8 @@ class OligoGenTest(unittest.TestCase):
         with open('oligo_seqs.fa') as f:
             self.lines = [x.rstrip('\n') for x in f]
     
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(self):
         os.remove('oligo_seqs.fa')
     
     def test_oligo_fasta_created(self):
@@ -83,7 +85,7 @@ class OligoGenTest(unittest.TestCase):
         )
     
     def test_fragment_start_equals_oligo_start(self):
-        if self.fish==1:
+        if self.fish:
             self.skipTest('this design is fragment-independent')
         coor_list = [x.strip('>') for x in self.lines[::2]]
         oligo_starts = [re.split('\W+', x)[1] for x in coor_list \
@@ -93,7 +95,7 @@ class OligoGenTest(unittest.TestCase):
         self.assertListEqual(oligo_starts, frag_starts)
     
     def test_fragment_stop_equals_oligo_stop(self):
-        if self.fish==1:
+        if self.fish:
             self.skipTest('this design is fragment-independent')
         coor_list = [x.strip('>') for x in self.lines[::2]]
         oligo_stops = [re.split('\W+', x)[2] for x in coor_list \
@@ -103,7 +105,7 @@ class OligoGenTest(unittest.TestCase):
         self.assertListEqual(oligo_stops, frag_stops)
         
     def test_oligo_is_inside_fragment(self):
-        if self.fish==1:
+        if self.fish:
             self.skipTest('this design is fragment-independent')
         coor_list = [x.strip('>') for x in self.lines[::2]]
         full_list = [list(map(int, re.split('\W+', x)[1:5])) \
@@ -135,7 +137,7 @@ class OligoGenTest(unittest.TestCase):
         )
     
     def test_all_left_oligos_start_with_restriction_site(self):
-        if self.fish==1:
+        if self.fish:
             self.skipTest('this design is restriction enzyme-independent')
         left_seqs = []; i = 0
         for x in self.lines[::2]:
@@ -146,7 +148,7 @@ class OligoGenTest(unittest.TestCase):
         )
     
     def test_all_right_oligos_end_with_restriction_site(self):
-        if self.fish==1:
+        if self.fish:
             self.skipTest('this design is restriction enzyme-independent')
         right_seqs = []; i = 0
         for x in self.lines[::2]:
@@ -170,15 +172,16 @@ class OligoGenTest(unittest.TestCase):
         f.close()
         
 class OligoGenTest_FISH(OligoGenTest):
-       
-    def setUp(self,
+     
+    @classmethod   
+    def setUpClass(self,
               fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
                    'Chromosomes/chr18.fa',
               step=30,
               oligo=30,
               region = '44455000-44555000',
               chromosome = 18):
-        self.fish = 1
+        self.fish = True
         self.fa = fa
         self.step = step
         self.oligo = oligo
@@ -194,10 +197,6 @@ class OligoGenTest_FISH(OligoGenTest):
         )
         with open('oligo_seqs.fa') as f:
             self.lines = [x.rstrip('\n') for x in f]
-    
-    def tearDown(self):
-        pass
-        os.remove('oligo_seqs.fa')
 
 if __name__ == '__main__':
     unittest.main()
