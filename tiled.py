@@ -21,8 +21,13 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
         format start-stop, e.g. 10000-20000. Omit this option to design
         oligos over the entire chromosome
         
-    Output
-    ------
+    Returns
+    -------
+    oligo_seqs: dict, contains oligo coordinates as keys and oligo sequences as
+        items
+        
+    Outputs
+    -------
     oligo_seqs.fa: a FASTA file containing sequences of all the oligos
     
     '''
@@ -46,6 +51,8 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
     
     cut_size = len(rs_dict[enzyme])
     
+    oligo_seqs = {}
+    
     fa_w = open('oligo_seqs.fa', 'w')    
     for i in range(len(pos_list)-1):
         j = i + 1
@@ -56,17 +63,26 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
             
             l_tup = (l_start, l_stop, l_start, r_stop)
             r_tup = (r_start, r_stop, l_start, r_stop)
+            l_seq = seq[l_start:l_stop]
+            r_seq = seq[r_start:r_stop]
             
+            oligo_seqs['{}:{}-L'.format(chr_name,
+                                       '-'.join(map(str, l_tup)))
+                        ] = str(l_seq)
             fa_w.write('>{}:{}-L\n{}\n'.format(chr_name,
                                                '-'.join(map(str, l_tup)),
-                                               seq[l_start:l_stop]))
+                                               l_seq))
             if frag_len>oligo:
+                oligo_seqs['{}:{}-R'.format(chr_name,
+                                       '-'.join(map(str, r_tup)))
+                        ] = str(r_seq)
                 fa_w.write('>{}:{}-R\n{}\n'.format(chr_name,
                                                    '-'.join(map(str, r_tup)),
-                                                   seq[r_start:r_stop]))
+                                                   r_seq))
     fa_w.close()
     
     print('\t...wrote oligos to oligo_seqs.fa')
+    return oligo_seqs
 
 def gen_oligos_fish(fa, chromosome, step=70, oligo=70, region=''):
     '''Generates fasta file containing the oligos for a specific
@@ -82,6 +98,11 @@ def gen_oligos_fish(fa, chromosome, step=70, oligo=70, region=''):
     region: the region of the chromosome to design oligos, must be in the
         format start-stop, e.g. 10000-20000. Omit this option to design
         oligos over the entire chromosome
+        
+    Returns
+    -------
+    oligo_seqs: dict, contains oligo coordinates as keys and oligo sequences as
+        items
         
     Output
     ------
@@ -101,17 +122,23 @@ def gen_oligos_fish(fa, chromosome, step=70, oligo=70, region=''):
     else:
         start, stop = map(int, region.split('-'))
     
+    oligo_seqs = {}
+    
     final_start = stop-oligo
     fa_w = open('oligo_seqs.fa', 'w') 
     while start<=final_start:
+        stop = start + oligo
+        ol_seq = str(seq[start:stop])
+        oligo_seqs['{}:{}-{}-000-000-X'.format(chr_name, start, stop)] = ol_seq
         fa_w.write('>{}:{}-{}-000-000-X\n{}\n'.format(chr_name,
                                                       start,
                                                       start+oligo,
-                                                      seq[start:start+oligo]))
+                                                      ol_seq))
         start+=step  
     fa_w.close()
     
     print('\t...wrote oligos to oligo_seqs.fa')
+    return oligo_seqs
     
 def split_fa():
     f = open('oligo_seqs.fa')
