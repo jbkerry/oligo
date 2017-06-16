@@ -17,9 +17,8 @@ from Bio.Alphabet import _verify_alphabet
 #self.start = 0
 #self.stop = len(full_chr)
 
+
 class OligoGenTest(unittest.TestCase):
-    
-    #fish=0
        
     def setUp(self,
               fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
@@ -83,8 +82,9 @@ class OligoGenTest(unittest.TestCase):
                for x, y in zip(oligo_starts, oligo_stops))
         )
     
-    @unittest.skipIf(fish == 1, 'this design is fragment-independent')
     def test_fragment_start_equals_oligo_start(self):
+        if self.fish==1:
+            self.skipTest('this design is fragment-independent')
         coor_list = [x.strip('>') for x in self.lines[::2]]
         oligo_starts = [re.split('\W+', x)[1] for x in coor_list \
                         if re.split('\W+', x)[5]=='L']
@@ -92,17 +92,19 @@ class OligoGenTest(unittest.TestCase):
                        if re.split('\W+', x)[5]=='L']
         self.assertListEqual(oligo_starts, frag_starts)
     
-    @unittest.skipIf(fish == 1, 'this design is fragment-independent')
     def test_fragment_stop_equals_oligo_stop(self):
+        if self.fish==1:
+            self.skipTest('this design is fragment-independent')
         coor_list = [x.strip('>') for x in self.lines[::2]]
         oligo_stops = [re.split('\W+', x)[2] for x in coor_list \
                         if re.split('\W+', x)[5]=='R']
         frag_stops = [re.split('\W+', x)[4] for x in coor_list \
                         if re.split('\W+', x)[5]=='R']
         self.assertListEqual(oligo_stops, frag_stops)
-    
-    @unittest.skipIf(fish == 1, 'this design is fragment-independent')    
+        
     def test_oligo_is_inside_fragment(self):
+        if self.fish==1:
+            self.skipTest('this design is fragment-independent')
         coor_list = [x.strip('>') for x in self.lines[::2]]
         full_list = [list(map(int, re.split('\W+', x)[1:5])) \
                      for x in coor_list]
@@ -132,9 +134,9 @@ class OligoGenTest(unittest.TestCase):
             all((x >= self.start) & (x <= self.stop) for x in oligo_stop_list),
         )
     
-    @unittest.skipIf(fish == 1,
-                     'this design is restriction enzyme-independent')    
     def test_all_left_oligos_start_with_restriction_site(self):
+        if self.fish==1:
+            self.skipTest('this design is restriction enzyme-independent')
         left_seqs = []; i = 0
         for x in self.lines[::2]:
             if re.split('\W+', x)[-1] == 'L': left_seqs.append(self.lines[i+1])
@@ -143,9 +145,9 @@ class OligoGenTest(unittest.TestCase):
             all(x[0:len(self.res_site)] == self.res_site for x in left_seqs),
         )
     
-    @unittest.skipIf(fish == 1,
-                     'this design is restriction enzyme-independent')
     def test_all_right_oligos_end_with_restriction_site(self):
+        if self.fish==1:
+            self.skipTest('this design is restriction enzyme-independent')
         right_seqs = []; i = 0
         for x in self.lines[::2]:
             if re.split('\W+', x)[-1] == 'R': right_seqs.append(self.lines[i+1])
@@ -168,7 +170,6 @@ class OligoGenTest(unittest.TestCase):
         f.close()
         
 class OligoGenTest_FISH(OligoGenTest):
-    fish = 1
        
     def setUp(self,
               fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
@@ -177,8 +178,7 @@ class OligoGenTest_FISH(OligoGenTest):
               oligo=30,
               region = '44455000-44555000',
               chromosome = 18):
-        
-        #super(OligoGenTest_FISH).fish=1
+        self.fish = 1
         self.fa = fa
         self.step = step
         self.oligo = oligo
