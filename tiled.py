@@ -25,11 +25,7 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
     -------
     oligo_seqs: dict, contains oligo coordinates as keys and oligo sequences as
         items
-        
-    Outputs
-    -------
-    oligo_seqs.fa: a FASTA file containing sequences of all the oligos
-    
+
     '''
     
     chr_name = 'chr'+str(chromosome)
@@ -52,8 +48,7 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
     cut_size = len(rs_dict[enzyme])
     
     oligo_seqs = {}
-    
-    fa_w = open('oligo_seqs.fa', 'w')    
+       
     for i in range(len(pos_list)-1):
         j = i + 1
         frag_len = pos_list[j]-pos_list[i]+cut_size
@@ -69,19 +64,12 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
             oligo_seqs['{}:{}-L'.format(chr_name,
                                        '-'.join(map(str, l_tup)))
                         ] = str(l_seq)
-            fa_w.write('>{}:{}-L\n{}\n'.format(chr_name,
-                                               '-'.join(map(str, l_tup)),
-                                               l_seq))
             if frag_len>oligo:
                 oligo_seqs['{}:{}-R'.format(chr_name,
                                        '-'.join(map(str, r_tup)))
                         ] = str(r_seq)
-                fa_w.write('>{}:{}-R\n{}\n'.format(chr_name,
-                                                   '-'.join(map(str, r_tup)),
-                                                   r_seq))
-    fa_w.close()
     
-    print('\t...wrote oligos to oligo_seqs.fa')
+    print('\t...complete')
     return oligo_seqs
 
 def gen_oligos_fish(fa, chromosome, step=70, oligo=70, region=''):
@@ -125,20 +113,36 @@ def gen_oligos_fish(fa, chromosome, step=70, oligo=70, region=''):
     oligo_seqs = {}
     
     final_start = stop-oligo
-    fa_w = open('oligo_seqs.fa', 'w') 
+
     while start<=final_start:
         stop = start + oligo
         ol_seq = str(seq[start:stop])
         oligo_seqs['{}:{}-{}-000-000-X'.format(chr_name, start, stop)] = ol_seq
-        fa_w.write('>{}:{}-{}-000-000-X\n{}\n'.format(chr_name,
-                                                      start,
-                                                      start+oligo,
-                                                      ol_seq))
         start+=step  
-    fa_w.close()
     
-    print('\t...wrote oligos to oligo_seqs.fa')
+    print('\t...complete')
     return oligo_seqs
+
+def write_oligos(oligo_seqs):
+    '''Writes dictionary containing all oligo sequences (key = oligo
+    coordinates, value = oligo sequence) to oligo_seqs.fa
+    
+    Parameters
+    ----------
+    oligo_seqs: dict, oligo coordinates as keys and oligo sequences as values
+    
+    Outputs
+    -------
+    oligo_seqs.fa: a FASTA file containing sequences of all the oligos
+    
+    '''
+    
+    with open('oligo_seqs.fa', 'w') as fa_w:
+        for key, value in oligo_seqs.items():
+            fa_w.write('>{}\n{}\n'.format(key, value))
+    
+    print('Wrote oligos to oligo_seqs.fa')
+    return
     
 def split_fa():
     f = open('oligo_seqs.fa')
@@ -153,6 +157,7 @@ def split_fa():
         start+=20000; stop+=20000
         
     print('Split files per 20,000 oligos')
+    return
 
 if __name__ == '__main__':
     
@@ -203,7 +208,7 @@ if __name__ == '__main__':
         help = 'Step size (in bp) between adjacent oligos when running in ' \
                'FISH mode (--fish), default=70. Omit this option if you are ' \
                'not using the --fish flag',
-        default = 'DpnII',
+        default = 70,
         required = False,
     )
     parser.add_argument(
@@ -237,11 +242,17 @@ if __name__ == '__main__':
         help = 'Detect off-targets using BLAT instead of STAR.',
         required = False,
     )
+    parser.add_argument(
+        '--test_fasta',
+        action = 'store_true',
+        help = argparse.SUPPRESS,
+        required = False,
+    )
     
     args = parser.parse_args()
     
     if args.fish:
-        gen_oligos_fish(
+        pass_seqs = gen_oligos_fish(
             fa = args.fasta,
             chromosome = args.chr,
             step = args.step_size,
@@ -249,17 +260,19 @@ if __name__ == '__main__':
             region = args.region,
         )
     else:
-        gen_oligos_capture(
+        pass_seqs = gen_oligos_capture(
             fa = args.fasta,
             chromosome = args.chr,
             enzyme = args.enzyme,
             oligo = args.oligo,
             region = args.region,
         )
-    tools.check_off_target(
-        genome = args.genome,
-        fa = args.fasta,
-        s_idx = args.star_index,
-        blat=args.blat,
-    )
-    tools.get_density(blat=args.blat)
+    write_oligos(oligo_seqs=pass_seqs)
+    if not args.test_fasta:
+        tools.check_off_target(
+            genome = args.genome,
+            fa = args.fasta,
+            s_idx = args.star_index,
+            blat=args.blat,
+        )
+        tools.get_density(blat=args.blat)

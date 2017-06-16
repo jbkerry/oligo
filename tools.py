@@ -5,7 +5,8 @@ import subprocess
 import pysam
 import re
 
-path_list = [x.rstrip('\n') for x in open('config.txt')]
+config_file = '/t1-data1/WTSA_Dev/jkerry/oligo/Dev/config.txt'
+path_list = [x.rstrip('\n') for x in open(config_file)]
 path_dict = dict(item.split(' = ') for item in path_list)
 
 spe_dict = {'mm9': 'mouse',
