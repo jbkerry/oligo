@@ -10,10 +10,11 @@ class OligoGenTest(unittest.TestCase):
     
     @classmethod   
     def setUpClass(self):
-        os.system('''python tiled.py -f /databank/igenomes/Mus_musculus/UCSC/
-                  mm9/Sequence/WholeGenomeFasta/genome.fa -g mm9 -c 10
-                  -r 12400000-12450000 -s /databank/igenomes/Mus_musculus/UCSC/
-                  mm9/Sequence/STAR --test_fasta''')
+        os.system('python tiled.py -f /databank/igenomes/Mus_musculus/UCSC/' \
+                  'mm9/Sequence/Chromosomes/chr10.fa -g mm9 -c 10 ' \
+                  '-r 12400000-12450000 -s /databank/igenomes/Mus_musculus/UCSC/' \
+                  'mm9/Sequence/STAR --test_fasta')
+        
         with open('oligo_seqs.fa') as f:
             self.lines = [x.rstrip('\n') for x in f]
     
