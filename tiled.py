@@ -51,7 +51,7 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
        
     for i in range(len(pos_list)-1):
         j = i + 1
-        frag_len = pos_list[j]-pos_list[i]+cut_size
+        frag_len = pos_list[j]-pos_list[i]+cut_size  ## check this code
         if (frag_len>=oligo):
             l_start = pos_list[i]; l_stop = l_start+oligo
             r_stop = pos_list[j]+cut_size; r_start = r_stop-oligo
