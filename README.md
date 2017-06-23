@@ -26,7 +26,7 @@ optional arguments:
   
 e.g.
 
-*python regions.py -f ~/mm9/genome.fa -g mm9 -b ~/files/coordinates.bed -o 70 -e DpnII -s ~/mm9/STAR*
+python regions.py -f ~/mm9/genome.fa -g mm9 -b ~/files/coordinates.bed -o 70 -e DpnII -s ~/mm9/STAR
 
 Depends on tools.py
 ```
@@ -68,7 +68,7 @@ optional arguments:
   
 e.g.
 
-*python regions.py -f ~/mm9/genome.fa -g mm9 -c 10 -e DpnII -o 70 -r 10520000-10620000 -s ~/mm9/STAR*
+python tiled.py -f ~/hg19/genome.fa -g hg19 -c 10 -e DpnII -o 70 -r 10520000-10620000 -s ~/hg19/STAR
 
 Depends on tools.py
 ```
