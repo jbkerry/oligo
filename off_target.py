@@ -65,6 +65,7 @@ if __name__ == '__main__':
     
     import tools
     import argparse
+    import subprocess
     
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -107,7 +108,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-m',
         '--max_dist',
-        type = str,
+        type = int,
         help = 'The maximum distance away from the off-target site to ' \
                'design oligos to, default=200',
         default = 200,
@@ -156,3 +157,7 @@ if __name__ == '__main__':
             blat=args.blat,
         )
         tools.get_density(blat=args.blat)
+        subprocess.run('sort -k1,1 -k2,2n oligo_info.txt >all_oligos_info.txt',
+                        shell=True)
+        subprocess.run('rm -f oligo_info.txt', shell=True)
+        subprocess.run('mv all_oligo_info.txt oligos_info.txt', shell=True)
