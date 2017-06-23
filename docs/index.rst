@@ -9,9 +9,10 @@ Welcome to oligo's documentation!
 .. toctree::
    :maxdepth: 2
    
+   :caption: Contents:
    all-about-me
    checkouts/readthedocs.org/user_builds/oligo/checkouts/latest/index.rst
-   :caption: Contents:
+   
 
 
 
