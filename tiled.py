@@ -122,27 +122,6 @@ def gen_oligos_fish(fa, chromosome, step=70, oligo=70, region=''):
     
     print('\t...complete')
     return oligo_seqs
-
-def write_oligos(oligo_seqs):
-    '''Writes dictionary containing all oligo sequences (key = oligo
-    coordinates, value = oligo sequence) to oligo_seqs.fa
-    
-    Parameters
-    ----------
-    oligo_seqs: dict, oligo coordinates as keys and oligo sequences as values
-    
-    Outputs
-    -------
-    oligo_seqs.fa: a FASTA file containing sequences of all the oligos
-    
-    '''
-    
-    with open('oligo_seqs.fa', 'w') as fa_w:
-        for key, value in oligo_seqs.items():
-            fa_w.write('>{}\n{}\n'.format(key, value))
-    
-    print('Wrote oligos to oligo_seqs.fa')
-    return
     
 def split_fa():
     f = open('oligo_seqs.fa')
@@ -163,6 +142,7 @@ if __name__ == '__main__':
     
     import tools
     import argparse
+    import sys
     
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -251,6 +231,10 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     
+    if not args.blat and not args.star_index:
+        msg = '-s/--star_index argument is required if --blat is not selected'
+        parser.error(msg)
+    
     if args.fish:
         pass_seqs = gen_oligos_fish(
             fa = args.fasta,
@@ -267,7 +251,7 @@ if __name__ == '__main__':
             oligo = args.oligo,
             region = args.region,
         )
-    write_oligos(oligo_seqs=pass_seqs)
+    tools.write_oligos(oligo_seqs=pass_seqs)
     if not args.test_fasta:
         tools.check_off_target(
             genome = args.genome,

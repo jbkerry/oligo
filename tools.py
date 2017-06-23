@@ -23,6 +23,27 @@ star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 ' \
              '--limitOutSAMoneReadBytes 300000 --outFileNamePrefix tiled_'
 
+def write_oligos(oligo_seqs):
+    '''Writes dictionary containing all oligo sequences (key = oligo
+    coordinates, value = oligo sequence) to oligo_seqs.fa
+    
+    Parameters
+    ----------
+    oligo_seqs: dict, oligo coordinates as keys and oligo sequences as values
+    
+    Outputs
+    -------
+    oligo_seqs.fa: a FASTA file containing sequences of all the oligos
+    
+    '''
+    
+    with open('oligo_seqs.fa', 'w') as fa_w:
+        for key, value in oligo_seqs.items():
+            fa_w.write('>{}\n{}\n'.format(key, value))
+    
+    print('Wrote oligos to oligo_seqs.fa')
+    return
+
 def check_off_target(genome, fa='', s_idx='', blat=False):
     '''Checks for repeat sequences in oligos generated from
     generate_oligos() using RepeatMasker and checks for off-target binding

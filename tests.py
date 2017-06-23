@@ -5,6 +5,7 @@ import os
 import tiled
 import regions
 import off_target
+import tools
 import re
 import pybedtools
 import argparse
@@ -58,7 +59,7 @@ class OligoGenTest_Main(unittest.TestCase):
         seq_f.close()
         
     def test_fasta_file_has_same_contents_as_oligo_dictionary(self):
-        tiled.write_oligos(oligo_seqs=self.seqs)
+        tools.write_oligos(oligo_seqs=self.seqs)
         test_dict = {}
         with open('oligo_seqs.fa') as f:
             for x in f:
