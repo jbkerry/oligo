@@ -5,7 +5,8 @@ import subprocess
 import pysam
 import re
 
-path_list = [x.rstrip('\n') for x in open('config.txt')]
+config_file = '/t1-data1/WTSA_Dev/jkerry/oligo/Dev/config.txt'
+path_list = [x.rstrip('\n') for x in open(config_file)]
 path_dict = dict(item.split(' = ') for item in path_list)
 
 spe_dict = {'mm9': 'mouse',
@@ -21,6 +22,27 @@ star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '--seedSearchLmax 20 --alignIntronMax 10 --seedPerWindowNmax ' \
              '15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 ' \
              '--limitOutSAMoneReadBytes 300000 --outFileNamePrefix tiled_'
+
+def write_oligos(oligo_seqs):
+    '''Writes dictionary containing all oligo sequences (key = oligo
+    coordinates, value = oligo sequence) to oligo_seqs.fa
+    
+    Parameters
+    ----------
+    oligo_seqs: dict, oligo coordinates as keys and oligo sequences as values
+    
+    Outputs
+    -------
+    oligo_seqs.fa: a FASTA file containing sequences of all the oligos
+    
+    '''
+    
+    with open('oligo_seqs.fa', 'w') as fa_w:
+        for key, value in oligo_seqs.items():
+            fa_w.write('>{}\n{}\n'.format(key, value))
+    
+    print('Wrote oligos to oligo_seqs.fa')
+    return
 
 def check_off_target(genome, fa='', s_idx='', blat=False):
     '''Checks for repeat sequences in oligos generated from
