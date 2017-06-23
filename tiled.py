@@ -23,8 +23,8 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
         
     Returns
     -------
-    oligo_seqs: dict, contains oligo coordinates as keys and oligo sequences as
-        items
+    oligo_seqs: dictionary containing oligo coordinates as keys and oligo
+        sequences as items
 
     '''
     

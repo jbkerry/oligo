@@ -21,35 +21,7 @@ from Bio.Alphabet import _verify_alphabet
 f = lambda x: re.split('\W+', x)
 g = lambda x: tuple(map(int, re.split('\W+', x)[1:5]))
 
-class OligoGenTest(unittest.TestCase):
-    
-    @classmethod   
-    def setUpClass(self,
-              fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
-                   'Chromosomes/chr18.fa',
-              enzyme='DpnII',
-              oligo=30,
-              region = '44455000-44555000',
-              chromosome = 18):
-        self.fish = False
-        self.fa = fa
-        self.enzyme = enzyme
-        self.res_site = tiled.rs_dict[enzyme]
-        self.oligo = oligo
-        self.chromosome = chromosome
-        self.region = region
-        self.start, self.stop = map(int, region.split('-'))
-        self.seqs = tiled.gen_oligos_capture(
-            fa = self.fa,
-            chromosome = self.chromosome,
-            enzyme = self.enzyme,
-            oligo = self.oligo,
-            region = self.region,
-        )
-    
-    @classmethod
-    def tearDownClass(self):
-        pass
+class OligoGenTest_Main(unittest.TestCase):
         
     def test_all_sequences_are_legitimate_dna_sequences(self):
         class DNAdict(): letters='GATCN'
@@ -67,60 +39,9 @@ class OligoGenTest(unittest.TestCase):
         self.assertTrue(
             all(g(x)[1]-g(x)[0]==self.oligo for x in self.seqs)
         )
-    
-    def test_fragment_start_equals_left_oligo_start(self):
-        if self.fish:
-            self.skipTest('this design is fragment-independent')
-        self.assertTrue(
-            all(g(x)[0]==g(x)[2] for x in self.seqs if f(x)[5]=='L'),
-        )
-    
-    def test_fragment_stop_equals_right_oligo_stop(self):
-        if self.fish:
-            self.skipTest('this design is fragment-independent')
-        self.assertTrue(
-            all(g(x)[1]==g(x)[3] for x in self.seqs if f(x)[5]=='R'),
-        )
-        
-    def test_oligo_is_inside_fragment(self):
-        if self.fish:
-            self.skipTest('this design is fragment-independent')
-        self.assertTrue(
-            all((g(x)[0]>=g(x)[2]) & (g(x)[1]<=g(x)[3]) for x in self.seqs),
-        )
         
     def test_all_oligos_are_correct_length(self):
         self.assertTrue(all(len(x) == self.oligo for x in self.seqs.values()))
-    
-    @unittest.skip     
-    def test_all_oligo_start_coordinates_are_within_specified_range(self):
-        self.assertTrue(
-            all((g(x)[0] >= self.start) & (g(x)[0] <= self.stop) \
-                for x in self.seqs),
-        )
-    
-    @unittest.skip    
-    def test_all_oligo_stop_coordinates_are_within_specified_range(self):
-        self.assertTrue(
-            all((g(x)[1] >= self.start) & (g(x)[1] <= self.stop) \
-                for x in self.seqs),
-        )
-    
-    def test_all_left_oligos_start_with_restriction_site(self):
-        if self.fish:
-            self.skipTest('this design is restriction enzyme-independent')
-        self.assertTrue(
-            all(y[0:len(self.res_site)] == self.res_site \
-                for x, y in self.seqs.items() if f(x)[5]=='L'),
-        )
-    
-    def test_all_right_oligos_end_with_restriction_site(self):
-        if self.fish:
-            self.skipTest('this design is restriction enzyme-independent')
-        self.assertTrue(
-            all(y[-len(self.res_site):] == self.res_site \
-                for x, y in self.seqs.items() if f(x)[5]=='R'),
-        )
         
     def test_sequence_is_same_if_using_bedtools_getfasta(self):
         a = pybedtools.BedTool(' '.join(f(next(iter(self.seqs)))[:3]), \
@@ -143,7 +64,80 @@ class OligoGenTest(unittest.TestCase):
         os.remove('oligo_seqs.fa')
         self.assertDictEqual(self.seqs, test_dict)
         
-class OligoGenTest_FISH(OligoGenTest):
+class OligoGenTest_Capture(unittest.TestCase):
+    
+    def test_fragment_start_equals_left_oligo_start(self):
+        self.assertTrue(
+            all(g(x)[0]==g(x)[2] for x in self.seqs if f(x)[5]=='L'),
+        )
+    
+    def test_fragment_stop_equals_right_oligo_stop(self):
+        self.assertTrue(
+            all(g(x)[1]==g(x)[3] for x in self.seqs if f(x)[5]=='R'),
+        )
+        
+    def test_oligo_is_inside_fragment(self):
+        self.assertTrue(
+            all((g(x)[0]>=g(x)[2]) & (g(x)[1]<=g(x)[3]) for x in self.seqs),
+        )
+    
+    def test_all_left_oligos_start_with_restriction_site(self):
+        self.assertTrue(
+            all(y[0:len(self.res_site)] == self.res_site \
+                for x, y in self.seqs.items() if f(x)[5]=='L'),
+        )
+    
+    def test_all_right_oligos_end_with_restriction_site(self):
+        self.assertTrue(
+            all(y[-len(self.res_site):] == self.res_site \
+                for x, y in self.seqs.items() if f(x)[5]=='R'),
+        )
+        
+class OligoGenTest_Blocks(unittest.TestCase):
+    
+    def test_all_oligo_start_coordinates_are_within_specified_range(self):
+        self.assertTrue(
+            all((g(x)[0] >= self.start) & (g(x)[0] <= self.stop) \
+                for x in self.seqs),
+        )
+       
+    def test_all_oligo_stop_coordinates_are_within_specified_range(self):
+        self.assertTrue(
+            all((g(x)[1] >= self.start) & (g(x)[1] <= self.stop) \
+                for x in self.seqs),
+        )
+        
+class OligoGenTest_Tiled(OligoGenTest_Main, OligoGenTest_Capture, OligoGenTest_Blocks):
+    
+    @classmethod   
+    def setUpClass(self,
+              fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
+                   'Chromosomes/chr18.fa',
+              enzyme='DpnII',
+              oligo=30,
+              region = '44455000-44555000',
+              chromosome = 18):
+        self.fa = fa
+        self.enzyme = enzyme
+        self.res_site = tiled.rs_dict[enzyme]
+        self.oligo = oligo
+        self.chromosome = chromosome
+        self.region = region
+        self.start, self.stop = map(int, region.split('-'))
+        self.seqs = tiled.gen_oligos_capture(
+            fa = self.fa,
+            chromosome = self.chromosome,
+            enzyme = self.enzyme,
+            oligo = self.oligo,
+            region = self.region,
+        )
+    
+    @classmethod
+    def tearDownClass(self):
+        pass
+
+        
+class OligoGenTest_FISH(OligoGenTest_Main, OligoGenTest_Blocks):
      
     @classmethod   
     def setUpClass(self,
@@ -153,7 +147,6 @@ class OligoGenTest_FISH(OligoGenTest):
               oligo=30,
               region = '44455000-44555000',
               chromosome = 18):
-        self.fish = True
         self.fa = fa
         self.step = step
         self.oligo = oligo
@@ -168,7 +161,7 @@ class OligoGenTest_FISH(OligoGenTest):
             region = self.region,
         )
         
-class OligoGenTest_Regions(OligoGenTest):
+class OligoGenTest_Regions(OligoGenTest_Main, OligoGenTest_Capture):
     
     @classmethod   
     def setUpClass(self,
@@ -178,7 +171,6 @@ class OligoGenTest_Regions(OligoGenTest):
                     'CapsequmInput_2.txt',
               enzyme = 'DpnII',
               oligo = 30):
-        self.fish = False
         self.fa = fa
         self.bed = bed
         self.enzyme = enzyme
