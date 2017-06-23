@@ -8,6 +8,8 @@ Welcome to oligo's documentation!
 
 .. toctree::
    :maxdepth: 2
+   
+   all-about-me
    :caption: Contents:
 
 
@@ -18,3 +20,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
