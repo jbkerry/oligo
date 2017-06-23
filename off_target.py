@@ -38,13 +38,13 @@ def gen_oligos(fa, bed, oligo=70, step=10, max_dist=200):
             seq = seq_dict[chr_name].seq.upper()
             
             l_stop = start-10
-            l_start = l_stop-oligo
             r_start = stop+10
-            r_stop = r_start+oligo
-            
+        
             counter=1
             while counter<=oligo_num:
                 
+                l_start = l_stop-oligo
+                r_stop = r_start+oligo
                 l_seq = seq[l_start:l_stop]
                 r_seq = seq[r_start:r_stop]
                 oligo_seqs['{}:{}-{}-000-000-X'.format(chr_name,
@@ -53,10 +53,9 @@ def gen_oligos(fa, bed, oligo=70, step=10, max_dist=200):
                 oligo_seqs['{}:{}-{}-000-000-X'.format(chr_name,
                                                        r_start,
                                                        r_stop)] = str(r_seq)
-                l_start-=step
+
                 l_stop-=step
                 r_start+=step
-                r_stop+=step
                 counter+=1
     
     print('\t...complete')

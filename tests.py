@@ -4,10 +4,12 @@ import unittest
 import os
 import tiled
 import regions
+import off_target
 import re
 import pybedtools
 import argparse
 import sys
+import math
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import _verify_alphabet
@@ -182,6 +184,36 @@ class OligoGenTest_Regions(OligoGenTest_Main, OligoGenTest_Capture):
             enzyme = self.enzyme,
             oligo = self.oligo,
         )
+        
+class OligoGenTest_OT(OligoGenTest_Main):
+    
+    @classmethod   
+    def setUpClass(self,
+              fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
+                   'WholeGenomeFasta/genome.fa',
+              bed = '/t1-data1/WTSA_Dev/jkerry/CaptureC/DDownes/' \
+                    'CapsequmInput_2.txt',
+              oligo = 30,
+              step = 10,
+              max_dist = 87):
+        self.fa = fa
+        self.bed = bed
+        self.oligo = oligo
+        self.step = step
+        self.max_dist = max_dist
+        self.seqs = off_target.gen_oligos(
+            fa = self.fa,
+            bed = self.bed,
+            oligo = self.oligo,
+            step = self.step,
+            max_dist = self.max_dist
+        )
+        
+    def test_correct_number_of_oligos_generated(self):
+        oligos_per_site = math.floor((self.max_dist-self.oligo)/self.step)*2
+        with open(self.bed) as f:
+            sites = len(f.readlines())
+        self.assertEqual(len(self.seqs), oligos_per_site*sites)
 
 
 if __name__ == '__main__':
