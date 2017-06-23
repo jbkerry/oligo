@@ -10,6 +10,7 @@ Welcome to oligo's documentation!
    :maxdepth: 2
    
    all-about-me
+   checkouts/readthedocs.org/user_builds/oligo/checkouts/latest/index.rst
    :caption: Contents:
 
 
