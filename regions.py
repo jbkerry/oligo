@@ -9,22 +9,22 @@ rs_dict = {'DpnII': 'GATC',
            'HindIII': 'AAGCTT'}
 
 def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
-    '''Generates oligos flanking restriction fragments that encompass the
-    coordinates supplied in the bed file
+    '''Generates oligos flanking restriction fragments that encompass the\n
+    coordinates supplied in the bed file\n\n
     
-    Parameters
-    ----------
-    fa: path to reference genome fasta
-    bed: tab-delimited bed file containing a list of coordinates for viewpoints
-        in the capture experiment.
-        Must be in the format 'chr'\t'start'\t'stop'\t'name'
-    enzyme: DpnII (GATC), NlaIII (CATG) or HindIII (AAGCTT), default=DpnII
-    oligo: the length of the oligo to design (bp), default=70
+    Parameters\n
+    \----------\n
+    fa: path to reference genome fasta\n
+    bed: tab-delimited bed file containing a list of coordinates for viewpoints\n
+        in the capture experiment.\n
+        Must be in the format 'chr'\t'start'\t'stop'\t'name'\n
+    enzyme: DpnII (GATC), NlaIII (CATG) or HindIII (AAGCTT), default=DpnII\n
+    oligo: the length of the oligo to design (bp), default=70\n\n
     
-    Returns
-    -------
-    oligo_seqs: dictionary containing oligo coordinates as keys and oligo
-        sequences as items
+    Returns\n
+    \-------\n
+    oligo_seqs: dictionary containing oligo coordinates as keys and oligo\n
+        sequences as items\n\n
     
     '''
     
