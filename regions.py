@@ -30,6 +30,8 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
     
     cut_sites = {}
     oligo_seqs = {}
+    associations = {}
+    redundants = {}
     cut_size = len(rs_dict[enzyme])
     p = re.compile(rs_dict[enzyme])
     
@@ -63,9 +65,14 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
                 l_seq = seq[l_start:l_stop]
                 r_seq = seq[r_start:r_stop]
                 
-                oligo_seqs['{}:{}-L'.format(chr_name,
-                                           '-'.join(map(str, l_tup)))
-                            ] = str(l_seq)
+                associations[name] = '{}-{}'.format(l_start, r_stop)
+                
+                l_key = '{}:{}-L'.format(chr_name, '-'.join(map(str, l_tup)))
+                if l_key in oligo_seqs:
+                    redundants[name] = 1 # store viewpoint coordinate as key and name as value
+                    continue
+                
+                oligo_seqs[l_key] = str(l_seq)
                 if frag_len>oligo:
                     oligo_seqs['{}:{}-R'.format(chr_name,
                                            '-'.join(map(str, r_tup)))
