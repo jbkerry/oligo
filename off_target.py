@@ -32,7 +32,7 @@ def gen_oligos(fa, bed, oligo=70, step=10, max_dist=200):
     
     with open(bed) as w:
         for x in w:
-            chr_name, start, stop, name = x.rstrip('\n').split('\t')
+            chr_name, start, stop, name = x.strip().split('\t')
             
             start, stop = map(int, (start, stop))
             seq = seq_dict[chr_name].seq.upper()

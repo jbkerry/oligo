@@ -21,10 +21,11 @@ from Bio.Alphabet import _verify_alphabet
 #self.start = 0
 #self.stop = len(full_chr)
 
-f = lambda x: re.split('\W+', x)
-g = lambda x: tuple(map(int, re.split('\W+', x)[1:5]))
+pattern = re.compile('\W+')
+f = lambda x: pattern.split(x)
+g = lambda x: tuple(map(int, pattern.split(x)[1:5]))
 
-class OligoGenTest_Main(unittest.TestCase):
+class OligoMainMixin():
         
     def test_all_sequences_are_legitimate_dna_sequences(self):
         class DNAdict(): letters='GATCN'
@@ -67,7 +68,7 @@ class OligoGenTest_Main(unittest.TestCase):
         os.remove('oligo_seqs.fa')
         self.assertDictEqual(self.seqs, test_dict)
         
-class OligoGenTest_Capture(unittest.TestCase):
+class OligoCaptureMixin():
     
     def test_fragment_start_equals_left_oligo_start(self):
         self.assertTrue(
@@ -86,17 +87,17 @@ class OligoGenTest_Capture(unittest.TestCase):
     
     def test_all_left_oligos_start_with_restriction_site(self):
         self.assertTrue(
-            all(y[0:len(self.res_site)] == self.res_site \
+            all(y.startswith(self.res_site) \
                 for x, y in self.seqs.items() if f(x)[5]=='L'),
         )
     
     def test_all_right_oligos_end_with_restriction_site(self):
         self.assertTrue(
-            all(y[-len(self.res_site):] == self.res_site \
+            all(y.endswith(self.res_site) \
                 for x, y in self.seqs.items() if f(x)[5]=='R'),
         )
         
-class OligoGenTest_Blocks(unittest.TestCase):
+class OligoBlocksMixin():
     
     def test_all_oligo_start_coordinates_are_within_specified_range(self):
         self.assertTrue(
@@ -110,7 +111,8 @@ class OligoGenTest_Blocks(unittest.TestCase):
                 for x in self.seqs),
         )
         
-class OligoGenTest_Tiled(OligoGenTest_Main, OligoGenTest_Capture, OligoGenTest_Blocks):
+class OligoGenTest_Tiled(unittest.TestCase, OligoMainMixin, OligoCaptureMixin,
+                         OligoBlocksMixin):
     
     @classmethod   
     def setUpClass(self,
@@ -140,7 +142,7 @@ class OligoGenTest_Tiled(OligoGenTest_Main, OligoGenTest_Capture, OligoGenTest_B
         pass
 
         
-class OligoGenTest_FISH(OligoGenTest_Main, OligoGenTest_Blocks):
+class OligoGenTest_FISH(unittest.TestCase, OligoMainMixin, OligoBlocksMixin):
      
     @classmethod   
     def setUpClass(self,
@@ -164,7 +166,8 @@ class OligoGenTest_FISH(OligoGenTest_Main, OligoGenTest_Blocks):
             region = self.region,
         )
         
-class OligoGenTest_Regions(OligoGenTest_Main, OligoGenTest_Capture):
+class OligoGenTest_Regions(unittest.TestCase, OligoMainMixin,
+                           OligoCaptureMixin):
     
     @classmethod   
     def setUpClass(self,
@@ -186,7 +189,7 @@ class OligoGenTest_Regions(OligoGenTest_Main, OligoGenTest_Capture):
             oligo = self.oligo,
         )
         
-class OligoGenTest_OT(OligoGenTest_Main):
+class OligoGenTest_OT(unittest.TestCase, OligoMainMixin):
     
     @classmethod   
     def setUpClass(self,
