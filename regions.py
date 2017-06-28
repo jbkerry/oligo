@@ -25,13 +25,18 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
     \-------\n
     oligo_seqs: dictionary containing oligo coordinates as keys and oligo\n
         sequences as items\n\n
+    associations: dictionary containing the fragment coordinates as keys and
+        the associated gene names as a comma-separated string
+    not_done: dictionary containing viewpoint coordinates of all those sites
+        that oligos were not generated for. The corresponding value is a tuple
+        with the gene name at index 0 and the reason at index 1
     
     '''
     
     cut_sites = {}
     oligo_seqs = {}
     associations = {}
-    redundants = {}
+    not_done = {}
     cut_size = len(rs_dict[enzyme])
     p = re.compile(rs_dict[enzyme])
     
@@ -53,7 +58,7 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
             seq = seq_dict[chr_name].seq.upper()
             
             l_start = cut_sites[chr_name][cut_sites[chr_name]<=start][-1]
-            r_stop = cut_sites[chr_name][cut_sites[chr_name]>=start][0] + cut_size
+            r_stop = cut_sites[chr_name][cut_sites[chr_name]>=start][0] + cut_size # currently this picks an adjacent fragment if the site in in a cutsite; are we okay with that?
             frag_len = r_stop - l_start
             
             if frag_len>=oligo:
@@ -65,11 +70,15 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
                 l_seq = seq[l_start:l_stop]
                 r_seq = seq[r_start:r_stop]
                 
-                associations[name] = '{}-{}'.format(l_start, r_stop)
+                frag_key = '{}:{}-{}'.format(chr_name, l_start, r_stop)
+                associations[frag_key] = '{}{},'.format(
+                    associations.get(frag_key, ''),
+                    name)
                 
                 l_key = '{}:{}-L'.format(chr_name, '-'.join(map(str, l_tup)))
                 if l_key in oligo_seqs:
-                    redundants[name] = 1 # store viewpoint coordinate as key and name as value
+                    vp_coor = '{}:{}-{}'.format(chr_name, start, stop)
+                    not_done[vp_coor] = (name, 'redundant')
                     continue
                 
                 oligo_seqs[l_key] = str(l_seq)
@@ -77,9 +86,12 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
                     oligo_seqs['{}:{}-R'.format(chr_name,
                                            '-'.join(map(str, r_tup)))
                             ] = str(r_seq)
+            else:
+                vp_coor = '{}:{}-{}'.format(chr_name, start, stop)
+                not_done[vp_coor] = (name, 'too short')
     
     print('\t...complete')
-    return oligo_seqs
+    return oligo_seqs, associations, not_done
 
 if __name__ == '__main__':
     
