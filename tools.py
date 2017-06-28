@@ -3,6 +3,7 @@
 import os
 import subprocess
 import re
+import pickle
 
 import pysam
 
@@ -190,14 +191,22 @@ def _get_repeats(all_oligos):
     return msg
 
 def _write_file(all_oligos):
+    p = re.compile('\W+')
+    if os.path.exists('_tmp.p'): assoc = pickle.load(open('_tmp.p', 'rb'))
     with open('oligo_info.txt', 'w') as f:
         f.write('chr\tstart\tstop\tfragment_start\tfragment_stop\t' \
                 'side_of_fragment\tsequence\ttotal_number_of_alignments\t' \
-                'density_score\trepeat_length\trepeat_class\tGC%\n')
+                'density_score\trepeat_length\trepeat_class\tGC%\t' \
+                'associations\n')
         for key, idx in all_oligos.items():
-            write_list = re.split('\W+', key)+idx[:-2]
-            if write_list[3:6]==['000', '000', 'X']:
-                write_list[3:6] = '.'*3
-            f.write('\t'.join(map(str, write_list))+'\n')
+            w_list = p.split(key)+idx[:-2]
+            if w_list[3:6]==['000', '000', 'X']:
+                w_list[3:6] = '.'*3
+            if assoc:
+                frag_coor = '{}:{}-{}'.format(w_list[0], w_list[3], w_list[4])
+                w_list.append(assoc.get(frag_coor, '.'))
+            else:
+                w_list.append('.')
+            f.write('\t'.join(map(str, w_list))+'\n')
     
     return 'Oligo data written to oligo_info.txt'
