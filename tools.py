@@ -2,8 +2,9 @@
 
 import os
 import subprocess
-import pysam
 import re
+
+import pysam
 
 config_file = '/t1-data1/WTSA_Dev/jkerry/oligo/Dev/config.txt'
 path_list = [x.rstrip('\n') for x in open(config_file)]
@@ -190,9 +191,9 @@ def _get_repeats(all_oligos):
 
 def _write_file(all_oligos):
     with open('oligo_info.txt', 'w') as f:
-        f.write('Chr\tStart\tStop\tFragment Start\tFragment Stop\t' \
-                'Side of fragment\tSequence\tTotal number of alignments\t' \
-                'Density score\tRepeat length\tRepeat Class\tGC%\n')
+        f.write('chr\tstart\tstop\tfragment_start\tfragment_stop\t' \
+                'side_of_fragment\tsequence\ttotal_number_of_alignments\t' \
+                'density_score\trepeat_length\trepeat_class\tGC%\n')
         for key, idx in all_oligos.items():
             write_list = re.split('\W+', key)+idx[:-2]
             if write_list[3:6]==['000', '000', 'X']:

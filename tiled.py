@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import re
+
 from Bio import SeqIO
 
 rs_dict = {'DpnII': 'GATC',

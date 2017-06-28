@@ -3,14 +3,16 @@
 import unittest
 import os
 import tiled
-import regions
-import off_target
-import tools
-import re
-import pybedtools
 import argparse
 import sys
 import math
+import re
+
+import pybedtools
+
+import regions
+import off_target
+import tools
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import _verify_alphabet

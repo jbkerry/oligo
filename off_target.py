@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import math
+
 from Bio import SeqIO
 
 def gen_oligos(fa, bed, oligo=70, step=10, max_dist=200):

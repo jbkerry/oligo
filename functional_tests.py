@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import unittest
-import tiled
 import os
+import unittest
+
+import tiled
 from Bio.Seq import Seq
 from Bio.Alphabet import _verify_alphabet
 

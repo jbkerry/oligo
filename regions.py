@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
-from Bio import SeqIO
-import numpy as np
 import re
+import sys
+import pickle
+
+import numpy as np
+
+from Bio import SeqIO
 
 rs_dict = {'DpnII': 'GATC',
            'NlaIII': 'CATG',
@@ -36,7 +40,6 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
     cut_sites = {}
     oligo_seqs = {}
     associations = {}
-    not_done = {}
     cut_size = len(rs_dict[enzyme])
     p = re.compile(rs_dict[enzyme])
     
@@ -54,11 +57,12 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
             
             if '_' in chr_name: continue
             
+            vp_coor = '{}:{}-{}'.format(chr_name, start, stop)
             start, stop = map(int, (start, stop))
             seq = seq_dict[chr_name].seq.upper()
             
             l_start = cut_sites[chr_name][cut_sites[chr_name]<=start][-1]
-            r_stop = cut_sites[chr_name][cut_sites[chr_name]>=start][0] + cut_size # currently this picks an adjacent fragment if the site in in a cutsite; are we okay with that?
+            r_stop = cut_sites[chr_name][cut_sites[chr_name]>=start][0] + cut_size # currently this picks an adjacent fragment if the site is in a cutsite; are we okay with that?
             frag_len = r_stop - l_start
             
             if frag_len>=oligo:
@@ -77,8 +81,9 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
                 
                 l_key = '{}:{}-L'.format(chr_name, '-'.join(map(str, l_tup)))
                 if l_key in oligo_seqs:
-                    vp_coor = '{}:{}-{}'.format(chr_name, start, stop)
-                    not_done[vp_coor] = (name, 'redundant')
+                    print('{} ({}) is redundant to another position'.format(
+                        vp_coor, name), file=sys.stderr)
+                    #not_done[vp_coor] = (name, 0) # 0 = redundant
                     continue
                 
                 oligo_seqs[l_key] = str(l_seq)
@@ -87,11 +92,12 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
                                            '-'.join(map(str, r_tup)))
                             ] = str(r_seq)
             else:
-                vp_coor = '{}:{}-{}'.format(chr_name, start, stop)
-                not_done[vp_coor] = (name, 'too short')
+                print('{} ({}) was in a fragment that was too small'.format(
+                        vp_coor, name), file=sys.stderr)
     
+    pickle.dump(associations, open('_tmp.p', 'wb'))
     print('\t...complete')
-    return oligo_seqs, associations, not_done
+    return oligo_seqs
 
 if __name__ == '__main__':
     
