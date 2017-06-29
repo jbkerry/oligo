@@ -8,18 +8,18 @@ Regions
 Description
 ===========
 
-The *Regions* module generates Capture-C oligos adjancent to a specified restriction enzyme recognition sequence, for a user-supplied set of viewpoint coordinates
+.. automodule:: regions
+   :platform: Unix
+   
+Functions: :func:`gen_oligos`
 
 .. note::
     
-    For full functionality, *Regions* should be run from the command line in order to test the efficiency of the generated oligos. This involves a pipeline that incorporates methods from the tools module.
+    For full functionality, regions.py should be run from the command line in order to test the efficiency of the generated oligos. This involves a pipeline that incorporates methods from the tools module.
     This is the intended use but can also be run in its constituent parts and modules are listed throughout the doc pages
 
 Usage
 =====
-
-.. module:: regions
-   :platform: Unix
 
 When run from the command line, *Regions* takes the following parameters
 
@@ -57,6 +57,8 @@ When run from the command line, *Regions* takes the following parameters
 | chr7    | 20000   | 20001   | geneX   |
 +---------+---------+---------+---------+ 
 
+
+.. autofunction:: gen_oligos()
 
 .. function:: gen_oligos()
    Explanation here

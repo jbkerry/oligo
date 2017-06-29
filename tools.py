@@ -200,8 +200,7 @@ def _write_file(all_oligos):
                 'associations\n')
         for key, idx in all_oligos.items():
             w_list = p.split(key)+idx[:-2]
-            if w_list[3:6]==['000', '000', 'X']:
-                w_list[3:6] = '.'*3
+            if w_list[3:6]==['000', '000', 'X']: w_list[3:6] = '.'*3
             if assoc:
                 frag_coor = '{}:{}-{}'.format(w_list[0], w_list[3], w_list[4])
                 w_list.append(assoc.get(frag_coor, '.'))

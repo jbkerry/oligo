@@ -1,4 +1,8 @@
-#!/usr/bin/env python
+'''The regions.py module generates Capture-C oligos adjancent to a specified
+restriction enzyme recognition sequence, for a user-supplied set of viewpoint
+coordinates
+
+'''
 
 import re
 import sys
@@ -13,27 +17,26 @@ rs_dict = {'DpnII': 'GATC',
            'HindIII': 'AAGCTT'}
 
 def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
-    '''Generates oligos flanking restriction fragments that encompass the\n
-    coordinates supplied in the bed file\n\n
+    r'''Generates oligos flanking restriction fragments that encompass the
+    coordinates supplied in the bed file
     
-    Parameters\n
-    \----------\n
-    fa: path to reference genome fasta\n
-    bed: tab-delimited bed file containing a list of coordinates for viewpoints\n
-        in the capture experiment.\n
-        Must be in the format 'chr'\t'start'\t'stop'\t'name'\n
-    enzyme: DpnII (GATC), NlaIII (CATG) or HindIII (AAGCTT), default=DpnII\n
-    oligo: the length of the oligo to design (bp), default=70\n\n
+    Parameters
+    ----------
+    fa : str
+        Path to reference genome fasta
+    bed : str
+        Path to tab-delimited bed file containing a list of coordinates for
+        viewpoints in the capture experiment. Must be in the format
+        'chr'\\t'start'\\t'stop'\\t'name'\\n
+    enzyme : {'DpnII', 'NlaIII', 'HindIII'}, optional
+        The enzyme for digestion, default=DpnII
+    oligo : int, optional
+        The length of the oligo to design (bp), default=70
     
-    Returns\n
-    \-------\n
-    oligo_seqs: dictionary containing oligo coordinates as keys and oligo\n
-        sequences as items\n\n
-    associations: dictionary containing the fragment coordinates as keys and
-        the associated gene names as a comma-separated string
-    not_done: dictionary containing viewpoint coordinates of all those sites
-        that oligos were not generated for. The corresponding value is a tuple
-        with the gene name at index 0 and the reason at index 1
+    Returns
+    -------
+    oligo_seqs : dictionary
+        Key = oligo coordinate; value = oligo sequence
     
     '''
     
