@@ -14,6 +14,7 @@ oligo: documentation
    regions
    tiled
    off_target
+   tools
 
 
 

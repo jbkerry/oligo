@@ -15,13 +15,12 @@ Functions: :func:`gen_oligos`
 
 .. note::
     
-    For full functionality, regions.py should be run from the command line in order to test the efficiency of the generated oligos. This involves a pipeline that incorporates methods from the tools module.
-    This is the intended use but can also be run in its constituent parts and modules are listed throughout the doc pages
+    For full functionality, `regions` should be run from the command line in order to test the efficiency of the generated oligos. This involves a pipeline that incorporates functions from the :doc:`tools <tools>` module.
 
 Usage
 =====
 
-When run from the command line, *Regions* takes the following parameters
+When run from the command line, `regions.py` takes the following parameters
 
 .. code-block:: bash
    :caption: Parameters for regions.py
@@ -45,28 +44,50 @@ When run from the command line, *Regions* takes the following parameters
                             running with BLAT (--blat)
       --blat                Detect off-targets using BLAT instead of STAR.
 
--f
-    Path to your reference genome fasta file. This is typically a file called **genome.fa**.
--g
-    The genome build which you are generating oligos for, e.g. **mm10** or **hg38**. This must match with the genome file you have supplied for the previous option.
--b
-    A tab-delimited 4-column bed file containing the coordinates of viewpoint you want to capture from. This must be in the format **chr**, **start**, **stop**, **viewpoint_name**. The coordinates are typcially 1bp e.g.
+Requirements
+------------
 
+| Python 3.4+, pysam, numpy, biopython
+| RepeatMasker
+| STAR or BLAT (:ref:`see below <star-blat>`)
 
-+---------+---------+---------+---------+
-| chr7    | 20000   | 20001   | geneX   |
-+---------+---------+---------+---------+ 
+Specifics
+---------
 
+**Bed file** (-b, \\--bed)
+    A 4-column, tab-delimited bed file containing the coordinates and names of the viewpoints you want to capture from. This must be in the format `chr`, `start`, `stop`, `viewpoint_name`. Typically, the coordinates should each span 1bp as shown below:
 
-.. autofunction:: gen_oligos()
-
-.. function:: gen_oligos()
-   Explanation here
+.. csv-table::
+   :align: right
    
-The :func:`gen_oligos` can be used for generate oligos
+   chr7, 20205, 20206, geneX
+   chr8, 1310000, 1310001, geneY
 
+.. warning::
+
+   Names in the last column should be unique so that the oligos can be unambiguosuly linked back to a named viewpoint.
+
+**Restriction enzyme** (-e, \\--enzyme)
+    The restriction enzyme being used in the Capture-C experiment. This determines the recogition sequence used to define the fragment boundaries and hence the starts and ends of the oligos. The current version supports `DpnII` (GATC), `NlaIII` (CATG) and `HindIII` (AAGCTT).
+    If this option is omitted, `DpnII` will be used by default.
+
+.. _star-blat:
+
+**STAR** (-s, \\--s_idx) or **BLAT** (\\--blat)
+    To check for off-targets, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `regions.py` is run with the `\\--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
+    by the user. However, BLAT can be particulary slow for large designs, especially for the human reference genomes. STAR's exceptional speed is better suited for designs with >500 viewpoints. If the `\\--blat` flag is not selected, the path to the STAR index must be supplied
+    after the `-s` (or `\\--s_idx`) flag.
+   
 Examples
 ========
 
-Below are examples using the *Regions* module for different scenarios
+Below are examples using the regions.py module for different scenarios
+
+Functions
+=========
+
+.. autofunction:: gen_oligos()
+
+
+
 

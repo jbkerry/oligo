@@ -1,4 +1,4 @@
-'''The regions.py module generates Capture-C oligos adjancent to a specified
+'''The `regions` module generates Capture-C oligos adjacent to a specified
 restriction enzyme recognition sequence, for a user-supplied set of viewpoint
 coordinates
 
