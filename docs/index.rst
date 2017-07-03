@@ -17,7 +17,7 @@ Indices and tables
     :hidden:
    
     Overview <self>
-    Capture-C <regions>
+    Capture-C <capture>
     Tiled Capture<tiled>
     CRISPR Off-Target <off_target>
     tools

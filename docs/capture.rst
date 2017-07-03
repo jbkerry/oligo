@@ -1,6 +1,6 @@
-#######
-Regions
-#######
+#########
+Capture-C
+#########
 
 .. toctree::
 
@@ -8,24 +8,24 @@ Regions
 Description
 ===========
 
-.. automodule:: regions
+.. automodule:: capture
    :platform: Unix
    
 Functions: :func:`gen_oligos`
 
 .. note::
     
-    For full functionality, `regions` should be run from the command line in order to test the efficiency of the generated oligos. This involves a pipeline that incorporates functions from the :doc:`tools <tools>` module.
+    For full functionality, `capture` should be run from the command line in order to test the efficiency of the generated oligos. This involves a pipeline that incorporates functions from the :doc:`tools <tools>` module.
 
 Usage
 =====
 
-When run from the command line, `regions.py` takes the following parameters
+When run from the command line, `capture.py` takes the following parameters
 
 .. code-block:: bash
-   :caption: Parameters for regions.py
+   :caption: Parameters for capture.py
 
-   usage: regions.py [-h] -f FASTA -g GENOME -b BED [-o OLIGO] [-e ENZYME]
+   usage: capture.py [-h] -f FASTA -g GENOME -b BED [-o OLIGO] [-e ENZYME]
                   [-s STAR_INDEX] [--blat]
 
    optional arguments:
@@ -74,14 +74,14 @@ Specifics
 .. _star-blat:
 
 **STAR** (-s, \\--s_idx) or **BLAT** (\\--blat)
-    To check for off-targets, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `regions.py` is run with the `\\--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
+    To check for off-targets, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `capture.py` is run with the `\\--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
     by the user. However, BLAT can be particulary slow for large designs, especially for the human reference genomes. STAR's exceptional speed is better suited for designs with >500 viewpoints. If the `\\--blat` flag is not selected, the path to the STAR index must be supplied
     after the `-s` (or `\\--s_idx`) flag.
    
 Examples
 ========
 
-Below are examples using the regions.py module for different scenarios
+Below are examples using the `capture` module for different scenarios
 
 Functions
 =========
