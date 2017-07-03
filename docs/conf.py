@@ -55,8 +55,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'oligo'
-copyright = '2017, J.Kerry'
-author = 'J.Kerry'
+copyright = '2017, Jon Kerry'
+author = 'Jon Kerry'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -93,7 +93,7 @@ todo_include_todos = True
 #
 html_theme = 'alabaster'
 html_sidebars = {
-    '**': ['globaltoc.html', 'sourcelink.html', 'searchbox.html'],
+    '**': ['about.html', 'relations.html', 'navigation.html', 'searchbox.html'],
     #'regions': ['globaltoc.html', 'sourcelink.html']
 }
 
@@ -101,7 +101,19 @@ html_sidebars = {
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'logo_name': 'true',
+    'description': 'Capture oligo design',
+    'fixed_sidebar': 'true',
+    'page_width': '1100px',
+    'body_text_align': 'justify',
+    'github_user': 'jbkerry',
+    'github_repo': 'oligo',
+    'github_button': 'true',
+    'github_type': 'watch',
+    'github_count': 'none',
+    'sidebar_collapse': 'true',
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
