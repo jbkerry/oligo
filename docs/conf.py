@@ -93,8 +93,7 @@ todo_include_todos = True
 #
 html_theme = 'alabaster'
 html_sidebars = {
-    '**': ['about.html', 'relations.html', 'navigation.html', 'searchbox.html'],
-    #'regions': ['globaltoc.html', 'sourcelink.html']
+    '**': ['about.html', 'relations.html', 'navigation.html', 'searchbox.html']
 }
 
 # Theme options are theme-specific and customize the look and feel of a theme
