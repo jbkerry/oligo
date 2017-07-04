@@ -21,6 +21,8 @@ import os
 import sys
 from unittest.mock import MagicMock
 
+import alabaster
+
 sys.path.insert(0, os.path.abspath('..'))
 
 class Mock(MagicMock):

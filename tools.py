@@ -27,7 +27,7 @@ def write_oligos(oligo_seqs):
     
     Parameters
     ----------
-    oligo_seqs : dictionary
+    oligo_seqs : dict
         Key = oligo coordinate; value = oligo sequence.
     
     Notes
@@ -59,7 +59,7 @@ def check_off_target(genome, fa='', s_idx='', blat=False):
     s_idx : str
         Path to the directory containing the STAR index for this genome
         (not required if blat=True)
-    blat : boolean
+    blat : bool
         Check off-target binding using BLAT instead of STAR (not
         recommended for large designs), default=False
         
