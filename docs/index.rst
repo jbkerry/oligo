@@ -1,6 +1,6 @@
-########################################
-oligo: a Python package for oligo design
-########################################
+#####
+oligo
+#####
 
 .. include:: ../README.md
 
