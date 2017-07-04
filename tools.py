@@ -8,7 +8,7 @@ import pickle
 
 import pysam
 
-config_file = '/t1-data1/WTSA_Dev/jkerry/oligo/Dev/config.txt'
+config_file = './config.txt'
 path_list = [x.rstrip('\n') for x in open(config_file)]
 path_dict = dict(item.split(' = ') for item in path_list)
 
