@@ -112,12 +112,7 @@ html_sidebars = {
 }
 
 html_additional_pages = {
-    '**': [
-        'about.html',
-        'navigation.html',
-        'relations.html',
-        'searchbox.html',
-    ]
+    '**': 'about.html',
 }
 
 # Theme options are theme-specific and customize the look and feel of a theme
