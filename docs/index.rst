@@ -1,10 +1,8 @@
-#############################
-oligo: Capture oligo design
-#############################
+########################################
+oligo: a Python package for oligo design
+########################################
 
-
-hello
-
+.. include:: ../README.md
 
 Indices and tables
 ==================
