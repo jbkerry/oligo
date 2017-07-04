@@ -8,10 +8,6 @@ import pickle
 
 import pysam
 
-config_file = './config.txt'
-path_list = [x.rstrip('\n') for x in open(config_file)]
-path_dict = dict(item.split(' = ') for item in path_list)
-
 spe_dict = {'mm9': 'mouse',
             'mm10': 'mouse',
             'hg18': 'human',
@@ -79,6 +75,9 @@ def check_off_target(genome, fa='', s_idx='', blat=False):
         
     '''
     
+    config_file = '/t1-data1/WTSA_Dev/jkerry/oligo/Dev/config.txt'
+    path_list = [x.rstrip('\n') for x in open(config_file)]
+    path_dict = dict(item.split(' = ') for item in path_list)
     rm_path = os.path.join(path_dict['RM_PATH'], 'RepeatMasker')
     print('Checking for repeat sequences in oligos...')
     rm_out = open('rm_log.txt', 'w')
