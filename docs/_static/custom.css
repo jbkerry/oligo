@@ -1,5 +1,9 @@
 @import url('alabaster.css');
 
+div.document {
+    width: 1100px;
+    margin: 30px auto 0 auto;
+}
 div.body > .section {
     text-align: justify;
 }
