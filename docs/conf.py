@@ -20,6 +20,7 @@
 import os
 import sys
 from unittest.mock import MagicMock
+from datetime import datetime
 
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -65,7 +66,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'oligo'
-copyright = '2017, Jon Kerry'
+year = datetime.now().year
+copyright = '{}, Jon Kerry'.format(year)
 author = 'Jon Kerry'
 
 # The version info for the project you're documenting, acts as replacement for
