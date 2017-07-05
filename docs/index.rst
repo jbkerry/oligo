@@ -4,6 +4,11 @@ oligo
 
 .. include:: ../README.md
 
+Overview
+========
+
+.. image:: _static/oligo_flow.png
+
 Indices and tables
 ==================
 
