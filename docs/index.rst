@@ -14,8 +14,8 @@ Indices and tables
 .. toctree::
     :hidden:
    
-    Overview <self>
     Capture-C <capture>
     Tiled Capture<tiled>
     CRISPR Off-Target <off_target>
     tools
+    

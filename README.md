@@ -10,6 +10,6 @@ The *oligo* python package consists of three modules for Capture-C and FISH olig
 
 When run from the command line, all of the modules listed above utilise functions from the *tools* module.
 
-For more information, see http://oligo.readthedocs.io (currently incomplete)
+For full documentation, see http://oligo.readthedocs.io (currently incomplete)
 
 **There is currently no stable release of the oligo package**
