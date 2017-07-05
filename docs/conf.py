@@ -119,6 +119,7 @@ html_theme_options = {
     'logo_name': 'true',
     'description': 'Capture oligo design',
     'fixed_sidebar': 'true',
+    'sidebar_includehidden': 'true',
     'page_width': '1100px',
     'body_text_align': 'justify',
     'github_user': 'jbkerry',
