@@ -2,8 +2,6 @@
 Tiled
 #####
 
-.. toctree::
-
 Description
 ===========
 

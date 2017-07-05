@@ -2,8 +2,6 @@
 Off-target
 ##########
 
-.. toctree::
-
 Description
 ===========
 

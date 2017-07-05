@@ -2,9 +2,6 @@
 Capture-C
 #########
 
-.. toctree::
-
-
 Description
 ===========
 
