@@ -122,7 +122,24 @@ def check_off_target(genome, fa='', s_idx='', blat=False):
     print('\t...complete')
 
 def get_density(sam='tiled_Aligned.out.sam',
-                blat_file='blat_out.psl', blat=False):
+                blat_file='blat_out.psl',
+                blat=False):
+    '''Calculates the off-target binding and repeat scores for each
+    oligo based on their scores from RepeatMasker and STAR/BLAT
+    
+    Parameters
+    ----------
+    sam : str
+        Path to STAR alignment (.sam) file from `check_off_targets`
+        (not required if blat=True), default = tiled_Aligned.out.sam
+    blat_file : str
+        Path to BLAT alignment (.psl) file from `check_off_targets`
+        (not required if blat=False), default = blat_out.psl
+    blat : bool
+        Off-target binding was checked with BLAT, default=False
+    
+    '''
+    
     #all_oligos[oligo] = [sequence, nh, density, rep_len,
     #                     rep_type, gc_perc, matches, mismatches]
     all_oligos = {}
@@ -165,6 +182,8 @@ def get_density(sam='tiled_Aligned.out.sam',
     print(rm_msg)
     write_msg = _write_file(all_oligos=all_oligos)
     print(write_msg)
+    
+    return
     
 def _get_gc(x):
     gc_perc = (x.count('C') + x.count('G'))/len(x)

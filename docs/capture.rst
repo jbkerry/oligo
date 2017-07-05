@@ -41,18 +41,26 @@ When run from the command line, `capture.py` takes the following parameters
                             running with BLAT (--blat)
       --blat                Detect off-targets using BLAT instead of STAR.
 
-Requirements
-------------
+Examples
+--------
 
-| Python 3.4+, pysam, numpy, biopython
-| RepeatMasker
-| STAR or BLAT (:ref:`see below <star-blat>`)
+Below are examples using the `capture` pipeline for different scenarios
+
+.. code-block:: bash
+    :caption: 50bp oligos for NlaIII fragments in hg19 build, using STAR to check off-target binding
+
+    python capture.py -f ~/hg19/Sequence/genome.fa -g hg19 -b viewpoints.bed -o 50 -e NlaIII -s ~/hg19/STAR/
+    
+.. code-block:: bash
+    :caption: 70bp oligos for HindIII fragments in mm10 build, using BLAT to check off-target binding
+
+    python capture.py -f ~/mm10/Sequence/genome.fa -g mm10 -b mouse_viewpoints.bed -e HindIII --blat
 
 Specifics
 ---------
 
 **Bed file** (-b, \\--bed)
-    A 4-column, tab-delimited bed file containing the coordinates and names of the viewpoints you want to capture from. This must be in the format `chr`, `start`, `stop`, `viewpoint_name`. Typically, the coordinates should each span 1bp as shown below:
+    A 4-column, tab-delimited bed file containing the coordinates and names of the viewpoints you want to capture from. This must be in the format `chr`, `start`, `stop`, `viewpoint_name`. Typically, the coordinates each span 1bp as shown below:
 
 .. csv-table::
    :align: right
@@ -70,18 +78,29 @@ Specifics
 
 .. _star-blat:
 
-**STAR** (-s, \\--s_idx) or **BLAT** (\\--blat)
-    To check for off-targets, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `capture.py` is run with the `\\--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
+**STAR** (-s, \\--star_index) or **BLAT** (\\--blat)
+    To check for off-target binding, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `capture.py` is run with the `\\--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
     by the user. However, BLAT can be particulary slow for large designs, especially for the human reference genomes. STAR's exceptional speed is better suited for designs with >500 viewpoints. If the `\\--blat` flag is not selected, the path to the STAR index must be supplied
-    after the `-s` (or `\\--s_idx`) flag.
-   
-Examples
-========
+    after the `-s` (or `\\--star_index`) flag.
 
-Below are examples using the `capture` module for different scenarios
+Requirements
+------------
+
+| Python 3.4+, pysam, numpy, biopython
+| RepeatMasker
+| STAR or BLAT (:ref:`see above <star-blat>`)
 
 Functions
 =========
+
+As well as being run as a full pipeline from the command line, the `oligo` modules have been written such that the individual functions can be easily run in a python shell. The pipeline runs the functions in the following order:
+
+#. :func:`capture.gen_oligos`
+#. :func:`tools.write_oligos`
+#. :func:`tools.check_off_target`
+#. :func:`tools.get_density`
+
+Below is a detailed list of functions in the `capture` module:
 
 .. autofunction:: gen_oligos()
 

@@ -36,7 +36,8 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
     Returns
     -------
     oligo_seqs : dict
-        Key = oligo coordinate; value = oligo sequence
+        Contains all oligo sequences. Dict key = oligo coordinate;
+        value = oligo sequence
     
     '''
     

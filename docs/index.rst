@@ -2,7 +2,10 @@
 oligo
 #####
 
-.. include:: ../README.md
+.. include:: ../README.rst
+    :end-before: For full documentation
+
+More detailed usage information can be found in the individual pages, via the navigation on the left.
 
 Overview
 ========
@@ -20,7 +23,7 @@ Indices and tables
     :hidden:
    
     Capture-C <capture>
-    Tiled Capture<tiled>
+    Tiled Capture <tiled>
     CRISPR Off-Target <off_target>
     tools
     
