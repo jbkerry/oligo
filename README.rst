@@ -8,8 +8,8 @@ The *oligo* python package consists of three modules for Capture-C and FISH olig
   are instead generated for a user-specified step size, in an end-to-end manner.
 * `off_target.py <http://oligo.rtfd.io/en/latest/off_target.html>`_: designs oligos to capture DNA surrounding potential CRISPR off-target cut sites to allow for efficient sequencing to determine off-target activity.
 
-The three modules listed above all output a FASTA file called *oligo_seqs.fa* which contains the oligo sequences. When run from the command line, the modules utilise functions from the *tools* module in a pipeline that checks the off-target binding and repeat content of the oligos.
-This information is output in a file called *oligo_info.txt*.
+The three modules listed above all generate oligo sequences, based on different underlying behaviours. When run from the command line, the modules utilise functions from the `tools <http://oligo.rtfd.io/en/latest/tools.html>`_ module, in a pipeline that checks
+the off-target binding and repeat content of the oligos. This information is output in a file called *oligo_info.txt*; oligo sequences are written to a FASTA file called *oligo_seqs.fa*
 
 For full documentation, see http://oligo.readthedocs.io (currently incomplete)
 
