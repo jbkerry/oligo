@@ -68,7 +68,7 @@ Specifics
    chr7, 20205, 20206, geneX
    chr8, 1310000, 1310001, geneY
 
-.. warning::
+.. caution::
 
    Names in the last column should be unique so that the oligos can be unambiguosuly linked back to a named viewpoint.
 
