@@ -1,5 +1,7 @@
 '''The `tools` module contains a suite of functions that are used
-downstream of regions.py, tiled.py and off_target.py'''
+downstream of regions.py, tiled.py and off_target.py
+
+'''
 
 import os
 import subprocess

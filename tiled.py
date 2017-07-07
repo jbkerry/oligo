@@ -1,4 +1,10 @@
-#!/usr/bin/env python
+'''The `tiled` module designs oligos for multiple adjacent
+restriction fragments across a specified region of a chromosome, or for
+the entire chromosome. If run in FISH mode (restriction fragment-
+independent), it will generate end-to-end oligos based on a user-defined
+step size.
+
+'''
 
 import re
 
@@ -14,18 +20,24 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
     
     Parameters
     ----------
-    fa: path to reference genome fasta
-    chromosome: chromosome number/letter e.g. 7 or X
-    enzyme: DpnII (GATC), NlaIII (CATG) or HindIII (AAGCTT), default=DpnII
-    oligo: the length of the oligo to design (bp), default=70
-    region: the region of the chromosome to design oligos, must be in the
-        format start-stop, e.g. 10000-20000. Omit this option to design
+    fa : str
+        Path to reference genome fasta
+    chromosome : str
+        Chromosome number/letter e.g. 7 or X
+    enzyme : {'DpnII', 'NlaIII', 'HindIII'}, optional
+        The enzyme for digestion, default=DpnII
+    oligo : int, optional
+        The length of the oligos to design (bp), default=70
+    region : str
+        The region of the chromosome to design oligos, must be in the
+        format start-stop, e.g. 10000-20000; omit this option to design
         oligos over the entire chromosome
         
     Returns
     -------
-    oligo_seqs: dictionary containing oligo coordinates as keys and oligo
-        sequences as items
+    oligo_seqs : dict
+        Contains all oligo sequences; key = oligo coordinate,
+        value = oligo sequence
 
     '''
     
@@ -79,23 +91,25 @@ def gen_oligos_fish(fa, chromosome, step=70, oligo=70, region=''):
     
     Parameters
     ----------
-    fa: path to reference genome fasta
-    chromosome: chromosome number/letter e.g. 7 or X
-    step: the step size, or how close adjacent oligos should be, default=70.
-        For adjacent oligos, set 'step' to equal 'oligo'
-    oligo: the length of the oligo to design (bp), default=70
-    region: the region of the chromosome to design oligos, must be in the
-        format start-stop, e.g. 10000-20000. Omit this option to design
+    fa : str
+        Path to reference genome fasta
+    chromosome : str
+        Chromosome number/letter e.g. 7 or X
+    step : int, optional
+        The step size, or how close adjacent oligos should be, default=70;
+        for end-to-end oligos, set `step` to equal `oligo`
+    oligo : int, optional
+        The length of the oligos to design (bp), default=70
+    region : str
+        The region of the chromosome to design oligos, must be in the
+        format start-stop, e.g. 10000-20000; omit this option to design
         oligos over the entire chromosome
         
     Returns
     -------
-    oligo_seqs: dict, contains oligo coordinates as keys and oligo sequences as
-        items
-        
-    Output
-    ------
-    oligo_seqs.fa: a FASTA file containing sequences of all the oligos
+    oligo_seqs : dict
+        Contains all oligo sequences; key = oligo coordinate,
+        value = oligo sequence
     
     '''
     

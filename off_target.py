@@ -1,26 +1,39 @@
-#!/usr/bin/env python
+'''The `off_target` module designs oligos adjacent to user-supplied
+coordinates for potential CRISPR off-target cleavage sites, to allow for
+efficient pull-down of the edited region
+
+'''
 
 import math
 
 from Bio import SeqIO
 
 def gen_oligos(fa, bed, oligo=70, step=10, max_dist=200):
-    '''Generates oligos flanking restriction fragments that encompass the
-    coordinates supplied in the bed file
+    r'''Generates oligos adjacent to user-supplied coordinates for
+    potential CRISPR off-target cleavage sites
     
     Parameters
     ----------
-    fa: path to reference genome fasta
-    bed: tab-delimited bed file containing a list of coordinates for viewpoints
-        in the capture experiment.
-        Must be in the format 'chr'\t'start'\t'stop'\t'name'
-    enzyme: DpnII (GATC), NlaIII (CATG) or HindIII (AAGCTT), default=DpnII
-    oligo: the length of the oligo to design (bp), default=70
+    fa : str
+        Path to reference genome fasta
+    bed : str
+        Path to tab-delimited bed file containing a list of coordinates
+        for viewpoints in the capture experiment; must be in the format
+        'chr'\\t'start'\\t'stop'\\t'name'\\n
+    oligo : int, optional
+        The length of the oligo to design (bp), default=70
+    step : int, optional
+        The step size, or how close adjacent oligos should be,
+        default=10; for end-to-end oligos, set `step` to equal `oligo`
+    max_dist : int, optional
+        The maximum distance away from the off-target site to design
+        oligos to, default=200
     
     Returns
     -------
-    oligo_seqs: dictionary containing oligo coordinates as keys and oligo
-        sequences as items
+    oligo_seqs : dict
+        Contains all oligo sequences; key = oligo coordinate,
+        value = oligo sequence
     
     '''
     

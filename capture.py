@@ -1,4 +1,4 @@
-'''The `capture` module generates Capture-C oligos adjacent to a specified
+'''The `capture` module designs Capture-C oligos adjacent to a specified
 restriction enzyme recognition sequence, for a user-supplied set of viewpoint
 coordinates
 
@@ -36,7 +36,7 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
     Returns
     -------
     oligo_seqs : dict
-        Contains all oligo sequences. Dict key = oligo coordinate;
+        Contains all oligo sequences; key = oligo coordinate,
         value = oligo sequence
     
     '''
