@@ -1,7 +1,7 @@
 '''The `tiled` module designs oligos for multiple adjacent
 restriction fragments across a specified region of a chromosome, or for
-the entire chromosome. If run in FISH mode (restriction fragment-
-independent), it will generate end-to-end oligos based on a user-defined
+the entire chromosome. If run in FISH mode (restriction fragment-independent),
+it will generate adjacent oligos based on a user-defined
 step size.
 
 '''

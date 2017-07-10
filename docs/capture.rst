@@ -1,6 +1,10 @@
-######################
-Capture-C (capture.py)
-######################
+#########
+Capture-C
+#########
+
+.. container:: subtitle
+
+    capture.py
 
 Functions: :func:`gen_oligos() <capture.gen_oligos>`
 
@@ -10,15 +14,15 @@ Description
 .. automodule:: capture
    :platform: Unix
 
-The image belows show a schematic of how `capture` designs oligos adjacent to the first restriction site of a specified restriction enzyme (DpnII in this example), on the left- and right-hand sides. In this case the user has supplied viewpoint
+The image below shows a schematic of how `capture` designs oligos adjacent to the first restriction site of a specified restriction enzyme (DpnII in this example), on the left- and right-hand sides. In this case the user has supplied viewpoint
 coordinates at chr2:5500000-5500001 and chr5:63223000-63223001.
 
 .. figure:: _static/capture_oligo_gen.png
 
     Schematic of oligo design by `capture`
     
-It is possible for the designed oligos to overlap, to within 1bp of each other. If the viewpoint coordinate is in a fragment with length less than the specified oligo length, no oligos will be generated for that fragment and the error will be
-logged. If the fragment length exactly equals the oligo length, only one oligo be generated.
+It is possible for the designed oligos to overlap, up to within 1bp of each other, when the restriction fragment is less than twice the length of the oligo. If the viewpoint coordinate is in a fragment with length less than the specified oligo length, no oligos will be generated for that fragment.
+If the fragment length exactly equals the oligo length, only one oligo will be generated.
 
 .. note::
     

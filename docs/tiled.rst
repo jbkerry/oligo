@@ -2,13 +2,28 @@
 Tiled Capture
 #############
 
+.. container:: subtitle
+
+    tiled.py
+
+Functions: :func:`gen_oligos_capture() <tiled.gen_oligos_capture>`, :func:`gen_oligos_fish() <tiled.gen_oligos_capture>`
+
 Description
 ===========
 
 .. automodule:: tiled
     :platform: Unix
     
-Functions: :func:`gen_oligos_capture`, :func:`gen_oligos_fish`
+The image below shows a schematic of how `tiled` designs oligos when run in either the default mode (top) or FISH mode (bottom). In the top panel the user has run `tiled` supplying the region chr10:13456000-13460000 and the restriction enzyme
+DpnII. In the bottom panel the same coordinates have been used but with the :option:`--fish` flag, and the step size set to equal the oligo length, thereby generating end-to-end oligos. For Tiled FISH, the design is completely independent of
+any restriction enzyme recognition sequences, however the DpnII sites have been left on the image for consistency.
+
+.. figure:: _static/tiled.png
+
+    Schematic of oligo design by `tiled`, in default (top) and FISH (bottom) modes
+    
+It is possible for the Tiled Capture oligos to overlap, up to within 1bp of each other, when the restriction fragment is less than twice the length of the oligo. If the specified region consists of a fragment with length less than the specified oligo length, no oligos will be generated for that fragment.
+If the fragment length exactly equals the oligo length, only one oligo will be generated. Similarly, in Tiled FISH, oligos can be designed such that they overlap up to within 1bp of each other; in this case, the step size would be set to 1.
 
 .. note::
     

@@ -57,7 +57,7 @@ Due to particular differences between the three pipelines, and in order to keep 
 
 **fragment_start, fragment_stop, side_of_fragment**
     These values will be replaced with a '.' for the Tiled Capture pipeline when run in FISH mode, and for the CRISPR Off-Target pipeline, as both of these pipelines are restriction fragment-independent
-**association**
+**associations**
     This value will be replaced with a '.' for the Tiled Capture pipeline as these oligos are generated for adjacent sites across one large region and not for different viewpoints associated with unique names
 
 .. _filtering:

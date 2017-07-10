@@ -2,13 +2,28 @@
 CRISPR Off-Target
 #################
 
+.. container:: subtitle
+
+    off_target.py
+
+Functions: :func:`gen_oligos() <off_target.gen_oligos>`
+
 Description
 ===========
 
 .. automodule:: off_target
    :platform: Unix
    
-Functions: :func:`gen_oligos`
+The image below shows a schematic of how `off_target` designs oligos in step-wise manner, walking away from a potential CRISPR off-target cut site; in this example the user has supplied an off-target site at the position chr6:56710100-56710101. The first oligo on either
+side is designed 10bp away from the cut-site, with adjacent oligos being designed a user-specified number of base-pairs (step size) further out, up until a specified maximum distance (`m`). Unlike the other pipelines, the intention is for only one oligo from each side of the off-target site
+to be used, based on the efficiency readouts shown in the output file `oligo_info.txt` (see :ref:`Choosing Good Oligos <filtering>` for more information).
+
+.. figure:: _static/off_target.png
+
+    Schematic of oligo design by `off_target`
+    
+Consideration should be taken into account for the unpredictability of indel mutations following CRISPR-mediated digestions, as deletion of the expected oligo hybridisation region could occur. Moreover, oligos should not be designed too far way from the cut-site in order
+to maintain an efficient pull-down of the region. Due to these points, we recommend trying a few combinations of pairs at different distances, for optimisation.
 
 .. note::
     
