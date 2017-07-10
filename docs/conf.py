@@ -110,6 +110,10 @@ html_sidebars = {
     '**': [
         'about.html',
         'navigation.html',
+        'searchbox.html',
+    ],
+    'index': [
+        'about.html',
         'relations.html',
         'searchbox.html',
     ]

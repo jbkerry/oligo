@@ -24,3 +24,14 @@ div.contents {
     background-color: white;
     border: none;
 }
+code.py-class {
+    font-weight: normal;
+    background-color: white;
+    font-size: large;
+}
+div.subtitle {
+    margin-bottom: 35px;
+}
+div.relations {
+    display: block;
+}
