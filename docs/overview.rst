@@ -10,13 +10,6 @@ More detailed usage information can be found in the individual pages, via the na
 .. figure:: _static/oligo_flow.png
     
     Workflows of the three pipelines
-    
-Requirements
-------------
-
-| `Python <https://docs.python.org/3/>`_ 3.4+, `pysam <http://pysam.readthedocs.io/en/latest>`_, `numpy <http://www.numpy.org/>`_, `biopython <http://biopython.org/wiki/Biopython>`_
-| `RepeatMasker <http://www.repeatmasker.org/>`_
-| `STAR <https://github.com/alexdobin/STAR>`_ or `BLAT <https://genome.ucsc.edu/FAQ/FAQblat.html>`_
 
 Output
 ======

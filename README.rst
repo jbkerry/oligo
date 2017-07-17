@@ -11,8 +11,11 @@ The *oligo* python package consists of three modules for Capture-C and FISH olig
 These three modules all generate oligo sequences, based on different underlying behaviours. When run from the command line, the modules utilise functions from the `tools <http://oligo.rtfd.io/en/latest/tools.html>`_ module, in a pipeline that checks
 the off-target binding and repeat content of the oligos. This information is output in a file called *oligo_info.txt*; oligo sequences are written to a FASTA file called *oligo_seqs.fa*
 
-**Requires:** `Python 3 <https://docs.python.org/3/>`_ (with `pysam <http://pysam.readthedocs.io/en/latest>`_, `numpy <http://www.numpy.org/>`_ & `biopython <http://biopython.org/wiki/Biopython>`_), `RepeatMasker <http://www.repeatmasker.org/>`_ and
-either `STAR <https://github.com/alexdobin/STAR>`_ or `BLAT <https://genome.ucsc.edu/FAQ/FAQblat.html>`_
+**Requires:**
+
+* `Python 3 <https://docs.python.org/3/>`_ (with `pysam <http://pysam.readthedocs.io/en/latest>`_, `numpy <http://www.numpy.org/>`_ & `biopython <http://biopython.org/wiki/Biopython>`_)
+* `RepeatMasker <http://www.repeatmasker.org/>`_
+* `STAR <https://github.com/alexdobin/STAR>`_ or `BLAT <https://genome.ucsc.edu/FAQ/FAQblat.html>`_
 
 For full documentation, see http://oligo.readthedocs.io (currently incomplete)
 
