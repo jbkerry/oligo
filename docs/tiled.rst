@@ -92,7 +92,7 @@ Below are examples using the `tiled` pipeline for different scenarios
 .. code-block:: bash
     :caption: 120bp oligos for DpnII fragments in hg38 for the whole of chromsome 18, using STAR to check off-target binding
 
-    python tiled.py -f ~/hg38/Sequence/genome.fa -g hg38 -c 18 -o 120 -s ~/hg19/STAR/
+    python tiled.py -f ~/hg38/Sequence/genome.fa -g hg38 -c 18 -o 120 -s ~/hg38/STAR/
     
 .. code-block:: bash
     :caption: 50bp oligos across the region 10,150,000 to 10,200,000 on chromosome X of mm9, with adjacent oligos separated by a gap of 10bp, using BLAT to check off-target binding

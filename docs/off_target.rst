@@ -22,7 +22,7 @@ to be used, based on the efficiency readouts shown in the output file `oligo_inf
 
     Schematic of oligo design by `off_target`
     
-Consideration should be taken into account for the unpredictability of indel mutations following CRISPR-mediated digestions, as deletion of the expected oligo hybridisation region could occur. Moreover, oligos should not be designed too far way from the cut-site in order
+The unpredictability of indel mutations following CRISPR-mediated digestions should be taken into consideration since deletion of the expected oligo hybridisation region could occur. Moreover, oligos should not be designed too far away from the cut-site in order
 to maintain an efficient pull-down of the region. Due to these points, we recommend trying a few combinations of pairs at different distances, for optimisation.
 
 .. note::
