@@ -64,10 +64,14 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
        
     for i in range(len(pos_list)-1):
         j = i + 1
-        frag_len = pos_list[j]-pos_list[i]+cut_size  ## check this code
+        
+        l_start = pos_list[i]
+        r_stop = pos_list[j]+cut_size 
+        frag_len = r_stop - l_start
+        
         if (frag_len>=oligo):
-            l_start = pos_list[i]; l_stop = l_start+oligo
-            r_stop = pos_list[j]+cut_size; r_start = r_stop-oligo
+            l_stop = l_start+oligo
+            r_start = r_stop-oligo
             
             l_tup = (l_start, l_stop, l_start, r_stop)
             r_tup = (r_start, r_stop, l_start, r_stop)
@@ -81,6 +85,9 @@ def gen_oligos_capture(fa, chromosome, enzyme='DpnII', oligo=70, region=''):
                 oligo_seqs['{}:{}-R'.format(chr_name,
                                        '-'.join(map(str, r_tup)))
                         ] = str(r_seq)
+        else:
+            print('The fragment {}:{}-{} was too small to design oligos in'.format(
+                chr_name, l_start, r_stop), file=sys.stderr)
     
     print('\t...complete')
     return oligo_seqs
