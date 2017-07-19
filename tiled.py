@@ -7,6 +7,7 @@ step size.
 '''
 
 import re
+import sys
 
 from Bio import SeqIO
 

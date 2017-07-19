@@ -43,7 +43,7 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
     
     cut_sites = {}
     oligo_seqs = {}
-    associations = {}
+    assoc = {}
     cut_size = len(rs_dict[enzyme])
     p = re.compile(rs_dict[enzyme])
     
@@ -79,9 +79,7 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
                 r_seq = seq[r_start:r_stop]
                 
                 frag_key = '{}:{}-{}'.format(chr_name, l_start, r_stop)
-                associations[frag_key] = '{}{},'.format(
-                    associations.get(frag_key, ''),
-                    name)
+                assoc[frag_key] = '{}{},'.format(assoc(frag_key, ''), name)
                 
                 l_key = '{}:{}-L'.format(chr_name, '-'.join(map(str, l_tup)))
                 if l_key in oligo_seqs:
@@ -99,7 +97,7 @@ def gen_oligos(fa, bed, enzyme='DpnII', oligo=70):
                 print('{} ({}) was in a fragment that was too small'.format(
                         vp_coor, name), file=sys.stderr)
     
-    pickle.dump(associations, open('_tmp.p', 'wb'))
+    pickle.dump(assoc, open('_tmp.p', 'wb'))
     print('\t...complete')
     return oligo_seqs
 

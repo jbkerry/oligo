@@ -5,6 +5,8 @@ efficient pull-down of the edited region
 '''
 
 import math
+import pickle
+import sys
 
 from Bio import SeqIO
 
@@ -43,11 +45,13 @@ def gen_oligos(fa, bed, oligo=70, step=10, max_dist=200):
 
     oligo_num = math.floor((max_dist-oligo)/step)
     oligo_seqs = {}
+    assoc = {}
     
     with open(bed) as w:
         for x in w:
             chr_name, start, stop, name = x.strip().split('\t')
             
+            chr_length = len(seq_dict[chr_name])
             start, stop = map(int, (start, stop))
             seq = seq_dict[chr_name].seq.upper()
             
@@ -58,20 +62,35 @@ def gen_oligos(fa, bed, oligo=70, step=10, max_dist=200):
             while counter<=oligo_num:
                 
                 l_start = l_stop-oligo
+                l_coor = '{}:{}-{}'.format(chr_name, l_start, l_stop)
                 r_stop = r_start+oligo
-                l_seq = seq[l_start:l_stop]
-                r_seq = seq[r_start:r_stop]
-                oligo_seqs['{}:{}-{}-000-000-X'.format(chr_name,
-                                                       l_start,
-                                                       l_stop)] = str(l_seq)
-                oligo_seqs['{}:{}-{}-000-000-X'.format(chr_name,
-                                                       r_start,
-                                                       r_stop)] = str(r_seq)
-
+                r_coor = '{}:{}-{}'.format(chr_name, r_start, r_stop)
+                
+                if l_start<0:
+                    print('Oligo {} for off-target site {} could not ' \
+                          'be generated because it went beyond the start of ' \
+                          'the chromosome'.format(l_coor, name),
+                    file=sys.stderr)
+                else:
+                    l_seq = seq[l_start:l_stop]
+                    oligo_seqs['{}-000-000-X'.format(l_coor)] = str(l_seq)
+                    
+                if r_stop>chr_length:
+                    print('Oligo {} for off-target site {} could not ' \
+                          'be generated because it went beyond the end of ' \
+                          'the chromosome'.format(r_coor, name),
+                    file=sys.stderr)
+                else:
+                    r_seq = seq[r_start:r_stop]
+                    oligo_seqs['{}-000-000-X'.format(r_coor)] = str(r_seq)
+                
+                assoc[l_coor] = assoc[r_coor] = name
+                
                 l_stop-=step
                 r_start+=step
                 counter+=1
     
+    pickle.dump(assoc, open('_tmp.p', 'wb'))
     print('\t...complete')
     return oligo_seqs
 
