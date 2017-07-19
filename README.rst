@@ -17,6 +17,6 @@ the off-target binding and repeat content of the oligos. This information is out
 * `RepeatMasker <http://www.repeatmasker.org/>`_
 * `STAR <https://github.com/alexdobin/STAR>`_ or `BLAT <https://genome.ucsc.edu/FAQ/FAQblat.html>`_
 
-For full documentation, see http://oligo.readthedocs.io (currently incomplete)
+For full documentation, see http://oligo.readthedocs.io
 
 **There is currently no stable release of the oligo package**
