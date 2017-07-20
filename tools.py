@@ -79,8 +79,9 @@ def check_off_target(genome, fa='', s_idx='', blat=False):
         
     '''
     
-    config_file = '/t1-data1/WTSA_Dev/jkerry/oligo/Dev/config.txt'
-    path_list = [x.rstrip('\n') for x in open(config_file)]
+    p = re.compile('^[A-Z]')
+    config_file = './config.txt'
+    path_list = [x.rstrip('\n') for x in open(config_file) if p.match(x)]
     path_dict = dict(item.split(' = ') for item in path_list)
     rm_path = os.path.join(path_dict['RM_PATH'], 'RepeatMasker')
     print('Checking for repeat sequences in oligos...')

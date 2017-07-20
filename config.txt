@@ -1,0 +1,5 @@
+### Replace the paths below with your directories that contain executables for STAR, BLAT and RepeatMasker (RM) ###
+
+STAR_PATH = /usr/home/rna-star/bin
+BLAT_PATH = /usr/home/blat/bin
+RM_PATH = /usr/home/repeatmasker/bin
