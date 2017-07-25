@@ -28,15 +28,15 @@ star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '100000 --outFilterMismatchNmax 110 --seedSearchStartLmax 4 ' \
              '--seedSearchLmax 20 --alignIntronMax 10 --seedPerWindowNmax ' \
              '15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 ' \
-             '--limitOutSAMoneReadBytes 400000 --outFileNamePrefix tiled_'
+             '--limitOutSAMoneReadBytes 400000 --outFileNamePrefix oligos_'
 
 class Tools(object):
     """Contains methods inherited by Capture, Tiled and OffTarget
     
     Parameters
     ----------
-    genome : str
-        Genome build e.g. mm10 or hg38
+    genome : {'mm9', 'mm10', 'hg18', 'hg19', 'hg38'}
+        Genome build
     fa : str
         Path to reference genome fasta
     
@@ -57,6 +57,8 @@ class Tools(object):
         self.fa = fa
         self.blat = blat
         self.fasta = 'oligo_seqs.fa'
+        self.oligo_seqs = {}
+        self._assoc = {}
 
     def write_oligos(self):
         """Writes `oligo_seqs` attribute to fasta file"""
@@ -119,9 +121,9 @@ class Tools(object):
             path = os.path.join(path_dict['BLAT_PATH'], 'blat')
             print('Checking off-target binding with BLAT...')
             blat_out = open('blat_log.txt', 'w')
+            run_out = 'blat_out.psl'
             subprocess.run(
-                '{} {} {} {} blat_out.psl'.format(path, blat_param,
-                                                  self.fa, self.fasta),
+                ' '.join(path, blat_param, self.fa, self.fasta, run_out),
                 shell=True,
                 stdout = blat_out,
                 stderr = blat_out,
@@ -131,6 +133,7 @@ class Tools(object):
             path = os.path.join(path_dict['STAR_PATH'], 'STAR')
             print('Checking off-target binding with STAR...')
             star_out = open('star_log.txt', 'w')
+            run_out = 'oligos_Aligned.out.sam'
             subprocess.run(
                 '{} --readFilesIn {} --genomeDir {} {}'.format(path,
                                                                self.fasta,
@@ -142,12 +145,12 @@ class Tools(object):
             )
             star_out.close()
             
-        print('\t...complete')
+        print('\t...complete. Alignments written to {}'.format(run_out))
         
         return None
     
     def get_density(self,
-                    sam='tiled_Aligned.out.sam',
+                    sam='oligos_Aligned.out.sam',
                     blat_file='blat_out.psl'):
         """Calculates the and repeat scores and off-target binding for
         each oligo based on their scores from RepeatMasker and
@@ -157,7 +160,7 @@ class Tools(object):
         ----------
         sam : str
             Path to STAR alignment (.sam) file from `check_off_targets`
-            (not required if `blat`=True), default = tiled_Aligned.out.sam
+            (not required if `blat`=True), default = oligos_Aligned.out.sam
         blat_file : str
             Path to BLAT alignment (.psl) file from `check_off_targets`
             (not required if `blat`=False), default = blat_out.psl
@@ -171,7 +174,8 @@ class Tools(object):
             for x in f:
                 header = re.sub('>', '', x.rstrip('\n'))
                 seq = next(f).rstrip('\n')
-                self._all_oligos[header] = [seq, 0, 0, 0, 'NA', self._get_gc(x=seq), 0, 0]
+                self._all_oligos[header] = [seq, 0, 0, 0, 'NA',
+                                            self._get_gc(x=seq), 0, 0]
         if self.blat:        
             with open(blat_file) as f:
                 for _ in range(5):
@@ -251,8 +255,6 @@ class Tools(object):
         """Sorts and writes oligo information to oligo_info.txt"""
         
         p = re.compile('\W+')
-        assoc = ''
-        if os.path.exists('_tmp.p'): assoc = pickle.load(open('_tmp.p', 'rb'))
         with open('oligo_info.txt', 'w') as f:
             f.write('chr\tstart\tstop\tfragment_start\tfragment_stop\t'
                     'side_of_fragment\tsequence\ttotal_number_of_alignments\t'
@@ -260,16 +262,21 @@ class Tools(object):
                     'associations\n')
             for key, idx in self._all_oligos.items():
                 w_list = p.split(key)+idx[:-2]
-                if w_list[3:6]==['000', '000', 'X']: w_list[3:6] = '.'*3
-                if assoc:
-                    if w_list[3:6]==['000', '000', 'X']:
+                if w_list[3:6] == ['000', '000', 'X']: w_list[3:6] = '.' * 3
+                if self._assoc:
+                    if w_list[3:6] == ['.', '.', '.']:
                         coor = '{}:{}-{}'.format(w_list[0], w_list[1], w_list[2])
                     else:
                         coor = '{}:{}-{}'.format(w_list[0], w_list[3], w_list[4])
-                    w_list.append(assoc.get(coor, '.'))
+                    w_list.append(self._assoc.get(coor, '.'))
                 else:
                     w_list.append('.')
                 f.write('\t'.join(map(str, w_list))+'\n')
+    
+        subprocess.run('sort -k1,1 -k2,2n oligo_info.txt >all_oligo_info.txt',
+                        shell=True)
+        subprocess.run('rm -f oligo_info.txt', shell=True)
+        subprocess.run('mv all_oligo_info.txt oligo_info.txt', shell=True)
         
         print('Oligo information written to oligo_info.txt')
         
@@ -300,8 +307,6 @@ class Capture(Tools):
         """
         
         cut_sites = {}
-        self.oligo_seqs = {}
-        assoc = {}
         cut_size = len(rs_dict[enzyme])
         p = re.compile(rs_dict[enzyme])
         
@@ -337,7 +342,8 @@ class Capture(Tools):
                     r_seq = seq[r_start:r_stop]
                     
                     frag_key = '{}:{}-{}'.format(chr_name, l_start, r_stop)
-                    assoc[frag_key] = '{}{},'.format(assoc.get(frag_key, ''), name)
+                    self._assoc[frag_key] = '{}{},'.format(
+                        self._assoc.get(frag_key, ''), name)
                     
                     l_key = '{}:{}-L'.format(chr_name, '-'.join(map(str, l_tup)))
                     if l_key in self.oligo_seqs:
@@ -355,7 +361,6 @@ class Capture(Tools):
                     print('{} ({}) was in a fragment that was too small'.format(
                             vp_coor, name), file=sys.stderr)
         
-        pickle.dump(assoc, open('_tmp.p', 'wb'))
         print('\t...complete. Oligos stored in the oligo_seqs attribute')
         
         return self
@@ -405,8 +410,6 @@ class Tiled(Tools):
             pos_list.append(m.start()+start)
         
         cut_size = len(rs_dict[enzyme])
-        
-        self.oligo_seqs = {}
            
         for i in range(len(pos_list)-1):
             j = i + 1
@@ -524,8 +527,6 @@ class OffTarget(Tools):
         print('\t...complete\nGenerating oligos...')
     
         oligo_num = math.floor((max_dist-oligo)/step)
-        self.oligo_seqs = {}
-        assoc = {}
         
         with open(bed) as w:
             for x in w:
@@ -568,13 +569,12 @@ class OffTarget(Tools):
                         self.oligo_seqs['{}-000-000-X'.format(r_coor)] = str(
                             r_seq)
                     
-                    assoc[l_coor] = assoc[r_coor] = name
+                    self._assoc[l_coor] = self._assoc[r_coor] = name
                     
                     l_stop-=step
                     r_start+=step
                     counter+=1
         
-        pickle.dump(assoc, open('_tmp.p', 'wb'))
         print('\t...complete.  Oligos stored in the oligo_seqs attribute')
         
         return self
