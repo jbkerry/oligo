@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
+import argparse
+import math
 import os
-import subprocess
-import re
-import sys
 import pickle
+import re
+import subprocess
+import sys
 
-import pysam
 import numpy as np
+import pysam
 from Bio import SeqIO
 
 rs_dict = {'DpnII': 'GATC',
@@ -28,8 +30,33 @@ star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 ' \
              '--limitOutSAMoneReadBytes 400000 --outFileNamePrefix tiled_'
 
-class UtilsMixin(object):
-    """Contains a suite of methods inherited by Capture, Tiled and OffTarget"""
+class Tools(object):
+    """Contains methods inherited by Capture, Tiled and OffTarget
+    
+    Parameters
+    ----------
+    genome : str
+        Genome build e.g. mm10 or hg38
+    fa : str
+        Path to reference genome fasta
+    
+    Attributes
+    ----------
+    blat : bool
+        Check off-target binding using BLAT instead of STAR (not
+        recommended for large designs), default = False
+    fasta : str
+        Name of fasta file for oligo sequences, default = oligo_seqs.fa
+    oligo_seqs : dict
+        Contains all oligo sequences after generating oligos
+        
+    """
+    
+    def __init__(self, genome, fa, blat=False):
+        self.genome = genome
+        self.fa = fa
+        self.blat = blat
+        self.fasta = 'oligo_seqs.fa'
 
     def write_oligos(self):
         """Writes `oligo_seqs` attribute to fasta file"""
@@ -248,34 +275,8 @@ class UtilsMixin(object):
         
         return None
 
-class Capture(UtilsMixin):
-    """Generates oligos for Capture-C
-    
-    Parameters
-    ----------
-    genome : str
-        Genome build e.g. mm10 or hg38
-    fa : str
-        Path to reference genome fasta
-    
-    Attributes
-    ----------
-    blat : bool
-        Check off-target binding using BLAT instead of STAR (not
-        recommended for large designs), default = False
-    fasta : str
-        Name of fasta file for oligo sequences, default = oligo_seqs.fa
-    oligo_seqs : dict
-        Contains all oligo sequences after generating oligos; key =
-        oligo coordinate, value = oligo sequence
-        
-    """
-    
-    def __init__(self, genome, fa, blat=False):
-        self.genome = genome
-        self.fa = fa
-        self.blat = blat
-        self.fasta = 'oligo_seqs.fa'
+class Capture(Tools):
+    """Designs oligos for Capture-C"""
         
     def gen_oligos(self, bed, enzyme='DpnII', oligo=70):
         r"""Generates oligos flanking restriction fragments that encompass the
@@ -288,9 +289,9 @@ class Capture(UtilsMixin):
             viewpoints in the capture experiment. Must be in the format
             'chr'\\t'start'\\t'stop'\\t'name'\\n
         enzyme : {'DpnII', 'NlaIII', 'HindIII'}, optional
-            The enzyme for digestion, default=DpnII
+            The enzyme for digestion, default = DpnII
         oligo : int, optional
-            The length of the oligo to design (bp), default=70
+            The length of the oligo to design (bp), default = 70
         
         Returns
         -------
@@ -322,8 +323,8 @@ class Capture(UtilsMixin):
                 start, stop = map(int, (start, stop))
                 seq = seq_dict[chr_name].seq.upper()
                 
-                l_start = cut_sites[chr_name][cut_sites[chr_name]<=start][-1]
-                r_stop = cut_sites[chr_name][cut_sites[chr_name]>=start][0] + cut_size # currently this picks an adjacent fragment if the site is in a cutsite; are we okay with that?
+                l_start = cut_sites[chr_name][cut_sites[chr_name] <= start][-1]
+                r_stop = cut_sites[chr_name][cut_sites[chr_name] >= start][0] + cut_size # currently this picks an adjacent fragment if the site is in a cutsite; are we okay with that?
                 frag_len = r_stop - l_start
                 
                 if frag_len>=oligo:
@@ -355,15 +356,242 @@ class Capture(UtilsMixin):
                             vp_coor, name), file=sys.stderr)
         
         pickle.dump(assoc, open('_tmp.p', 'wb'))
-        print('\t...complete')
+        print('\t...complete. Oligos stored in the oligo_seqs attribute')
         
         return self
     
+class Tiled(Tools):
+    """Designs oligos adjacent to each other or on adjacent fragments"""
+    
+    def gen_oligos_capture(self, chrom, region='', enzyme='DpnII', oligo=70):
+        """Designs oligos for multiple adjacent restriction fragments
+        across a specified region of a chromosome, or for the entire
+        chromosome.
+        
+        Parameters
+        ----------
+        chrom : str
+            Chromosome number/letter e.g. 7 or X
+        region : str, optional
+            The region of the chromosome to design oligos, e.g.
+            10000-20000; omit this option to design oligos over the
+            entire chromosome
+        enzyme : {'DpnII', 'NlaIII', 'HindIII'}, optional
+            The enzyme for digestion, default=DpnII
+        oligo : int, optional
+            The length of the oligos to design (bp), default=70
+            
+        Returns
+        -------
+        self : object
+    
+        """
+        
+        chr_name = 'chr'+str(chrom)
+        
+        print('Loading reference fasta file...')
+        seq_dict = SeqIO.to_dict(SeqIO.parse(self.fa, 'fasta'))
+        seq = seq_dict[chr_name].seq.upper()
+        print('\t...complete\nGenerating oligos...')
+            
+        if not region:
+            start = 0; stop = len(seq)
+        else:
+            start, stop = map(int, region.split('-'))
+        
+        p = re.compile(rs_dict[enzyme])
+        pos_list = []
+        for m in p.finditer(str(seq[start:stop])):
+            pos_list.append(m.start()+start)
+        
+        cut_size = len(rs_dict[enzyme])
+        
+        self.oligo_seqs = {}
+           
+        for i in range(len(pos_list)-1):
+            j = i + 1
+            
+            l_start = pos_list[i]
+            r_stop = pos_list[j]+cut_size 
+            frag_len = r_stop - l_start
+            
+            if (frag_len>=oligo):
+                l_stop = l_start+oligo
+                r_start = r_stop-oligo
+                
+                l_tup = (l_start, l_stop, l_start, r_stop)
+                r_tup = (r_start, r_stop, l_start, r_stop)
+                l_seq = seq[l_start:l_stop]
+                r_seq = seq[r_start:r_stop]
+                
+                self.oligo_seqs['{}:{}-L'.format(chr_name,
+                                                 '-'.join(map(str, l_tup)))
+                               ] = str(l_seq)
+                if frag_len>oligo:
+                    self.oligo_seqs['{}:{}-R'.format(chr_name,
+                                                     '-'.join(map(str, r_tup)))
+                                   ] = str(r_seq)
+            else:
+                print('The fragment {}:{}-{} was too small to design oligos '
+                      'in'.format(chr_name, l_start, r_stop), file=sys.stderr)
+        
+        print('\t...complete. Oligos stored in the oligo_seqs attribute')
+        
+        return self
+    
+    def gen_oligos_fish(self, chrom, region='', step=70, oligo=70):
+        """Designs adjacent oligos based on a user-defined step size,
+        across a specified region of a chromosome, or for the entire
+        chromosome.
+        
+        Parameters
+        ----------
+        chrom : str
+            Chromosome number/letter e.g. 7 or X
+        region : str, optional
+            The region of the chromosome to design oligos, e.g.
+            10000-20000; omit this option to design oligos over the
+        step : int, optional
+            The step size, or how close adjacent oligos should be, default=70;
+            for end-to-end oligos, set `step` to equal `oligo`
+        oligo : int, optional
+            The length of the oligos to design (bp), default=70
+            
+        Returns
+        -------
+        self : object
+        
+        """
+        
+        chr_name = 'chr'+str(chrom)
+        
+        print('Loading reference fasta file...')
+        seq_dict = SeqIO.to_dict(SeqIO.parse(self.fa, 'fasta'))
+        seq = seq_dict[chr_name].seq.upper()
+        print('\t...complete\nGenerating oligos...')
+            
+        if not region:
+            start = 0; stop = len(seq)
+        else:
+            start, stop = map(int, region.split('-'))
+        
+        self.oligo_seqs = {}
+        
+        final_start = stop - oligo
+    
+        while start<=final_start:
+            stop = start + oligo
+            ol_seq = str(seq[start:stop])
+            self.oligo_seqs['{}:{}-{}-000-000-X'.format(chr_name,
+                                                        start,
+                                                        stop)] = ol_seq
+            start+=step  
+        
+        print('\t...complete. Oligos stored in the oligo_seqs attribute')
+        
+        return self
+    
+class OffTarget(Tools):
+    """Designs oligos adjacent to potential CRISPR off-target sites"""
+    
+    def gen_oligos(self, bed, oligo=70, step=10, max_dist=200):
+        r"""Designs oligos adjacent to user-supplied coordinates for
+        potential CRISPR off-target cleavage sites
+        
+        Parameters
+        ----------
+        bed : str
+            Path to tab-delimited bed file containing a list of coordinates
+            for viewpoints in the capture experiment; must be in the format
+            'chr'\\t'start'\\t'stop'\\t'name'\\n
+        oligo : int, optional
+            The length of the oligo to design (bp), default=70
+        step : int, optional
+            The step size, or how close adjacent oligos should be,
+            default=10; for end-to-end oligos, set `step` to equal `oligo`
+        max_dist : int, optional
+            The maximum distance away from the off-target site to design
+            oligos to, default = 200
+        
+        Returns
+        -------
+        self : object
+        
+        """
+        
+        print('Loading reference fasta file...')
+        seq_dict = SeqIO.to_dict(SeqIO.parse(self.fa, 'fasta'))
+        print('\t...complete\nGenerating oligos...')
+    
+        oligo_num = math.floor((max_dist-oligo)/step)
+        self.oligo_seqs = {}
+        assoc = {}
+        
+        with open(bed) as w:
+            for x in w:
+                chr_name, start, stop, name = x.strip().split('\t')
+                
+                if '_' in chr_name: continue
+                
+                chr_length = len(seq_dict[chr_name])
+                start, stop = map(int, (start, stop))
+                seq = seq_dict[chr_name].seq.upper()
+                
+                l_stop = start-10
+                r_start = stop+10
+            
+                counter=1
+                while counter<=oligo_num:
+                    
+                    l_start = l_stop-oligo
+                    l_coor = '{}:{}-{}'.format(chr_name, l_start, l_stop)
+                    r_stop = r_start+oligo
+                    r_coor = '{}:{}-{}'.format(chr_name, r_start, r_stop)
+                    
+                    if l_start<0:
+                        print('Oligo {} for off-target site {} could not ' \
+                              'be generated because it went beyond the start of ' \
+                              'the chromosome'.format(l_coor, name),
+                        file=sys.stderr)
+                    else:
+                        l_seq = seq[l_start:l_stop]
+                        self.oligo_seqs['{}-000-000-X'.format(l_coor)] = str(
+                            l_seq)
+                        
+                    if r_stop>chr_length:
+                        print('Oligo {} for off-target site {} could not ' \
+                              'be generated because it went beyond the end of ' \
+                              'the chromosome'.format(r_coor, name),
+                        file=sys.stderr)
+                    else:
+                        r_seq = seq[r_start:r_stop]
+                        self.oligo_seqs['{}-000-000-X'.format(r_coor)] = str(
+                            r_seq)
+                    
+                    assoc[l_coor] = assoc[r_coor] = name
+                    
+                    l_stop-=step
+                    r_start+=step
+                    counter+=1
+        
+        pickle.dump(assoc, open('_tmp.p', 'wb'))
+        print('\t...complete.  Oligos stored in the oligo_seqs attribute')
+        
+        return self
+
 if __name__ == '__main__':
+    class_tup = ('Capture', 'Tiled', 'OffTarget')
     try:
         class_arg = sys.argv[1]
+        if class_arg not in class_tup:
+            raise NameError('{} is not a recognised class name, choose from '
+                            'one of the following: {}'.format(
+                                class_arg,
+                                ', '.join(class_tup)
+                            ))
     except IndexError:
-        raise('oligo.py must be followed by a class name: Capture, Tiled or OffTarget')
+        raise IndexError('oligo.py must be followed by one of the following '
+                         'class names: {}'.format(', '.join(class_tup)))
     parser = argparse.ArgumentParser()
     
     parser.add_argument(
@@ -377,9 +605,97 @@ if __name__ == '__main__':
         '-g',
         '--genome',
         type = str,
-        help = 'Genome build e.g. \'mm10\' or \'hg38\'.',
+        choices = ['mm9', 'mm10', 'hg18', 'hg19', 'mm38'],
+        help = 'Genome build',
         required = True,
     )
+    
+    if class_arg == 'Capture': 
+        parser.add_argument(
+            '-b',
+            '--bed',
+            type = str,
+            help = 'Path to bed file with capture viewpoint coordinates',
+            required = True,
+        )
+        parser.add_argument(
+            '-e',
+            '--enzyme',
+            type = str,
+            choices = ['DpnII', 'NlaIII', 'HindIII'],
+            help = 'Name of restriction enzyme, default=DpnII',
+            default = 'DpnII',
+            required = False,
+        )
+    elif class_arg == 'Tiled': 
+        parser.add_argument(
+            '-c',
+            '--chr',
+            type = str,
+            help = 'Chromosome number/letter on which to design the oligos.',
+            required = True,
+        )
+        parser.add_argument(
+            '-r',
+            '--region',
+            type = str,
+            help = 'The region in which to design the oligos; must be in the ' \
+                   'format \'start-stop\' e.g. \'10000-20000\'. Omit this ' \
+                   'option to design oligos across the entire chromosome.',
+            required = False,
+        )
+        parser.add_argument(
+            '--fish',
+            action = 'store_true',
+            help = 'Run in FISH mode (restriciton enzyme independent).',
+            required = False,
+        )
+        parser.add_argument(
+            '-e',
+            '--enzyme',
+            type = str,
+            choices = ['DpnII', 'NlaIII', 'HindIII'],
+            help = 'Name of restriction enzyme, default=DpnII. Omit this option ' \
+                   'if running in FISH mode (--fish)',
+            default = 'DpnII',
+            required = False,
+        )
+        parser.add_argument(
+            '-t',
+            '--step_size',
+            type = int,
+            help = 'Step size (in bp) between adjacent oligos when running in ' \
+                   'FISH mode (--fish), default=70. Omit this option if you are ' \
+                   'not using the --fish flag',
+            default = 70,
+            required = False,
+        )
+    elif class_arg == 'OffTarget':
+        parser.add_argument(
+            '-b',
+            '--bed',
+            type = str,
+            help = 'Path to bed file with off-target coordinates',
+            required = True,
+        )
+        parser.add_argument(
+            '-t',
+            '--step_size',
+            type = int,
+            help = 'Step size (in bp) between adjacent oligos, default=10',
+            default = 10,
+            required = False,
+        )
+        parser.add_argument(
+            '-m',
+            '--max_dist',
+            type = int,
+            help = 'The maximum distance away from the off-target site to ' \
+                   'design oligos to, default=200',
+            default = 200,
+            required = False,
+        )
+    
     parser.add_argument(
         '-o',
         '--oligo',
@@ -409,31 +725,40 @@ if __name__ == '__main__':
         required = False,
     )
     
-    if class_arg == 'Capture': 
-        parser.add_argument(
-            '-b',
-            '--bed',
-            type = str,
-            help = 'Path to bed file with capture viewpoint coordinates',
-            required = True,
-        )
-        parser.add_argument(
-            '-e',
-            '--enzyme',
-            type = str,
-            help = 'Name of restriction enzyme, default=DpnII',
-            default = 'DpnII',
-            required = False,
-        )
-        
-        args = parser.parse_args()
-        c = Capture(genome=args.genome, fa=args.fasta)
-        c = c.gen_oligos(
+    args = parser.parse_args()
+    
+    if class_arg == 'Capture':
+        c = Capture(genome=args.genome, fa=args.fasta, blat=arg.blat)
+        c.gen_oligos_capture(
             bed = args.bed,
             enzyme = args.enzyme,
             oligo = args.oligo,
         )
-    
+    elif class_arg == 'Tiled':
+        c = Tiled(genome=args.genome, fa=args.fasta, blat=args.blat)
+        if args.fish:
+            c.gen_oligos_fish(
+                chrom = args.chr,
+                region = args.region,
+                step = args.step_size,
+                oligo = args.oligo
+            )
+        else:
+            c.gen_oligos_capture(
+                chrom = args.chr,
+                region = args.region,
+                enzyme = args.enzyme,
+                oligo = args.oligo
+            )
+    elif class_arg == 'OffTarget':
+        c = OffTarget(genome=args.genome, fa=args.fasta, blat=arg.blat)
+        c.gen_oligos(
+            bed = args.bed,
+            step = args.step_size,
+            max_dist = args.max_dist,
+            oligo = args.oligo,
+        )
+        
     c.write_oligos()
     c.check_off_target(s_idx=args.star_index)
     c.get_density()
