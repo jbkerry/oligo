@@ -9,6 +9,7 @@ import subprocess
 import sys
 
 import numpy as np
+import pandas as pd
 import pysam
 from Bio import SeqIO
 
@@ -85,7 +86,7 @@ class Tools(object):
         Raises
         ------
         AttributeError
-            If `blat`=False but `s_idx` is not specified
+            If `blat` = False but `s_idx` is not specified
         FileNotFoundError
             If a fasta file with the name specified by the `fasta`
             attribute is not found
@@ -123,7 +124,7 @@ class Tools(object):
             blat_out = open('blat_log.txt', 'w')
             run_out = 'blat_out.psl'
             subprocess.run(
-                ' '.join(path, blat_param, self.fa, self.fasta, run_out),
+                ' '.join((path, blat_param, self.fa, self.fasta, run_out)),
                 shell=True,
                 stdout = blat_out,
                 stderr = blat_out,
@@ -175,7 +176,7 @@ class Tools(object):
                 header = re.sub('>', '', x.rstrip('\n'))
                 seq = next(f).rstrip('\n')
                 self._all_oligos[header] = [seq, 0, 0, 0, 'NA',
-                                            self._get_gc(x=seq), 0, 0]
+                                            self._get_gc(seq), 0, 0]
         if self.blat:        
             with open(blat_file) as f:
                 for _ in range(5):
@@ -240,8 +241,8 @@ class Tools(object):
                         qname, dup = qname.split('_')
                     
                     qstart, qstop = map(int, (parts[6:8]))
-                    length = (qstop - qstart)+1
-                    if length>self._all_oligos[qname][3]:
+                    length = (qstop-qstart) + 1
+                    if length > self._all_oligos[qname][3]:
                         self._all_oligos[qname][3:5] = length, rep_type
                 msg = 'Repeat scores calculated'
             else:
@@ -252,7 +253,7 @@ class Tools(object):
         return None
     
     def _write_file(self):
-        """Sorts and writes oligo information to oligo_info.txt"""
+        """Writes oligo information to oligo_info.txt"""
         
         p = re.compile('\W+')
         with open('oligo_info.txt', 'w') as f:
@@ -273,14 +274,20 @@ class Tools(object):
                     w_list.append('.')
                 f.write('\t'.join(map(str, w_list))+'\n')
     
-        subprocess.run('sort -k1,1 -k2,2n oligo_info.txt >all_oligo_info.txt',
-                        shell=True)
-        subprocess.run('rm -f oligo_info.txt', shell=True)
-        subprocess.run('mv all_oligo_info.txt oligo_info.txt', shell=True)
-        
+        sorted_df = self._sort_file()
+        sorted_df.to_csv('oligo_info.txt', sep='\t', index=False, na_rep='NA')
         print('Oligo information written to oligo_info.txt')
         
         return None
+    
+    def _sort_file(self):
+        """Sorts oligo output file"""
+        df = pd.read_table('oligo_info.txt', header=0)
+        df['chr'] = [int(x[3:]) for x in df['chr']]
+        df.sort_values(['chr', 'start'], inplace=True)
+        df['chr'] = 'chr' + df['chr'].map(str)
+        
+        return df
 
 class Capture(Tools):
     """Designs oligos for Capture-C"""
@@ -361,7 +368,9 @@ class Capture(Tools):
                     print('{} ({}) was in a fragment that was too small'.format(
                             vp_coor, name), file=sys.stderr)
         
-        print('\t...complete. Oligos stored in the oligo_seqs attribute')
+        print('\t...complete.')
+        if __name__ != '__main__':
+            print('Oligos stored in the oligo_seqs attribute')
         
         return self
     
@@ -605,7 +614,7 @@ if __name__ == '__main__':
         '-g',
         '--genome',
         type = str,
-        choices = ['mm9', 'mm10', 'hg18', 'hg19', 'mm38'],
+        choices = ['mm9', 'mm10', 'hg18', 'hg19', 'hg38'],
         help = 'Genome build',
         required = True,
     )
@@ -725,11 +734,15 @@ if __name__ == '__main__':
         required = False,
     )
     
-    args = parser.parse_args()
+    args = parser.parse_args(sys.argv[2:])
+    
+    if not args.blat and not args.star_index:
+        msg = '-s/--star_index argument is required if --blat is not selected'
+        parser.error(msg)
     
     if class_arg == 'Capture':
-        c = Capture(genome=args.genome, fa=args.fasta, blat=arg.blat)
-        c.gen_oligos_capture(
+        c = Capture(genome=args.genome, fa=args.fasta, blat=args.blat)
+        c.gen_oligos(
             bed = args.bed,
             enzyme = args.enzyme,
             oligo = args.oligo,
@@ -751,7 +764,7 @@ if __name__ == '__main__':
                 oligo = args.oligo
             )
     elif class_arg == 'OffTarget':
-        c = OffTarget(genome=args.genome, fa=args.fasta, blat=arg.blat)
+        c = OffTarget(genome=args.genome, fa=args.fasta, blat=args.blat)
         c.gen_oligos(
             bed = args.bed,
             step = args.step_size,
