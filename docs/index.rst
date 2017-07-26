@@ -20,4 +20,9 @@ oligo
 For questions related to `oligo`, email jon.kerry@imm.ox.ac.uk
 
 To report a bug, open an issue on the GitHub page: https://github.com/jbkerry/oligo/issues
+
+.. toctree::
+    :hidden:
+    
+    capture_class
     

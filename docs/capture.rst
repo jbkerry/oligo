@@ -2,17 +2,12 @@
 Capture-C
 #########
 
-.. container:: subtitle
+.. currentmodule:: oligo
 
-    capture.py
-
-Functions: :func:`gen_oligos() <capture.gen_oligos>`
+:doc:`oligo.Capture <capture_class>`
 
 Description
 ===========
-
-.. automodule:: capture
-   :platform: Unix
 
 The image below shows a schematic of how `capture` designs oligos adjacent to the first restriction site of a specified restriction enzyme (DpnII in this example), on the left- and right-hand sides. In this case the user has supplied viewpoint
 coordinates at chr2:5500000-5500001 and chr5:63223000-63223001.
@@ -74,12 +69,12 @@ Below are examples using the `capture` pipeline for different scenarios
 .. code-block:: bash
     :caption: 50bp oligos for NlaIII fragments in hg19 build, using STAR to check off-target binding
 
-    python capture.py -f ~/hg19/Sequence/genome.fa -g hg19 -b viewpoints.bed -o 50 -e NlaIII -s ~/hg19/STAR/
+    python oligo.py Capture -f ~/hg19/Sequence/genome.fa -g hg19 -b viewpoints.bed -o 50 -e NlaIII -s ~/hg19/STAR/
     
 .. code-block:: bash
     :caption: 70bp oligos for HindIII fragments in mm10 build, using BLAT to check off-target binding
 
-    python capture.py -f ~/mm10/Sequence/genome.fa -g mm10 -b mouse_viewpoints.bed -e HindIII --blat
+    python oligo.py Capture -f ~/mm10/Sequence/genome.fa -g mm10 -b mouse_viewpoints.bed -e HindIII --blat
 
 Specifics
 ---------
@@ -113,19 +108,46 @@ Specifics
     by the user. However, BLAT can be particulary slow for large designs, especially for the human reference genomes. STAR's exceptional speed is better suited for designs with >500 viewpoints (1000 oligos). If the :option:`--blat` flag is not selected, the path to the STAR index must be supplied
     after the :option:`-s` (or :option:`--star_index`) flag.
 
-Functions
-=========
+Python
+======
 
-As well as being run as a full pipeline from the command line, the `oligo` modules have been written such that the individual functions can be easily run in a python shell. The  `capture` pipeline runs the functions in the following order:
+As well as being run as a full pipeline from the command line, the `oligo` classes have been written such that the individual methods can be easily run in a python shell. The `Capture` pipeline implements methods from :doc:`oligo.Capture <capture_class>`.
+The following examples show the order in which the class methods are implemented:
 
-#. :func:`capture.gen_oligos`
-#. :func:`tools.write_oligos`
-#. :func:`tools.check_off_target`
-#. :func:`tools.get_density`
+.. code-block:: python
+    :caption: Create a instance of the Capture class
 
-Below is a detailed list of functions in the `capture` module:
+    >>> c = oligo.Capture(genome='mm9', fa='mm9_genome.fa')
+    
+.. code-block:: python
+    :caption: Generate oligos and write to fasta file
 
-.. autofunction:: gen_oligos
+    >>> c.gen_oligos(bed='capture_sites.bed').write_oligos()
+    Loading reference fasta file...
+        ...complete
+    Generating oligos...
+        ...complete.
+    Oligos stored in the oligo_seqs attribute
+    Wrote oligos to oligo_seqs.fa
+    
+.. code-block:: python
+    :caption: Check for repeats and off-target binding of oligos in the fasta file
+
+    >>> c.check_off_target(s_idx='/mm9/STAR')
+    Checking for repeat sequences in oligos...
+        ...complete
+    Checking off-target binding with STAR...
+        ...complete. Alignments written to oligos_Aligned.out.sam
+
+.. code-block:: python
+    :caption: Output repeats and off-target information
+
+    >>> c.get_density()
+    Density scores calculated
+    Repeat scores calculated
+    Oligo information written to oligo_info.txt
+
+See :doc:`oligo.Capture <capture_class>` for more detailed information
 
 .. centered:: :doc:`Top of Page <capture>`
 

@@ -32,7 +32,7 @@ star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '--limitOutSAMoneReadBytes 400000 --outFileNamePrefix oligos_'
 
 class Tools(object):
-    """Contains methods inherited by Capture, Tiled and OffTarget
+    """
     
     Parameters
     ----------
@@ -102,7 +102,7 @@ class Tools(object):
         
         p = re.compile('^[A-Z]')
         config_file = './config.txt'
-        path_list = [x.rstrip('\n') for x in open(config_file) if p.match(x)]
+        path_list = [x.strip() for x in open(config_file) if p.match(x)]
         path_dict = dict(item.split(' = ') for item in path_list)
         rm_path = os.path.join(path_dict['RM_PATH'], 'RepeatMasker')
         print('Checking for repeat sequences in oligos...')
@@ -291,6 +291,8 @@ class Tools(object):
 
 class Capture(Tools):
     """Designs oligos for Capture-C"""
+    
+    __doc__ += Tools.__doc__
         
     def gen_oligos(self, bed, enzyme='DpnII', oligo=70):
         r"""Generates oligos flanking restriction fragments that encompass the
@@ -365,7 +367,7 @@ class Capture(Tools):
                                                '-'.join(map(str, r_tup)))
                                 ] = str(r_seq)
                 else:
-                    print('{} ({}) was in a fragment that was too small'.format(
+                    print('{} ({}) is in a fragment that is too small. Skipping.'.format(
                             vp_coor, name), file=sys.stderr)
         
         print('\t...complete.')
@@ -444,10 +446,12 @@ class Tiled(Tools):
                                                      '-'.join(map(str, r_tup)))
                                    ] = str(r_seq)
             else:
-                print('The fragment {}:{}-{} was too small to design oligos '
-                      'in'.format(chr_name, l_start, r_stop), file=sys.stderr)
+                print('The fragment {}:{}-{} is too small to design oligos '
+                      'in. Skipping.'.format(chr_name, l_start, r_stop), file=sys.stderr)
         
-        print('\t...complete. Oligos stored in the oligo_seqs attribute')
+        print('\t...complete.')
+        if __name__ != '__main__':
+            print('Oligos stored in the oligo_seqs attribute')
         
         return self
     
@@ -499,7 +503,9 @@ class Tiled(Tools):
                                                         stop)] = ol_seq
             start+=step  
         
-        print('\t...complete. Oligos stored in the oligo_seqs attribute')
+        print('\t...complete.')
+        if __name__ != '__main__':
+            print('Oligos stored in the oligo_seqs attribute')
         
         return self
     
@@ -584,7 +590,9 @@ class OffTarget(Tools):
                     r_start+=step
                     counter+=1
         
-        print('\t...complete.  Oligos stored in the oligo_seqs attribute')
+        print('\t...complete.')
+        if __name__ != '__main__':
+            print('Oligos stored in the oligo_seqs attribute')
         
         return self
 
