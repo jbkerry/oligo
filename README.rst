@@ -19,4 +19,4 @@ the off-target binding and repeat content of the oligos. This information is out
 
 For full documentation, see http://oligo.readthedocs.io
 
-**There is currently no stable release of the oligo package**
+**The oligo package is currently only available as a pre-release version: 0.1.1a**
