@@ -11,6 +11,10 @@ The *design.py* module consists of three classes for Capture-C and FISH oligo de
 These three classes all generate oligo sequences, based on different underlying behaviours. When run from the command line, *design.py* utilises methods from the `Tools <http://oligo.rtfd.io/en/latest/tools_class.html>`_ class, in a pipeline that checks
 the off-target binding and repeat content of the oligos. This information is output in a file called *oligo_info.txt*; oligo sequences are written to a FASTA file called *oligo_seqs.fa*
 
+**Installation:**
+
+Currently the only way to obtain `oligo` is to download the latest `release <https://github.com/jbkerry/oligo/releases>`_ or clone the git repository. The two essential files are the `design.py` module and `config.txt`.
+
 **Requires:**
 
 * `Python 3 <https://docs.python.org/3/>`_ (with `pysam <http://pysam.readthedocs.io/en/latest>`_, `numpy <http://www.numpy.org/>`_ & `biopython <http://biopython.org/wiki/Biopython>`_)
