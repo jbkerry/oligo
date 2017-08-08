@@ -13,7 +13,7 @@ the off-target binding and repeat content of the oligos. This information is out
 
 **Installation:**
 
-Currently the only way to obtain `oligo` is to download the latest `release <https://github.com/jbkerry/oligo/releases>`_ or clone the git repository. The two essential files are the `design.py` module and `config.txt`.
+Currently the only way to obtain *oligo* is to download the `latest release <https://github.com/jbkerry/oligo/releases>`_ or clone the git repository. The two essential files are *design.py* and *config.txt*.
 
 **Requires:**
 
