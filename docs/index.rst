@@ -13,7 +13,6 @@ oligo
     Capture-C <capture>
     Tiled Capture <tiled>
     CRISPR Off-Target <off_target>
-    tools
 
 * :ref:`genindex`
 
@@ -25,4 +24,6 @@ To report a bug, open an issue on the GitHub page: https://github.com/jbkerry/ol
     :hidden:
     
     capture_class
-    
+    tiled_class
+    offtarget_class
+    tools_class

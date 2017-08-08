@@ -2,37 +2,32 @@
 Tiled Capture
 #############
 
-.. container:: subtitle
+.. currentmodule:: oligo
 
-    tiled.py
-
-Functions: :func:`gen_oligos_capture() <tiled.gen_oligos_capture>`, :func:`gen_oligos_fish() <tiled.gen_oligos_capture>`
+:doc:`oligo.Tiled <tiled_class>`
 
 Description
 ===========
 
-.. automodule:: tiled
-    :platform: Unix
-    
-The image below shows a schematic of how `tiled` designs oligos when run in either the default mode (top) or FISH mode (bottom). In the top panel the user has run `tiled` supplying the region chr10:13456000-13460000 and the restriction enzyme
+The image below shows a schematic of how `Tiled` designs oligos when run in either the default mode (top) or FISH mode (bottom). In the top panel the user has run `Tiled` supplying the region chr10:13456000-13460000 and the restriction enzyme
 DpnII. In the bottom panel the same coordinates have been used but with the :option:`--fish` flag, and the step size set to equal the oligo length, thereby generating end-to-end oligos. For Tiled FISH, the design is completely independent of
 any restriction enzyme recognition sequences, however the DpnII sites have been left on the image for consistency.
 
 .. figure:: _static/tiled.png
 
-    Schematic of oligo design by `tiled`, in default (top) and FISH (bottom) modes
+    Schematic of oligo design by `Tiled`, in default (top) and FISH (bottom) modes
     
 It is possible for the Tiled Capture oligos to overlap, up to within 1bp of each other, when the restriction fragment is less than twice the length of the oligo. If the specified region consists of a fragment with length less than the specified oligo length, no oligos will be generated for that fragment.
 If the fragment length exactly equals the oligo length, only one oligo will be generated. Similarly, in Tiled FISH, oligos can be designed such that they overlap up to within 1bp of each other; in this case, the step size would be set to 1.
 
 .. note::
     
-    For full functionality, `tiled` should be run from the command line in order to test the efficiency of the generated oligos. This involves a pipeline that incorporates functions from the :doc:`tools <tools>` module.
+    For full functionality, `Tiled` should be run from the command line in order to test the efficiency of the generated oligos. This involves a pipeline that incorporates methods from the :doc:`Tools <tools_class>` class.
 
 Usage
 =====
 
-When run from the command line, `tiled.py` takes the following parameters
+When run from the command line, `oligo.py Tiled` takes the following parameters
 
 .. option:: -h, --help
     
@@ -87,17 +82,17 @@ When run from the command line, `tiled.py` takes the following parameters
 Examples
 --------
 
-Below are examples using the `tiled` pipeline for different scenarios
+Below are examples using the `Tiled` pipeline for different scenarios
 
 .. code-block:: bash
     :caption: 120bp oligos for DpnII fragments in hg38 for the whole of chromsome 18, using STAR to check off-target binding
 
-    python tiled.py -f ~/hg38/Sequence/genome.fa -g hg38 -c 18 -o 120 -s ~/hg38/STAR/
+    python oligo.py Tiled -f ~/hg38/Sequence/genome.fa -g hg38 -c 18 -o 120 -s ~/hg38/STAR/
     
 .. code-block:: bash
     :caption: 50bp oligos across the region 10,150,000 to 10,200,000 on chromosome X of mm9, with adjacent oligos separated by a gap of 10bp, using BLAT to check off-target binding
 
-    python tiled.py --fish -f ~/mm9/Sequence/genome.fa -g mm9 -c X -r 10150000-10200000 -o 50 -t 60 --blat
+    python oligo.py Tiled --fish -f ~/mm9/Sequence/genome.fa -g mm9 -c X -r 10150000-10200000 -o 50 -t 60 --blat
     
 Specifics
 ---------
@@ -123,24 +118,49 @@ Specifics
 .. _star-blat:
 
 **STAR** (:option:`-s`, :option:`--star_index`) or **BLAT** (:option:`--blat`)
-    To check for off-target binding, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `tiled.py` is run with the :option:`--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
+    To check for off-target binding, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `oligo.py Tiled` is run with the :option:`--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
     by the user. However, BLAT can be particulary slow for large designs, especially for the human reference genomes. STAR's exceptional speed is better suited for designs with >1000 oligos. If the :option:`--blat` flag is not selected, the path to the STAR index must be supplied
     after the :option:`-s` (or :option:`--star_index`) flag.
     
-Functions
-=========
+API
+===
 
-As well as being run as a full pipeline from the command line, the `oligo` modules have been written such that the individual functions can be easily run in a python shell. The pipeline runs the functions in the following order:
+As well as being run as a full pipeline from the command line, the `oligo` classes have been written such that the individual methods can be easily run in a python shell. The `Tiled` pipeline implements methods from :doc:`oligo.Tiled <tiled_class>`.
+The following examples show the order in which the class methods are implemented:
 
-#. :func:`tiled.gen_oligos_capture` OR :func:`tiled.gen_oligos_fish` (:option:`--fish`)
-#. :func:`tools.write_oligos`
-#. :func:`tools.check_off_target`
-#. :func:`tools.get_density`
+.. code-block:: python
+    :caption: Create a instance of the Tiled class
 
-Below is a detailed list of functions in the `tiled` module:
+    >>> t = oligo.Tiled(genome='hg38', fa='hg38_genome.fa', blat=True)
+    
+.. code-block:: python
+    :caption: Generate oligos and write to fasta file
 
-.. autofunction:: gen_oligos_capture
+    >>> t.gen_oligos_capture(chrom=7, region='100000-120000', enzyme='NlaIII').write_oligos()
+    Loading reference fasta file...
+        ...complete
+    Generating oligos...
+        ...complete.
+    Oligos stored in the oligo_seqs attribute
+    Wrote oligos to oligo_seqs.fa
+    
+.. code-block:: python
+    :caption: Check for repeats and off-target binding of oligos in the fasta file
 
-.. autofunction:: gen_oligos_fish
+    >>> t.check_off_target()
+    Checking for repeat sequences in oligos...
+        ...complete
+    Checking off-target binding with BLAT...
+        ...complete. Alignments written to blat_out.psl
+
+.. code-block:: python
+    :caption: Output repeats and off-target information
+
+    >>> t.get_density()
+    Density scores calculated
+    Repeat scores calculated
+    Oligo information written to oligo_info.txt
+
+See :doc:`oligo.Tiled <tiled_class>` for more detailed information
 
 .. centered:: :doc:`Top of Page <tiled>`

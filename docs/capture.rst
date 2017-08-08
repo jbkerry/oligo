@@ -9,24 +9,24 @@ Capture-C
 Description
 ===========
 
-The image below shows a schematic of how `capture` designs oligos adjacent to the first restriction site of a specified restriction enzyme (DpnII in this example), on the left- and right-hand sides. In this case the user has supplied viewpoint
+The image below shows a schematic of how the `Capture` pipeline designs oligos adjacent to the first restriction site of a specified restriction enzyme (DpnII in this example), on the left- and right-hand sides. In this case the user has supplied viewpoint
 coordinates at chr2:5500000-5500001 and chr5:63223000-63223001.
 
 .. figure:: _static/capture_oligo_gen.png
 
-    Schematic of oligo design by `capture`
+    Schematic of oligo design by `Capture`
     
 It is possible for the designed oligos to overlap, up to within 1bp of each other, when the restriction fragment is less than twice the length of the oligo. If the viewpoint coordinate is in a fragment with length less than the specified oligo length, no oligos will be generated for that fragment.
 If the fragment length exactly equals the oligo length, only one oligo will be generated.
 
 .. note::
     
-    For full functionality, `capture` should be run from the command line in order to test the efficiency of the generated oligos. This involves a pipeline that incorporates functions from the :doc:`tools <tools>` module.
+    For full functionality, `Capture` should be run from the command line in order to test the efficiency of the generated oligos. This involves a pipeline that incorporates methods from the :doc:`Tools <tools_class>` class.
 
 Usage
 =====
 
-When run from the command line, `capture.py` takes the following parameters:
+When run from the command line, `oligo.py Capture` takes the following parameters:
 
 .. option:: -h, --help
     
@@ -64,7 +64,7 @@ When run from the command line, `capture.py` takes the following parameters:
 Examples
 --------
 
-Below are examples using the `capture` pipeline for different scenarios
+Below are examples using the `Capture` pipeline for different scenarios
 
 .. code-block:: bash
     :caption: 50bp oligos for NlaIII fragments in hg19 build, using STAR to check off-target binding
@@ -104,12 +104,12 @@ Specifics
 .. _star-blat:
 
 **STAR** (:option:`-s`, :option:`--star_index`) or **BLAT** (:option:`--blat`)
-    To check for off-target binding, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `capture.py` is run with the :option:`--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
+    To check for off-target binding, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `oligo.py Capture` is run with the :option:`--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
     by the user. However, BLAT can be particulary slow for large designs, especially for the human reference genomes. STAR's exceptional speed is better suited for designs with >500 viewpoints (1000 oligos). If the :option:`--blat` flag is not selected, the path to the STAR index must be supplied
     after the :option:`-s` (or :option:`--star_index`) flag.
 
-Python
-======
+API
+===
 
 As well as being run as a full pipeline from the command line, the `oligo` classes have been written such that the individual methods can be easily run in a python shell. The `Capture` pipeline implements methods from :doc:`oligo.Capture <capture_class>`.
 The following examples show the order in which the class methods are implemented:
@@ -150,7 +150,4 @@ The following examples show the order in which the class methods are implemented
 See :doc:`oligo.Capture <capture_class>` for more detailed information
 
 .. centered:: :doc:`Top of Page <capture>`
-
-
-
 
