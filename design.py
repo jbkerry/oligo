@@ -781,7 +781,8 @@ if __name__ == '__main__':
         )
         
     c.write_oligos()
-    c.check_off_target(s_idx=args.star_index)
-    c.get_density()
+    if not args.test_fasta:    
+        c.check_off_target(s_idx=args.star_index)
+        c.get_density()
     
 
