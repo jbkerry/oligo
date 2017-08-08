@@ -13,17 +13,10 @@ oligo
     Capture-C <capture>
     Tiled Capture <tiled>
     CRISPR Off-Target <off_target>
+    classes
 
 * :ref:`genindex`
 
 For questions related to `oligo`, email jon.kerry@imm.ox.ac.uk
 
 To report a bug, open an issue on the GitHub page: https://github.com/jbkerry/oligo/issues
-
-.. toctree::
-    :hidden:
-    
-    capture_class
-    tiled_class
-    offtarget_class
-    tools_class
