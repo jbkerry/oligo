@@ -20,6 +20,11 @@ from oligo.oligo import Capture, Tiled, OffTarget, Tools, rs_dict
 #self.start = 0
 #self.stop = len(full_chr)
 
+gen_fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/WholeGenomeFasta' \
+         '/genome.fa'
+chr18_fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/Chromosomes' \
+           '/chr18.fa',
+gen_bed = '/t1-data1/WTSA_Dev/jkerry/CaptureC/DDownes/CapsequmInput_2.txt'
 pattern = re.compile('\W+')
 #f = lambda x: pattern.split(x)
 #g = lambda x: tuple(map(int, pattern.split(x)[1:5]))
@@ -116,30 +121,17 @@ class OligoGenTest_Tiled(unittest.TestCase, OligoMainMixin, OligoCaptureMixin,
                          OligoBlocksMixin):
     
     @classmethod   
-    def setUpClass(self,
-              fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
-                   'Chromosomes/chr18.fa',
-              genome = 'mm9',
-              enzyme = 'DpnII',
-              oligo = 30,
-              region = '44455000-44555000',
-              chrom = 18):
-        self.fa = fa
-        self.genome = genome
-        self.enzyme = enzyme
+    def setUpClass(self, fa=gen_fa, genome='mm9', enzyme='DpnII', oligo=30,
+                   region='44455000-44555000', chrom=18):
+
         self.res_site = rs_dict[enzyme]
         self.oligo = oligo
-        self.chrom = chrom
-        self.region = region
         self.start, self.stop = map(int, region.split('-'))
-        t = Tiled(fa=self.fa, genome=self.genome)
-        t.gen_oligos_capture(
-            chrom = self.chrom,
-            enzyme = self.enzyme,
-            oligo = self.oligo,
-            region = self.region,
-        )
-        self.seqs = t.oligo_seqs
+        
+        self.c = Tiled(fa=fa, genome=genome)
+        self.c.gen_oligos_capture(chrom=chrom, enzyme=enzyme, oligo=oligo,
+                                  region=region)
+        self.seqs = self.c.oligo_seqs
     
     @classmethod
     def tearDownClass(self):
@@ -149,89 +141,50 @@ class OligoGenTest_Tiled(unittest.TestCase, OligoMainMixin, OligoCaptureMixin,
 class OligoGenTest_FISH(unittest.TestCase, OligoMainMixin, OligoBlocksMixin):
      
     @classmethod   
-    def setUpClass(self,
-              fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
-                   'Chromosomes/chr18.fa',
-              genome = 'mm9',
-              step = 30,
-              oligo = 30,
-              region = '44455000-44555000',
-              chrom = 18):
-        self.fa = fa
-        self.genome = genome
-        self.step = step
-        self.oligo = oligo
-        self.chrom = chrom
-        self.region = region
-        self.start, self.stop = map(int, region.split('-'))
-        t = Tiled(fa=self.fa, genome=self.genome)
-        t.gen_oligos_fish(
-            chrom = self.chrom,
-            step = self.step,
-            oligo = self.oligo,
-            region = self.region,
-        )
-        self.seqs = t.oligo_seqs
+    def setUpClass(self, fa=gen_fa, genome='mm9', step=30, oligo=30,
+                   region='44455000-44555000', chrom=18):
         
-class OligoGenTest_Regions(unittest.TestCase, OligoMainMixin,
+        self.oligo = oligo
+        self.start, self.stop = map(int, region.split('-'))
+        
+        self.c = Tiled(fa=fa, genome=genome)
+        self.c.gen_oligos_fish(chrom=chrom, step=step, oligo=oligo,
+                               region=region)
+        self.seqs = self.c.oligo_seqs
+        
+class OligoGenTest_Capture(unittest.TestCase, OligoMainMixin,
                            OligoCaptureMixin):
     
     @classmethod   
-    def setUpClass(self,
-              fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
-                   'WholeGenomeFasta/genome.fa',
-              genome = 'mm9',
-              bed = '/t1-data1/WTSA_Dev/jkerry/CaptureC/DDownes/' \
-                    'CapsequmInput_2.txt',
-              enzyme = 'DpnII',
-              oligo = 30):
-        self.fa = fa
-        self.genome = genome
-        self.bed = bed
-        self.enzyme = enzyme
-        self.oligo = oligo
+    def setUpClass(self, fa=gen_fa, genome='mm9', bed=gen_bed, enzyme='DpnII',
+                   oligo=30):
+        
         self.res_site = rs_dict[enzyme]
-        self.c = Capture(fa=self.fa, genome=self.genome)
-        self.c.gen_oligos(
-            bed = self.bed,
-            enzyme = self.enzyme,
-            oligo = self.oligo,
-        )
+        self.oligo = oligo
+        
+        self.c = Capture(fa=fa, genome=genome)
+        self.c.gen_oligos(bed=bed, enzyme=enzyme, oligo=oligo)
         self.seqs = self.c.oligo_seqs
         
 class OligoGenTest_OT(unittest.TestCase, OligoMainMixin):
     
     @classmethod   
-    def setUpClass(self,
-              fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
-                   'WholeGenomeFasta/genome.fa',
-              genome = 'mm9',
-              bed = '/t1-data1/WTSA_Dev/jkerry/CaptureC/DDownes/' \
-                    'CapsequmInput_2.txt',
-              oligo = 30,
-              step = 10,
-              max_dist = 87):
-        self.fa = fa
-        self.genome = genome
+    def setUpClass(self, fa=gen_fa, genome='mm9', bed=gen_bed, oligo=30,
+                   step=10, max_dist=87):
         self.bed = bed
         self.oligo = oligo
         self.step = step
         self.max_dist = max_dist
-        o = OffTarget(fa=self.fa, genome=self.genome)
-        o.gen_oligos(
-            bed = self.bed,
-            oligo = self.oligo,
-            step = self.step,
-            max_dist = self.max_dist
-        )
-        self.seqs = o.oligo_seqs
+        self.c = OffTarget(fa=fa, genome=genome)
+        self.c.gen_oligos(bed=bed, oligo=oligo, step=step, max_dist=max_dist)
+        self.seqs = self.c.oligo_seqs
         
     def test_correct_number_of_oligos_generated(self):
         oligos_per_site = math.floor((self.max_dist-self.oligo)/self.step)*2
         with open(self.bed) as f:
-            sites = len(f.readlines())
+            #sites = len(f.readlines())
+            sites = len([x.strip() for x in f if '_' not in x.strip().split('\t')[0]])
         self.assertEqual(len(self.seqs), oligos_per_site*sites)
-
 
 if __name__ == '__main__':
     unittest.main()
