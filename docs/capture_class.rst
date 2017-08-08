@@ -1,8 +1,8 @@
-#############
-oligo.Capture
-#############
+####################
+oligo.design.Capture
+####################
 
-.. currentmodule:: oligo
+.. currentmodule:: design
 
 .. autoclass:: Capture
     :members:

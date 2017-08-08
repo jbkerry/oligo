@@ -1,8 +1,8 @@
-###########
-oligo.Tools
-###########
+##################
+oligo.design.Tools
+##################
 
-.. currentmodule:: oligo
+.. currentmodule:: design
 
 .. autoclass:: Tools
     :members:

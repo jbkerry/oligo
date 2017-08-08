@@ -1,8 +1,8 @@
-###############
-oligo.OffTarget
-###############
+######################
+oligo.design.OffTarget
+######################
 
-.. currentmodule:: oligo
+.. currentmodule:: design
 
 .. autoclass:: OffTarget
     :members:

@@ -2,9 +2,9 @@
 Capture-C
 #########
 
-.. currentmodule:: oligo
+.. currentmodule:: design
 
-:doc:`oligo.Capture <capture_class>`
+:doc:`design.Capture <capture_class>`
 
 Description
 ===========
@@ -26,7 +26,7 @@ If the fragment length exactly equals the oligo length, only one oligo will be g
 Usage
 =====
 
-When run from the command line, `oligo.py Capture` takes the following parameters:
+When run from the command line, `design.py Capture` takes the following parameters:
 
 .. option:: -h, --help
     
@@ -69,12 +69,12 @@ Below are examples using the `Capture` pipeline for different scenarios
 .. code-block:: bash
     :caption: 50bp oligos for NlaIII fragments in hg19 build, using STAR to check off-target binding
 
-    python oligo.py Capture -f ~/hg19/Sequence/genome.fa -g hg19 -b viewpoints.bed -o 50 -e NlaIII -s ~/hg19/STAR/
+    python design.py Capture -f ~/hg19/Sequence/genome.fa -g hg19 -b viewpoints.bed -o 50 -e NlaIII -s ~/hg19/STAR/
     
 .. code-block:: bash
     :caption: 70bp oligos for HindIII fragments in mm10 build, using BLAT to check off-target binding
 
-    python oligo.py Capture -f ~/mm10/Sequence/genome.fa -g mm10 -b mouse_viewpoints.bed -e HindIII --blat
+    python design.py Capture -f ~/mm10/Sequence/genome.fa -g mm10 -b mouse_viewpoints.bed -e HindIII --blat
 
 Specifics
 ---------
@@ -104,20 +104,21 @@ Specifics
 .. _star-blat:
 
 **STAR** (:option:`-s`, :option:`--star_index`) or **BLAT** (:option:`--blat`)
-    To check for off-target binding, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `oligo.py Capture` is run with the :option:`--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
+    To check for off-target binding, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `design.py Capture` is run with the :option:`--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
     by the user. However, BLAT can be particulary slow for large designs, especially for the human reference genomes. STAR's exceptional speed is better suited for designs with >500 viewpoints (1000 oligos). If the :option:`--blat` flag is not selected, the path to the STAR index must be supplied
     after the :option:`-s` (or :option:`--star_index`) flag.
 
 API
 ===
 
-As well as being run as a full pipeline from the command line, the `oligo` classes have been written such that the individual methods can be easily run in a python shell. The `Capture` pipeline implements methods from :doc:`oligo.Capture <capture_class>`.
+As well as being run as a full pipeline from the command line, the `design` classes have been written such that the individual methods can be easily run in a python shell. The `Capture` pipeline implements methods from :doc:`design.Capture <capture_class>`.
 The following examples show the order in which the class methods are implemented:
 
 .. code-block:: python
     :caption: Create a instance of the Capture class
 
-    >>> c = oligo.Capture(genome='mm9', fa='mm9_genome.fa')
+    >>> from oligo.design import Capture
+    >>> c = Capture(genome='mm9', fa='mm9_genome.fa')
     
 .. code-block:: python
     :caption: Generate oligos and write to fasta file
@@ -147,7 +148,7 @@ The following examples show the order in which the class methods are implemented
     Repeat scores calculated
     Oligo information written to oligo_info.txt
 
-See :doc:`oligo.Capture <capture_class>` for more detailed information
+See :doc:`design.Capture <capture_class>` for more detailed information
 
 .. centered:: :doc:`Top of Page <capture>`
 

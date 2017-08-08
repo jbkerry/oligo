@@ -2,9 +2,9 @@
 Tiled Capture
 #############
 
-.. currentmodule:: oligo
+.. currentmodule:: design
 
-:doc:`oligo.Tiled <tiled_class>`
+:doc:`design.Tiled <tiled_class>`
 
 Description
 ===========
@@ -27,7 +27,7 @@ If the fragment length exactly equals the oligo length, only one oligo will be g
 Usage
 =====
 
-When run from the command line, `oligo.py Tiled` takes the following parameters
+When run from the command line, `design.py Tiled` takes the following parameters
 
 .. option:: -h, --help
     
@@ -87,12 +87,12 @@ Below are examples using the `Tiled` pipeline for different scenarios
 .. code-block:: bash
     :caption: 120bp oligos for DpnII fragments in hg38 for the whole of chromsome 18, using STAR to check off-target binding
 
-    python oligo.py Tiled -f ~/hg38/Sequence/genome.fa -g hg38 -c 18 -o 120 -s ~/hg38/STAR/
+    python design.py Tiled -f ~/hg38/Sequence/genome.fa -g hg38 -c 18 -o 120 -s ~/hg38/STAR/
     
 .. code-block:: bash
     :caption: 50bp oligos across the region 10,150,000 to 10,200,000 on chromosome X of mm9, with adjacent oligos separated by a gap of 10bp, using BLAT to check off-target binding
 
-    python oligo.py Tiled --fish -f ~/mm9/Sequence/genome.fa -g mm9 -c X -r 10150000-10200000 -o 50 -t 60 --blat
+    python design.py Tiled --fish -f ~/mm9/Sequence/genome.fa -g mm9 -c X -r 10150000-10200000 -o 50 -t 60 --blat
     
 Specifics
 ---------
@@ -118,20 +118,21 @@ Specifics
 .. _star-blat:
 
 **STAR** (:option:`-s`, :option:`--star_index`) or **BLAT** (:option:`--blat`)
-    To check for off-target binding, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `oligo.py Tiled` is run with the :option:`--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
+    To check for off-target binding, either the sequence aligner STAR or the BLAST-like Alignment Tool (BLAT) can be used. By default, STAR is used, unless `design.py Tiled` is run with the :option:`--blat` flag. Since BLAT is more widely used to detect off-target binding events, this might be preferred
     by the user. However, BLAT can be particulary slow for large designs, especially for the human reference genomes. STAR's exceptional speed is better suited for designs with >1000 oligos. If the :option:`--blat` flag is not selected, the path to the STAR index must be supplied
     after the :option:`-s` (or :option:`--star_index`) flag.
     
 API
 ===
 
-As well as being run as a full pipeline from the command line, the `oligo` classes have been written such that the individual methods can be easily run in a python shell. The `Tiled` pipeline implements methods from :doc:`oligo.Tiled <tiled_class>`.
+As well as being run as a full pipeline from the command line, the `design` classes have been written such that the individual methods can be easily run in a python shell. The `Tiled` pipeline implements methods from :doc:`design.Tiled <tiled_class>`.
 The following examples show the order in which the class methods are implemented:
 
 .. code-block:: python
     :caption: Create a instance of the Tiled class
-
-    >>> t = oligo.Tiled(genome='hg38', fa='hg38_genome.fa', blat=True)
+    
+    >>> from oligo.design import Tiled
+    >>> t = Tiled(genome='hg38', fa='hg38_genome.fa', blat=True)
     
 .. code-block:: python
     :caption: Generate oligos and write to fasta file
@@ -161,6 +162,6 @@ The following examples show the order in which the class methods are implemented
     Repeat scores calculated
     Oligo information written to oligo_info.txt
 
-See :doc:`oligo.Tiled <tiled_class>` for more detailed information
+See :doc:`design.Tiled <tiled_class>` for more detailed information
 
 .. centered:: :doc:`Top of Page <tiled>`

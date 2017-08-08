@@ -2,9 +2,9 @@
 CRISPR Off-Target
 #################
 
-.. currentmodule:: oligo
+.. currentmodule:: design
 
-:doc:`oligo.OffTarget <offtarget_class>`
+:doc:`design.OffTarget <offtarget_class>`
 
 Description
 ===========
@@ -27,7 +27,7 @@ to maintain an efficient pull-down of the region. Due to these points, we recomm
 Usage
 =====
 
-When run from the command line, `oligo.py OffTarget` takes the following parameters:
+When run from the command line, `design.py OffTarget` takes the following parameters:
 
 .. option:: -h, --help
     
@@ -73,23 +73,24 @@ Below are examples using the `OffTarget` pipeline for different scenarios
 .. code-block:: bash
     :caption: 100bp oligos using the hg18 build, walking out from the off-target sites 50bp at a time up until 300bp away, using BLAT to check off-target binding
 
-    python oligo.py OffTarget -f ~/hg18/Sequence/genome.fa -g hg18 -b off_target_sites.bed -o 100 -t 50 -m 300 --blat
+    python design.py OffTarget -f ~/hg18/Sequence/genome.fa -g hg18 -b off_target_sites.bed -o 100 -t 50 -m 300 --blat
     
 .. code-block:: bash
     :caption: 50bp oligos using the mm10 build, walking out from the off-target sites 10bp at a time up until 200bp away, using STAR to check off-target binding
 
-    python oligo.py OffTarget -f ~/mm10/Sequence/genome.fa -g mm10 -b ms_off_targets.bed -o 50 -s ~/mm10/STAR/
+    python design.py OffTarget -f ~/mm10/Sequence/genome.fa -g mm10 -b ms_off_targets.bed -o 50 -s ~/mm10/STAR/
     
 API
 ===
 
-As well as being run as a full pipeline from the command line, the `oligo` classes have been written such that the individual methods can be easily run in a python shell. The `OffTarget` pipeline implements methods from :doc:`oligo.OffTarget <offtarget_class>`.
+As well as being run as a full pipeline from the command line, the `design` classes have been written such that the individual methods can be easily run in a python shell. The `OffTarget` pipeline implements methods from :doc:`design.OffTarget <offtarget_class>`.
 The following examples show the order in which the class methods are implemented:
 
 .. code-block:: python
     :caption: Create a instance of the OffTarget class
-
-    >>> o = oligo.OffTarget(genome='hg19', fa='hg19_genome.fa')
+    
+    >>> from oligo.design import OffTarget
+    >>> o = OffTarget(genome='hg19', fa='hg19_genome.fa')
     
 .. code-block:: python
     :caption: Generate oligos and write to fasta file
@@ -119,6 +120,6 @@ The following examples show the order in which the class methods are implemented
     Repeat scores calculated
     Oligo information written to oligo_info.txt
 
-See :doc:`oligo.OffTarget <offtarget_class>` for more detailed information
+See :doc:`design.OffTarget <offtarget_class>` for more detailed information
 
 .. centered:: :doc:`Top of Page <off_target>`

@@ -12,7 +12,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import _verify_alphabet
 
-from oligo.oligo import Capture, Tiled, OffTarget, Tools, rs_dict
+from oligo.design import Capture, Tiled, OffTarget, Tools, rs_dict
 
 #fa = '/databank/igenomes/Mus_musculus/UCSC/mm9/Sequence/' \
 #                  'Chromosomes/chr18.fa'

@@ -1,8 +1,8 @@
-###########
-oligo.Tiled
-###########
+##################
+oligo.design.Tiled
+##################
 
-.. currentmodule:: oligo
+.. currentmodule:: design
 
 .. autoclass:: Tiled
     :members:
