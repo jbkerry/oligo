@@ -13,11 +13,11 @@ the off-target binding and repeat content of the oligos. This information is out
 
 **Installation:**
 
-Currently the only way to obtain *oligo* is to download the `latest release <https://github.com/jbkerry/oligo/releases>`_ or clone the GitHub repository. The two essential files are *design.py* and *config.txt*.
+To start using *oligo*, either clone the GitHub repository or download the `latest release <https://github.com/jbkerry/oligo/releases>`_.
 
 **Requires:**
 
-* `Python 3 <https://docs.python.org/3/>`_ (with `pysam <http://pysam.readthedocs.io/en/latest>`_, `numpy <http://www.numpy.org/>`_ & `biopython <http://biopython.org/wiki/Biopython>`_)
+* `Python <https://docs.python.org/3/>`_ 2.7 or >=3.4  (with `pysam <http://pysam.readthedocs.io/en/latest>`_, `numpy <http://www.numpy.org/>`_, `pandas <http://pandas.pydata.org/>`_ & `biopython <http://biopython.org/wiki/Biopython>`_)
 * `RepeatMasker <http://www.repeatmasker.org/>`_
 * `STAR <https://github.com/alexdobin/STAR>`_ or `BLAT <https://genome.ucsc.edu/FAQ/FAQblat.html>`_
 

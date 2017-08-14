@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function, division
+
 import argparse
 import math
 import os
@@ -107,7 +109,7 @@ class Tools(object):
         rm_path = os.path.join(path_dict['RM_PATH'], 'RepeatMasker')
         print('Checking for repeat sequences in oligos...')
         rm_out = open('rm_log.txt', 'w')
-        subprocess.run(
+        subprocess.call(
             '{} -noint -s -species {} {}'.format(rm_path,
                                                  spe_dict[self.genome.lower()],
                                                  self.fasta),
@@ -123,7 +125,7 @@ class Tools(object):
             print('Checking off-target binding with BLAT...')
             blat_out = open('blat_log.txt', 'w')
             run_out = 'blat_out.psl'
-            subprocess.run(
+            subprocess.call(
                 ' '.join((path, blat_param, self.fa, self.fasta, run_out)),
                 shell=True,
                 stdout = blat_out,
@@ -135,7 +137,7 @@ class Tools(object):
             print('Checking off-target binding with STAR...')
             star_out = open('star_log.txt', 'w')
             run_out = 'oligos_Aligned.out.sam'
-            subprocess.run(
+            subprocess.call(
                 '{} --readFilesIn {} --genomeDir {} {}'.format(path,
                                                                self.fasta,
                                                                s_idx,
