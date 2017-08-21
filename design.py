@@ -463,7 +463,7 @@ class Tiled(Tools):
         
         return self
     
-    def gen_oligos_fish(self, chrom, region='', step=70, oligo=70):
+    def gen_oligos_contig(self, chrom, region='', step=70, oligo=70):
         """Designs adjacent oligos based on a user-defined step size,
         across a specified region of a chromosome, or for the entire
         chromosome.
@@ -615,7 +615,7 @@ if __name__ == '__main__':
                                 ', '.join(class_tup)
                             ))
     except IndexError:
-        raise IndexError('oligo.py must be followed by one of the following '
+        raise IndexError('design.py must be followed by one of the following '
                          'class names: {}'.format(', '.join(class_tup)))
     parser = argparse.ArgumentParser()
     
@@ -670,9 +670,9 @@ if __name__ == '__main__':
             required = False,
         )
         parser.add_argument(
-            '--fish',
+            '--contig',
             action = 'store_true',
-            help = 'Run in FISH mode (restriciton enzyme independent).',
+            help = 'Run in contiguous mode (restriciton enzyme independent).',
             required = False,
         )
         parser.add_argument(
@@ -681,7 +681,7 @@ if __name__ == '__main__':
             type = str,
             choices = ['DpnII', 'NlaIII', 'HindIII'],
             help = 'Name of restriction enzyme, default=DpnII. Omit this ' \
-                   'option if running in FISH mode (--fish)',
+                   'option if running in contiguous mode (--contig)',
             default = 'DpnII',
             required = False,
         )
@@ -690,8 +690,8 @@ if __name__ == '__main__':
             '--step_size',
             type = int,
             help = 'Step size (in bp) between adjacent oligos when running ' \
-                   'in FISH mode (--fish), default=70. Omit this option if ' \
-                   'you are not using the --fish flag',
+                   'in contiguous mode (--contig), default=70. Omit this option if ' \
+                   'you are not using the --contig flag',
             default = 70,
             required = False,
         )
@@ -765,8 +765,8 @@ if __name__ == '__main__':
         )
     elif class_arg == 'Tiled':
         c = Tiled(genome=args.genome, fa=args.fasta, blat=args.blat)
-        if args.fish:
-            c.gen_oligos_fish(
+        if args.contig:
+            c.gen_oligos_contig(
                 chrom = args.chr,
                 region = args.region,
                 step = args.step_size,

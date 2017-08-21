@@ -9,16 +9,16 @@ Tiled Capture
 Description
 ===========
 
-The image below shows a schematic of how `Tiled` designs oligos when run in either the default mode (top) or FISH mode (bottom). In the top panel the user has run `Tiled` supplying the region chr10:13456000-13460000 and the restriction enzyme
-DpnII. In the bottom panel the same coordinates have been used but with the :option:`--fish` flag, and the step size set to equal the oligo length, thereby generating end-to-end oligos. For Tiled FISH, the design is completely independent of
+The image below shows a schematic of how `Tiled` designs oligos when run in either the default mode (top) or contiguous mode (bottom). In the top panel the user has run `Tiled` supplying the region chr10:13456000-13460000 and the restriction enzyme
+DpnII. In the bottom panel the same coordinates have been used but with the :option:`--contig` flag, and the step size set to equal the oligo length, thereby generating end-to-end oligos. For contiguous Tiled, the design is completely independent of
 any restriction enzyme recognition sequences, however the DpnII sites have been left on the image for consistency.
 
 .. figure:: _static/tiled.png
 
-    Schematic of oligo design by `Tiled`, in default (top) and FISH (bottom) modes
+    Schematic of oligo design by `Tiled`, in default (top) and contiguous (bottom) modes
     
 It is possible for the Tiled Capture oligos to overlap, up to within 1bp of each other, when the restriction fragment is less than twice the length of the oligo. If the specified region consists of a fragment with length less than the specified oligo length, no oligos will be generated for that fragment.
-If the fragment length exactly equals the oligo length, only one oligo will be generated. Similarly, in Tiled FISH, oligos can be designed such that they overlap up to within 1bp of each other; in this case, the step size would be set to 1.
+If the fragment length exactly equals the oligo length, only one oligo will be generated. Similarly, in contiguous Tiled, oligos can be designed such that they overlap up to within 1bp of each other; in this case, the step size would be set to 1.
 
 .. note::
     
@@ -33,9 +33,9 @@ When run from the command line, `design.py Tiled` takes the following parameters
     
     (flag) Show this help message and exit
     
-.. option:: --fish
+.. option:: --contig
 
-    (flag) Run the pipeline in :ref:`FISH mode <fish>`
+    (flag) Run the pipeline in :ref:`contiguous mode <contig>`
     
 .. option:: -f <reference fasta>, --fasta <reference fasta>
     
@@ -59,7 +59,7 @@ When run from the command line, `design.py Tiled` takes the following parameters
 .. option:: -e <enzyme>, --enzyme <enzyme>
 
     ({DpnII, NlaIII, HindIII}, optional) Name of the :ref:`restriction enzyme <enzyme>` to be used
-    for fragment digestion, default=DpnII; omit this option if running in FISH mode (:option:`--fish`)
+    for fragment digestion, default=DpnII; omit this option if running in contiguous mode (:option:`--contig`)
     
 .. option:: -o <oligo length>, --oligo <oligo length>
 
@@ -68,8 +68,8 @@ When run from the command line, `design.py Tiled` takes the following parameters
 .. option:: -t <step size>, --step_size <step size>
 
     (int, optional) The number of base-pairs between the start coordinates of adjacent oligos (:ref:`see below <step>`), when running in
-    FISH mode (:option:`--fish`), default=70; omit this option if you are not using
-    the :option:`--fish` flag
+    contiguous mode (:option:`--contig`), default=70; omit this option if you are not using
+    the :option:`--contig` flag
     
 .. option:: -s <STAR index>, --star_index <STAR index>
 
@@ -92,21 +92,21 @@ Below are examples using the `Tiled` pipeline for different scenarios
 .. code-block:: bash
     :caption: 50bp oligos across the region 10,150,000 to 10,200,000 on chromosome X of mm9, with adjacent oligos separated by a gap of 10bp, using BLAT to check off-target binding
 
-    $ python design.py Tiled --fish -f ~/mm9/Sequence/genome.fa -g mm9 -c X -r 10150000-10200000 -o 50 -t 60 --blat
+    $ python design.py Tiled --contig -f ~/mm9/Sequence/genome.fa -g mm9 -c X -r 10150000-10200000 -o 50 -t 60 --blat
     
 Specifics
 ---------
 
-.. _fish:
+.. _contig:
 
-**FISH** (:option:`--fish`)
-    Running the pipeline in FISH mode no longer restricts oligo design to Capture-C specification and hence the oligos are designed independently of any restriction fragment or recognition sequence. Instead, the user defines a :ref:`step size <step>` (:option:`-t`, :option:`--step_size`)
+**Contiguous mode** (:option:`--contig`)
+    Running the pipeline in contiguous mode no longer restricts oligo design to Capture-C specification and hence the oligos are designed independently of any restriction fragment or recognition sequence. Instead, the user defines a :ref:`step size <step>` (:option:`-t`, :option:`--step_size`)
     to design oligos within close proximity to each other, across a specified region (:option:`-r`, :option:`--region`) or entire chromosome
    
 .. _enzyme:
 
 **Restriction enzyme** (:option:`-e`, :option:`--enzyme`)
-    The restriction enzyme being used in the Tiled Capture experiment (if not running in FISH mode). This determines the recogition sequence used to define the fragment boundaries and hence the starts and ends of the oligos. The current version supports `DpnII` (GATC), `NlaIII` (CATG) and `HindIII` (AAGCTT).
+    The restriction enzyme being used in the Tiled Capture experiment (if not running in contiguous mode). This determines the recogition sequence used to define the fragment boundaries and hence the starts and ends of the oligos. The current version supports `DpnII` (GATC), `NlaIII` (CATG) and `HindIII` (AAGCTT).
     If this option is omitted, `DpnII` will be used by default.
     
 .. _step:

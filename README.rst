@@ -1,10 +1,10 @@
 Capture Oligo Design
 ====================
 
-The *design.py* module consists of three classes for Capture-C and FISH oligo design.
+The *design.py* module consists of three classes for Capture-C oligo design.
 
 * `Capture <http://oligo.rtfd.io/en/latest/capture.html>`_: designs oligos for a standard Capture-C experiment. The user supplies a list of viewpoint coordinates, and oligos are generated adjacent to the flanking recognition sequence of a specified restriction enzyme.
-* `Tiled <http://oligo.rtfd.io/en/latest/tiled.html>`_: designs oligos for multiple adjacent restriction fragments across a specified region of a chromosome, or for the entire chromosome. If *Tiled* is run in FISH mode, oligos are generated independent of restriction fragments and
+* `Tiled <http://oligo.rtfd.io/en/latest/tiled.html>`_: designs oligos for multiple adjacent restriction fragments across a specified region of a chromosome, or for the entire chromosome. If *Tiled* is run in contiguous mode, oligos are generated independent of restriction fragments and
   are instead generated for a user-specified step size, in an adjacent manner.
 * `OffTarget <http://oligo.rtfd.io/en/latest/off_target.html>`_: designs oligos to capture DNA surrounding potential CRISPR off-target cut sites to allow for efficient sequencing to determine off-target activity.
 
