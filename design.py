@@ -10,10 +10,10 @@ import re
 import subprocess
 import sys
 
-import numpy as np
-import pandas as pd
-import pysam
-from Bio import SeqIO
+import numpy as np  # >=1.7
+import pandas as pd  # >=0.17
+import pysam  # >=0.8
+from Bio import SeqIO  # >=1.60
 
 rs_dict = {'DpnII': 'GATC',
            'NlaIII': 'CATG',
@@ -268,9 +268,13 @@ class Tools(object):
                 if w_list[3:6] == ['000', '000', 'X']: w_list[3:6] = '.' * 3
                 if self._assoc:
                     if w_list[3:6] == ['.', '.', '.']:
-                        coor = '{}:{}-{}'.format(w_list[0], w_list[1], w_list[2])
+                        coor = '{}:{}-{}'.format(w_list[0],
+                                                 w_list[1],
+                                                 w_list[2])
                     else:
-                        coor = '{}:{}-{}'.format(w_list[0], w_list[3], w_list[4])
+                        coor = '{}:{}-{}'.format(w_list[0],
+                                                 w_list[3],
+                                                 w_list[4])
                     w_list.append(self._assoc.get(coor, '.'))
                 else:
                     w_list.append('.')
@@ -356,7 +360,8 @@ class Capture(Tools):
                     self._assoc[frag_key] = '{}{},'.format(
                         self._assoc.get(frag_key, ''), name)
                     
-                    l_key = '{}:{}-L'.format(chr_name, '-'.join(map(str, l_tup)))
+                    l_key = '{}:{}-L'.format(chr_name, '-'.join(map(str,
+                                                                    l_tup)))
                     if l_key in self.oligo_seqs:
                         print('{} ({}) is redundant to another position'.format(
                             vp_coor, name), file=sys.stderr)
@@ -369,8 +374,8 @@ class Capture(Tools):
                                                '-'.join(map(str, r_tup)))
                                 ] = str(r_seq)
                 else:
-                    print('{} ({}) is in a fragment that is too small. Skipping.'.format(
-                            vp_coor, name), file=sys.stderr)
+                    print('{} ({}) is in a fragment that is too small. '
+                          'Skipping.'.format(vp_coor, name), file=sys.stderr)
         
         print('\t...complete.')
         if __name__ != '__main__':
@@ -449,7 +454,8 @@ class Tiled(Tools):
                                    ] = str(r_seq)
             else:
                 print('The fragment {}:{}-{} is too small to design oligos '
-                      'in. Skipping.'.format(chr_name, l_start, r_stop), file=sys.stderr)
+                      'in. Skipping.'.format(chr_name, l_start, r_stop),
+                      file=sys.stderr)
         
         print('\t...complete.')
         if __name__ != '__main__':
@@ -567,8 +573,8 @@ class OffTarget(Tools):
                     r_coor = '{}:{}-{}'.format(chr_name, r_start, r_stop)
                     
                     if l_start<0:
-                        print('Oligo {} for off-target site {} could not ' \
-                              'be generated because it went beyond the start of ' \
+                        print('Oligo {} for off-target site {} could not be '
+                              'generated because it went beyond the start of '
                               'the chromosome'.format(l_coor, name),
                         file=sys.stderr)
                     else:
@@ -577,8 +583,8 @@ class OffTarget(Tools):
                             l_seq)
                         
                     if r_stop>chr_length:
-                        print('Oligo {} for off-target site {} could not ' \
-                              'be generated because it went beyond the end of ' \
+                        print('Oligo {} for off-target site {} could not '
+                              'be generated because it went beyond the end of '
                               'the chromosome'.format(r_coor, name),
                         file=sys.stderr)
                     else:
@@ -658,8 +664,8 @@ if __name__ == '__main__':
             '-r',
             '--region',
             type = str,
-            help = 'The region in which to design the oligos; must be in the ' \
-                   'format \'start-stop\' e.g. \'10000-20000\'. Omit this ' \
+            help = 'The region in which to design the oligos; must be in the' \
+                   ' format \'start-stop\' e.g. \'10000-20000\'. Omit this ' \
                    'option to design oligos across the entire chromosome.',
             required = False,
         )
@@ -674,8 +680,8 @@ if __name__ == '__main__':
             '--enzyme',
             type = str,
             choices = ['DpnII', 'NlaIII', 'HindIII'],
-            help = 'Name of restriction enzyme, default=DpnII. Omit this option ' \
-                   'if running in FISH mode (--fish)',
+            help = 'Name of restriction enzyme, default=DpnII. Omit this ' \
+                   'option if running in FISH mode (--fish)',
             default = 'DpnII',
             required = False,
         )
@@ -683,9 +689,9 @@ if __name__ == '__main__':
             '-t',
             '--step_size',
             type = int,
-            help = 'Step size (in bp) between adjacent oligos when running in ' \
-                   'FISH mode (--fish), default=70. Omit this option if you are ' \
-                   'not using the --fish flag',
+            help = 'Step size (in bp) between adjacent oligos when running ' \
+                   'in FISH mode (--fish), default=70. Omit this option if ' \
+                   'you are not using the --fish flag',
             default = 70,
             required = False,
         )
