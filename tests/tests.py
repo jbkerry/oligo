@@ -138,7 +138,7 @@ class OligoGenTest_Tiled(unittest.TestCase, OligoMainMixin, OligoCaptureMixin,
         pass
 
         
-class OligoGenTest_FISH(unittest.TestCase, OligoMainMixin, OligoBlocksMixin):
+class OligoGenTest_Contig(unittest.TestCase, OligoMainMixin, OligoBlocksMixin):
      
     @classmethod   
     def setUpClass(self, fa=gen_fa, genome='mm9', step=30, oligo=30,
@@ -148,10 +148,10 @@ class OligoGenTest_FISH(unittest.TestCase, OligoMainMixin, OligoBlocksMixin):
         self.start, self.stop = map(int, region.split('-'))
         
         self.c = Tiled(fa=fa, genome=genome)
-        self.c.gen_oligos_fish(chrom=chrom, step=step, oligo=oligo,
-                               region=region)
+        self.c.gen_oligos_contig(chrom=chrom, step=step, oligo=oligo,
+                                 region=region)
         self.seqs = self.c.oligo_seqs
-        
+    
 class OligoGenTest_Capture(unittest.TestCase, OligoMainMixin,
                            OligoCaptureMixin):
     
@@ -185,6 +185,38 @@ class OligoGenTest_OT(unittest.TestCase, OligoMainMixin):
             #sites = len(f.readlines())
             sites = len([x.strip() for x in f if '_' not in x.strip().split('\t')[0]])
         self.assertEqual(len(self.seqs), oligos_per_site*sites)
+        
+class MappingTest_Capture(OligoGenTest_Capture):
+    
+    @classmethod
+    def setUpClass(self):
+        pass
+        #super(MappingTest_Capture, self).setUpClass()
+        #self.c.write_oligos()
+    
+    @classmethod
+    def tearDownClass(self):
+        os.remove('oligo_seqs.fa')
+        
+    def test_sam_file_is_created(self):
+        self.c.write_oligos()
+        self.c.check_off_target(s_idx='/databank/igenomes/Mus_musculus/UCSC/'
+                                'mm9/Sequence/STAR')
+        self.assertTrue(os.path.exists('./file.sam'))
+    
+    
+    
+        
+class ValueTests(unittest.TestCase):
+    
+    @classmethod
+    def setUpClass(self):
+        self.d = Tiled(fa=gen_fa, genome='mm9')
+    
+    def test_step_size_less_than_one_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.d.gen_oligos_contig(chrom=18, step=0, oligo=30,
+                                     region='44455000-44555000')
 
 if __name__ == '__main__':
     unittest.main()

@@ -33,6 +33,12 @@ star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 ' \
              '--limitOutSAMoneReadBytes 400000 --outFileNamePrefix oligos_'
 
+def check_value(x, l):
+    for value, label in zip(x, l):
+        if (value<1) | isinstance(value, float):
+            raise ValueError(
+                '{} must be an integer greater than 0'.format(label))
+
 class Tools(object):
     """
     
@@ -321,6 +327,8 @@ class Capture(Tools):
         
         """
         
+        check_value((oligo,), ('Oligo size',))
+        
         cut_sites = {}
         cut_size = len(rs_dict[enzyme])
         p = re.compile(rs_dict[enzyme])
@@ -386,6 +394,8 @@ class Capture(Tools):
 class Tiled(Tools):
     """Designs oligos adjacent to each other or on adjacent fragments"""
     
+    __doc__ += Tools.__doc__
+    
     def gen_oligos_capture(self, chrom, region='', enzyme='DpnII', oligo=70):
         """Designs oligos for multiple adjacent restriction fragments
         across a specified region of a chromosome, or for the entire
@@ -409,6 +419,8 @@ class Tiled(Tools):
         self : object
     
         """
+        
+        check_value((oligo,), ('Oligo size',))
         
         chr_name = 'chr'+str(chrom)
         
@@ -481,11 +493,18 @@ class Tiled(Tools):
         oligo : int, optional
             The length of the oligos to design (bp), default=70
             
+        Raises
+        ------
+        ValueError
+            If `step` or `oligo` <1 or not an integer
+            
         Returns
         -------
         self : object
         
         """
+        
+        check_value((step, oligo), ('Step size', 'Oligo size'))
         
         chr_name = 'chr'+str(chrom)
         
@@ -509,7 +528,7 @@ class Tiled(Tools):
             self.oligo_seqs['{}:{}-{}-000-000-X'.format(chr_name,
                                                         start,
                                                         stop)] = ol_seq
-            start+=step  
+            start += step  
         
         print('\t...complete.')
         if __name__ != '__main__':
@@ -519,6 +538,8 @@ class Tiled(Tools):
     
 class OffTarget(Tools):
     """Designs oligos adjacent to potential CRISPR off-target sites"""
+    
+    __doc__ += Tools.__doc__
     
     def gen_oligos(self, bed, oligo=70, step=10, max_dist=200):
         r"""Designs oligos adjacent to user-supplied coordinates for
@@ -544,6 +565,9 @@ class OffTarget(Tools):
         self : object
         
         """
+        
+        check_value((step, oligo, max_dist),
+                    ('Step size', 'Oligo size', 'Maximum distance'))
         
         print('Loading reference fasta file...')
         seq_dict = SeqIO.to_dict(SeqIO.parse(self.fa, 'fasta'))
