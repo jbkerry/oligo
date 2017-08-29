@@ -15,15 +15,15 @@ import pandas as pd  # >=0.17
 import pysam  # >=0.8
 from Bio import SeqIO  # >=1.60
 
-rs_dict = {'DpnII': 'GATC',
-           'NlaIII': 'CATG',
-           'HindIII': 'AAGCTT'}
+recognition_seq = {'DpnII': 'GATC',
+                   'NlaIII': 'CATG',
+                   'HindIII': 'AAGCTT'}
 
-spe_dict = {'mm9': 'mouse',
-            'mm10': 'mouse',
-            'hg18': 'human',
-            'hg19': 'human',
-            'hg38': 'human'}
+species = {'mm9': 'mouse',
+           'mm10': 'mouse',
+           'hg18': 'human',
+           'hg19': 'human',
+           'hg38': 'human'}
 
 blat_param = '-stepSize=5 -minScore=10 -minIdentity=0 -repMatch=999999'
 star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
@@ -38,6 +38,9 @@ def check_value(x, l):
         if (value<1) | isinstance(value, float):
             raise ValueError(
                 '{} must be an integer greater than 0'.format(label))
+            break
+    else:
+        return None
 
 class Tools(object):
     """
@@ -117,7 +120,7 @@ class Tools(object):
         rm_out = open('rm_log.txt', 'w')
         subprocess.call(
             '{} -noint -s -species {} {}'.format(rm_path,
-                                                 spe_dict[self.genome.lower()],
+                                                 species[self.genome.lower()],
                                                  self.fasta),
             shell = True,
             stdout = rm_out,
@@ -330,8 +333,8 @@ class Capture(Tools):
         check_value((oligo,), ('Oligo size',))
         
         cut_sites = {}
-        cut_size = len(rs_dict[enzyme])
-        p = re.compile(rs_dict[enzyme])
+        cut_size = len(recognition_seq[enzyme])
+        p = re.compile(recognition_seq[enzyme])
         
         print('Loading reference fasta file...')
         seq_dict = SeqIO.to_dict(SeqIO.parse(self.fa, 'fasta'))
@@ -355,7 +358,7 @@ class Capture(Tools):
                 r_stop = cut_sites[chr_name][cut_sites[chr_name] >= start][0] + cut_size # currently this picks an adjacent fragment if the site is in a cutsite; are we okay with that?
                 frag_len = r_stop - l_start
                 
-                if frag_len>=oligo:
+                if frag_len >= oligo:
                     l_stop = l_start + oligo
                     r_start = r_stop - oligo
                     
@@ -434,12 +437,12 @@ class Tiled(Tools):
         else:
             start, stop = map(int, region.split('-'))
         
-        p = re.compile(rs_dict[enzyme])
+        p = re.compile(recognition_seq[enzyme])
         pos_list = []
         for m in p.finditer(str(seq[start:stop])):
             pos_list.append(m.start()+start)
         
-        cut_size = len(rs_dict[enzyme])
+        cut_size = len(recognition_seq[enzyme])
            
         for i in range(len(pos_list)-1):
             j = i + 1
