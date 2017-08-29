@@ -3,6 +3,7 @@
 from __future__ import print_function, division
 
 import argparse
+from collections import namedtuple
 import math
 import os
 import pickle
@@ -33,8 +34,8 @@ star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 ' \
              '--limitOutSAMoneReadBytes 400000 --outFileNamePrefix oligos_'
 
-def check_value(x, l):
-    for value, label in zip(x, l):
+def check_value(values, labels):
+    for value, label in zip(values, labels):
         if (value<1) | isinstance(value, float):
             raise ValueError(
                 '{} must be an integer greater than 0'.format(label))
@@ -83,7 +84,7 @@ class Tools(object):
         
         return None
     
-    def check_off_target(self, s_idx=''):
+    def align_to_genome(self, s_idx=''):
         """Checks for repeat sequences in oligos in fasta file using
         RepeatMasker and checks for off-target binding using either
         BLAT or STAR
@@ -104,6 +105,23 @@ class Tools(object):
             
         """
         
+        def run_command(options, cmd, msg):
+            CmdOptions = namedtuple('CmdOptions', ['paths_key', 'exe',
+                                                   'name', 'log_file',
+                                                   'output_file'])           
+            run_options = CmdOptions._make(options)
+            path = os.path.join(paths[run_options.paths_key], run_options.exe)
+            print('{} with {}...'.format(msg, run_options.name))
+            log = open(run_options.log_file, 'w')
+            subprocess.call(' '.join((path, cmd)), shell=True, stdout=log,
+                            stderr=log)
+            log.close()
+            
+            print('\t...complete. Alignments written to {}'.format(
+                  run_options.output_file))
+            
+            return None
+        
         if (not self.blat) and (not s_idx):
             raise AttributeError('Path to STAR index must be set if '
                                  'blat=False')
@@ -112,52 +130,30 @@ class Tools(object):
                                     'not found'.format(self.fasta))
         
         p = re.compile('^[A-Z]')
-        config_file = './config.txt'
-        path_list = [x.strip() for x in open(config_file) if p.match(x)]
-        path_dict = dict(item.split(' = ') for item in path_list)
-        rm_path = os.path.join(path_dict['RM_PATH'], 'RepeatMasker')
-        print('Checking for repeat sequences in oligos...')
-        rm_out = open('rm_log.txt', 'w')
-        subprocess.call(
-            '{} -noint -s -species {} {}'.format(rm_path,
-                                                 species[self.genome.lower()],
-                                                 self.fasta),
-            shell = True,
-            stdout = rm_out,
-            stderr = rm_out,
-        )
-        rm_out.close()
-        print('\t...complete')
+        paths = dict((x.strip().split(' = ') for x in open(
+            '.config.txt') if p.match(x)))
+        
+        rm_options = ('RM_PATH', 'RepeatMasker', 'RepeatMasker', 'rm_log.txt',
+                      ''.join((self.fasta, '.out')))
+        rm_cmd = '-noint -s -species {} {}'.format(
+                     species[self.genome.lower()], self.fasta)
+        rm_msg = 'Checking for for repeat sequence in oligos,'
+        
+        run_command(rm_options, rm_cmd, rm_msg)  # Repeat Masker
         
         if self.blat:
-            path = os.path.join(path_dict['BLAT_PATH'], 'blat')
-            print('Checking off-target binding with BLAT...')
-            blat_out = open('blat_log.txt', 'w')
-            run_out = 'blat_out.psl'
-            subprocess.call(
-                ' '.join((path, blat_param, self.fa, self.fasta, run_out)),
-                shell=True,
-                stdout = blat_out,
-                stderr = blat_out,
-            )
-            blat_out.close()
+            blat_out = 'blat_out.psl'
+            aligner_options = ('BLAT_PATH', 'blat', 'BLAT', 'blat_log.txt',
+                           blat_out)
+            aligner_cmd = ' '.join((blat_param, self.fa, self.fasta, blat_out))
         else:
-            path = os.path.join(path_dict['STAR_PATH'], 'STAR')
-            print('Checking off-target binding with STAR...')
-            star_out = open('star_log.txt', 'w')
-            run_out = 'oligos_Aligned.out.sam'
-            subprocess.call(
-                '{} --readFilesIn {} --genomeDir {} {}'.format(path,
-                                                               self.fasta,
-                                                               s_idx,
-                                                               star_param),
-                shell = True,
-                stdout = star_out,
-                stderr = star_out,
-            )
-            star_out.close()
-            
-        print('\t...complete. Alignments written to {}'.format(run_out))
+            aligner_options = ('STAR_PATH', 'STAR', 'STAR', 'star_log.txt',
+                           'oligos_Aligned.out.sam')
+            aligner_cmd = '--readFilesIn {} --genomeDir {} {}'.format(
+                self.fasta, s_idx, star_param)
+        aligner_msg = 'Aligning oligos to the genome,'
+        
+        run_command(aligner_options, aligner_cmd, aligner_msg)  # STAR/BLAT
         
         return None
     
@@ -171,10 +167,10 @@ class Tools(object):
         Parameters
         ----------
         sam : str
-            Path to STAR alignment (.sam) file from `check_off_targets`
+            Path to STAR alignment (.sam) file from `align_to_genome`
             (not required if `blat`=True), default = oligos_Aligned.out.sam
         blat_file : str
-            Path to BLAT alignment (.psl) file from `check_off_targets`
+            Path to BLAT alignment (.psl) file from `align_to_genome`
             (not required if `blat`=False), default = blat_out.psl
         
         """
@@ -184,10 +180,10 @@ class Tools(object):
         self._all_oligos = {}
         with open(self.fasta) as f:
             for x in f:
-                header = re.sub('>', '', x.rstrip('\n'))
+                read_name = x.lstrip('>').rstrip('\n')
                 seq = next(f).rstrip('\n')
-                self._all_oligos[header] = [seq, 0, 0, 0, 'NA',
-                                            self._get_gc(seq), 0, 0]
+                self._all_oligos[read_name] = [seq, 0, 0, 0, 'NA',
+                                                self._get_gc(seq), 0, 0]
         if self.blat:        
             with open(blat_file) as f:
                 for _ in range(5):
@@ -817,7 +813,7 @@ if __name__ == '__main__':
         
     c.write_oligos()
     if not args.test_fasta:    
-        c.check_off_target(s_idx=args.star_index)
+        c.align_to_genome(s_idx=args.star_index)
         c.get_density()
     
 
