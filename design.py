@@ -33,6 +33,8 @@ star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
              '--seedSearchLmax 20 --alignIntronMax 10 --seedPerWindowNmax ' \
              '15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 ' \
              '--limitOutSAMoneReadBytes 400000 --outFileNamePrefix oligos_'
+p = re.compile('^[A-Z]')
+paths = dict((x.strip().split(' = ') for x in open('./config.txt') if p.match(x)))
 
 def check_value(values, labels):
     for value, label in zip(values, labels):
@@ -84,10 +86,21 @@ class Tools(object):
         
         return None
     
+    def check_repeats(self):
+        """Check for repeat sequences in oligos, using RepeatMasker"""
+        
+        repeat_options = ('RM_PATH', 'RepeatMasker', 'RepeatMasker',
+                          'rm_log.txt', ''.join((self.fasta, '.out')))
+        repeat_cmd = '-noint -s -species {} {}'.format(
+                     species[self.genome.lower()], self.fasta)
+        repeat_msg = 'Checking for repeat sequences in oligos,'   
+        
+        self._run_command(repeat_options, repeat_cmd, repeat_msg)
+        
+        return None
+    
     def align_to_genome(self, s_idx=''):
-        """Checks for repeat sequences in oligos in fasta file using
-        RepeatMasker and checks for off-target binding using either
-        BLAT or STAR
+        """Aligns oligos to the genome using BLAT or STAR
         
         Parameters
         ----------
@@ -105,41 +118,12 @@ class Tools(object):
             
         """
         
-        def run_command(options, cmd, msg):
-            CmdOptions = namedtuple('CmdOptions', ['paths_key', 'exe',
-                                                   'name', 'log_file',
-                                                   'output_file'])           
-            run_options = CmdOptions._make(options)
-            path = os.path.join(paths[run_options.paths_key], run_options.exe)
-            print('{} with {}...'.format(msg, run_options.name))
-            log = open(run_options.log_file, 'w')
-            subprocess.call(' '.join((path, cmd)), shell=True, stdout=log,
-                            stderr=log)
-            log.close()
-            
-            print('\t...complete. Alignments written to {}'.format(
-                  run_options.output_file))
-            
-            return None
-        
         if (not self.blat) and (not s_idx):
             raise AttributeError('Path to STAR index must be set if '
                                  'blat=False')
         if not os.path.exists(self.fasta):
             raise FileNotFoundError('A valid FASTA file with the name {} was '
                                     'not found'.format(self.fasta))
-        
-        p = re.compile('^[A-Z]')
-        paths = dict((x.strip().split(' = ') for x in open(
-            '.config.txt') if p.match(x)))
-        
-        rm_options = ('RM_PATH', 'RepeatMasker', 'RepeatMasker', 'rm_log.txt',
-                      ''.join((self.fasta, '.out')))
-        rm_cmd = '-noint -s -species {} {}'.format(
-                     species[self.genome.lower()], self.fasta)
-        rm_msg = 'Checking for for repeat sequence in oligos,'
-        
-        run_command(rm_options, rm_cmd, rm_msg)  # Repeat Masker
         
         if self.blat:
             blat_out = 'blat_out.psl'
@@ -148,19 +132,19 @@ class Tools(object):
             aligner_cmd = ' '.join((blat_param, self.fa, self.fasta, blat_out))
         else:
             aligner_options = ('STAR_PATH', 'STAR', 'STAR', 'star_log.txt',
-                           'oligos_Aligned.out.sam')
+                               'oligos_Aligned.out.sam')
             aligner_cmd = '--readFilesIn {} --genomeDir {} {}'.format(
                 self.fasta, s_idx, star_param)
         aligner_msg = 'Aligning oligos to the genome,'
         
-        run_command(aligner_options, aligner_cmd, aligner_msg)  # STAR/BLAT
+        self._run_command(aligner_options, aligner_cmd, aligner_msg)
         
         return None
     
     def get_density(self,
                     sam='oligos_Aligned.out.sam',
                     blat_file='blat_out.psl'):
-        """Calculates the and repeat scores and off-target binding for
+        """Calculates the repeat scores and off-target binding for
         each oligo based on their scores from RepeatMasker and
         STAR/BLAT. Outputs results to `oligo_info.txt`.
         
@@ -216,6 +200,24 @@ class Tools(object):
         print('Density scores calculated')
         self._get_repeats()
         self._write_file()
+        
+        return None
+    
+    def _run_command(self, options, cmd, msg):
+        """Runs a command using subprocess"""
+        
+        CmdOptions = namedtuple('CmdOptions', ['paths_key', 'exe',
+                                               'name', 'log_file',
+                                               'output_file'])           
+        run_options = CmdOptions._make(options)
+        path = os.path.join(paths[run_options.paths_key], run_options.exe)
+        print('{} with {}...'.format(msg, run_options.name))
+        log = open(run_options.log_file, 'w')
+        subprocess.call(' '.join((path, cmd)), shell=True, stdout=log,
+                        stderr=log)
+        log.close()
+        print('\t...complete. Output written to {}'.format(
+            run_options.output_file))
         
         return None
         
@@ -389,6 +391,17 @@ class Capture(Tools):
             print('Oligos stored in the oligo_seqs attribute')
         
         return self
+    
+    def __repr__(self):
+        
+        return 'Instance of oligo.design Capture class. Run ' \
+               'self.gen_oligos(*args) to generate oligos to the {} ' \
+               'genome'.format(self.genome)
+    
+    def __str__(self):
+        
+        return 'Capture-C oligo design object for the {} genome'.format(
+            self.genome)
     
 class Tiled(Tools):
     """Designs oligos adjacent to each other or on adjacent fragments"""
