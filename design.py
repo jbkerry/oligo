@@ -25,16 +25,17 @@ species = {'mm9': 'mouse',
            'hg19': 'human',
            'hg38': 'human'}
 
+repeat_param = '-noint -s -species {} {}'
 blat_param = '-stepSize=5 -minScore=10 -minIdentity=0 -repMatch=999999'
-star_param = '--runThreadN 4 --genomeLoad NoSharedMemory ' \
+star_param = '--readFilesIn {} --genomeDir {} --runThreadN 4 --genomeLoad NoSharedMemory ' \
              '--outFilterMultimapScoreRange 1000 --outFilterMultimapNmax ' \
              '100000 --outFilterMismatchNmax 110 --seedSearchStartLmax 4 ' \
              '--seedSearchLmax 20 --alignIntronMax 10 --seedPerWindowNmax ' \
              '15 --seedMultimapNmax 11000 --winAnchorMultimapNmax 200 ' \
              '--limitOutSAMoneReadBytes 400000 --outFileNamePrefix oligos_'
 
-p = re.compile('^[A-Z]')
-paths = dict((x.strip().split(' = ') for x in open('./config.txt') if p.match(x)))
+pat = re.compile('^[A-Z]')
+paths = dict((x.strip().split(' = ') for x in open('./config.txt') if pat.match(x)))
 
 def check_value(values, labels):
     for value, label in zip(values, labels):
@@ -73,6 +74,7 @@ class Tools(object):
         self.blat = blat
         self.fasta = 'oligo_seqs.fa'
         self.oligo_seqs = {}
+        self._oligo_stats = {}
         self._assoc = {}
 
     def write_fasta(self):
@@ -89,13 +91,12 @@ class Tools(object):
     def detect_repeats(self):
         """Detects repeat sequences in oligos, using RepeatMasker"""
         
-        repeat_options = ('RM_PATH', 'RepeatMasker', 'RepeatMasker',
-                          'rm_log.txt', ''.join((self.fasta, '.out')))
-        repeat_cmd = '-noint -s -species {} {}'.format(
-                     species[self.genome.lower()], self.fasta)
-        repeat_msg = 'Checking for repeat sequences in oligos,'   
+        options = ('RM_PATH', 'RepeatMasker', 'RepeatMasker',
+                   'rm_log.txt', ''.join((self.fasta, '.out')))
+        cmd = repeat_param.format(species[self.genome.lower()], self.fasta)
+        msg = 'Checking for repeat sequences in oligos,'
         
-        self._run_command(repeat_options, repeat_cmd, repeat_msg)
+        self._run_command(options, cmd, msg)
         
         return self
     
@@ -127,17 +128,15 @@ class Tools(object):
         
         if self.blat:
             blat_out = 'blat_out.psl'
-            aligner_options = ('BLAT_PATH', 'blat', 'BLAT', 'blat_log.txt',
-                           blat_out)
-            aligner_cmd = ' '.join((blat_param, self.fa, self.fasta, blat_out))
+            options = ('BLAT_PATH', 'blat', 'BLAT', 'blat_log.txt', blat_out)
+            cmd = ' '.join((blat_param, self.fa, self.fasta, blat_out))
         else:
-            aligner_options = ('STAR_PATH', 'STAR', 'STAR', 'star_log.txt',
-                               'oligos_Aligned.out.sam')
-            aligner_cmd = '--readFilesIn {} --genomeDir {} {}'.format(
-                self.fasta, s_idx, star_param)
-        aligner_msg = 'Aligning oligos to the genome,'
+            options = ('STAR_PATH', 'STAR', 'STAR', 'star_log.txt',
+                       'oligos_Aligned.out.sam')
+            cmd = star_param.format(self.fasta, s_idx)
+        msg = 'Aligning oligos to the genome,'
         
-        self._run_command(aligner_options, aligner_cmd, aligner_msg)
+        self._run_command(options, cmd, msg)
         
         return None
     
@@ -147,7 +146,7 @@ class Tools(object):
         
         """
         
-        if not self._oligo_stats: _create_oligo_stats()
+        if not self._oligo_stats: self._populate_oligo_stats()
         
         with open('.'.join((self.fasta, 'out'))) as repeats_file:
             if len(repeats_file.readlines())>1:
@@ -193,7 +192,7 @@ class Tools(object):
         
         """
         
-        if not self._oligo_stats: _create_oligo_stats()
+        if not self._oligo_stats: self._populate_oligo_stats()
         
         if self.blat:        
             with open(blat_file) as f:
@@ -231,30 +230,37 @@ class Tools(object):
         return self
     
     def write_oligo_info(self):
-        """Writes oligo information to oligo_info.txt"""
+        """Writes oligo stats to oligo_info.txt"""
         
         p = re.compile('\W+')
-        with open('oligo_info.txt', 'w') as f:
-            f.write('chr\tstart\tstop\tfragment_start\tfragment_stop\t'
+        with open('oligo_info.txt', 'w') as output:
+            output.write('chr\tstart\tstop\tfragment_start\tfragment_stop\t'
                     'side_of_fragment\tsequence\ttotal_number_of_alignments\t'
                     'density_score\trepeat_length\trepeat_class\tGC%\t'
                     'associations\n')
-            for key, idx in self._oligo_stats.items():
-                w_list = p.split(key)+idx[:-2]
-                if w_list[3:6] == ['000', '000', 'X']: w_list[3:6] = '.' * 3
+            for oligo, stats in self._oligo_stats.items():
+                oligo_parts = (chrom, read_start, read_stop, frag_start,
+                               frag_stop, frag_side) = p.split(oligo)
+                
+                has_fragment = True
+                if (frag_start, frag_stop, frag_side) == ('000', '000', 'X'):
+                    has_fragment = False
+                    frag_start, frag_stop, frag_side = '.' * 3
+                    
                 if self._assoc:
-                    if w_list[3:6] == ['.', '.', '.']:
-                        coor = '{}:{}-{}'.format(w_list[0],
-                                                 w_list[1],
-                                                 w_list[2])
+                    if has_fragment:
+                        coor = '{}:{}-{}'.format(chrom, frag_start, frag_stop)
                     else:
-                        coor = '{}:{}-{}'.format(w_list[0],
-                                                 w_list[3],
-                                                 w_list[4])
-                    w_list.append(self._assoc.get(coor, '.'))
+                        coor = '{}:{}-{}'.format(chrom, read_start, read_stop)
+                    associations = self._assoc.get(coor, '.')
                 else:
-                    w_list.append('.')
-                f.write('\t'.join(map(str, w_list))+'\n')
+                    associations = '.'
+                
+                keys = ('sequence', 'multimap', 'density', 'repeat_length',
+                        'repeat_type', 'GC%')
+                to_write = oligo_parts + [str(stats[x])
+                                          for x in keys] + [associations]
+                output.write('{}\n'.format('\t'.join(to_write)))
     
         sorted_df = self._sort_file()
         sorted_df.to_csv('oligo_info.txt', sep='\t', index=False, na_rep='NA')
@@ -265,9 +271,8 @@ class Tools(object):
     def _run_command(self, options, cmd, msg):
         """Runs a command using subprocess"""
         
-        CmdOptions = namedtuple('CmdOptions', ['paths_key', 'exe',
-                                               'name', 'log_file',
-                                               'output_file'])           
+        CmdOptions = namedtuple('CmdOptions', ['paths_key', 'exe', 'name',
+                                               'log_file', 'output_file'])           
         run_options = CmdOptions._make(options)
         path = os.path.join(paths[run_options.paths_key], run_options.exe)
         print('{} with {}...'.format(msg, run_options.name))
@@ -280,12 +285,13 @@ class Tools(object):
         
         return None
     
-    def _create_oligo_stats(self):
-        self._oligo_stats = {}
+    def _populate_oligo_stats(self):
+        """Populates _oligo_stats attribute with default values""" 
+        
         with open(self.fasta) as fasta_file:
             for line in fasta_file:
                 oligo_name = line.lstrip('>').strip()
-                read_seq = next(f).strip()
+                read_seq = next(fasta_file).strip()
                 self._oligo_stats[oligo_name] = {
                     'sequence': read_seq,
                     'multimap': 0,
@@ -297,11 +303,14 @@ class Tools(object):
                     'mismatches': 0,
                 }
         
+        return None
+        
     def _get_gc(self, x):
         """Calculates GC percentage of a DNA sequence"""
         
-        gc_perc = (x.count('C') + x.count('G'))/len(x)
-        gc_perc = float("{0:.2f}".format(gc_perc))
+        gc_decimal = (x.count('C') + x.count('G'))/len(x)
+        gc_decimal = float("{0:.2f}".format(gc_decimal))
+        gc_perc = int(gc_decimal*100)
         
         return gc_perc
     
@@ -313,6 +322,13 @@ class Tools(object):
         df['chr'] = 'chr' + df['chr'].map(str)
         
         return df
+    
+    def __repr__(self):
+        
+        return '{}(genome={}, fa={}, blat={})'.format(self.__class__.__name__,
+                                                      self.genome,
+                                                      self.fa,
+                                                      self.blat)
 
 class Capture(Tools):
     """Designs oligos for Capture-C"""
@@ -403,12 +419,6 @@ class Capture(Tools):
             print('Oligos stored in the oligo_seqs attribute')
         
         return self
-    
-    def __repr__(self):
-        
-        return 'Instance of oligo.design Capture class. Run ' \
-               'self.gen_oligos(*args) to generate oligos to the {} ' \
-               'genome'.format(self.genome)
     
     def __str__(self):
         
