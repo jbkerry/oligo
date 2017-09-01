@@ -9,10 +9,7 @@ import subprocess
 
 import pandas as pd  # >=0.17
 import pysam  # >=0.8
-
-recognition_seq = {'DpnII': 'GATC',
-                   'NlaIII': 'CATG',
-                   'HindIII': 'AAGCTT'}
+from Bio import SeqIO  # >=1.60
 
 species = {'mm9': 'mouse',
            'mm10': 'mouse',
@@ -59,8 +56,14 @@ class Tools(object):
         self.fa = fa
         self.blat = blat
         self.fasta = 'oligo_seqs.fa'
+        if self.__class__.__name__ != 'Tools':
+            print('Loading reference fasta file...')
+            self.genome_seq = SeqIO.to_dict(SeqIO.parse(fa, 'fasta'))
+            print('\t...complete')
+            
+    def _create_attr(self, oligo):
+        self.oligo = oligo
         self.oligo_seqs = {}
-        self._oligo_stats = {}
         self._assoc = {}
 
     def write_fasta(self):
@@ -132,7 +135,10 @@ class Tools(object):
         
         """
         
-        if not self._oligo_stats: self._populate_oligo_stats()
+        try:
+            self._oligo_stats
+        except AttributeError:
+            self._populate_oligo_stats()
         
         with open('.'.join((self.fasta, 'out'))) as repeats_file:
             if len(repeats_file.readlines())>1:
@@ -178,7 +184,10 @@ class Tools(object):
         
         """
         
-        if not self._oligo_stats: self._populate_oligo_stats()
+        try:
+            self._oligo_stats
+        except AttributeError:
+            self._populate_oligo_stats()
         
         if self.blat:        
             with open(blat_file) as f:
@@ -273,7 +282,7 @@ class Tools(object):
     
     def _populate_oligo_stats(self):
         """Populates _oligo_stats attribute with default values""" 
-        
+        self._oligo_stats = {}
         with open(self.fasta) as fasta_file:
             for line in fasta_file:
                 oligo_name = line.lstrip('>').strip()

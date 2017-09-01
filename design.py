@@ -8,9 +8,12 @@ import re
 import sys
 
 import numpy as np  # >=1.7
-from Bio import SeqIO  # >=1.60
 
 from .tools import Tools
+
+recognition_seq = {'DpnII': 'GATC',
+                   'NlaIII': 'CATG',
+                   'HindIII': 'AAGCTT'}
 
 def check_value(values, labels):
     for value, label in zip(values, labels):
@@ -20,40 +23,49 @@ def check_value(values, labels):
             break
     else:
         return None
+
+class FragmentError(Exception):
+    pass
+
+class FragmentMixin(object):
     
-def get_sequence(seq, *coors):
-    for coor in coors:
-        yield str(seq[coor[0]:coor[1]])
-
-def get_oligo_coor(chrom, oligo, start, stop):
-
-    def create_key(chrom, oligo_coor, frag_coor, side):
-        key = ':'.join((chrom, '-'.join(map(str, (oligo_coor + frag_coor)))))
-        key = '-'.join(key, side)
+    def _get_oligo_seqs(self, chrom, start, stop):
+    
+        def create_key(chrom, oligo_coor, frag_coor, side):
+            key = ':'.join((chrom, '-'.join(map(str, (oligo_coor + frag_coor)))))
+            key = '-'.join((key, side))
+            
+            return key
         
-        return key
-    
-    left_coor = (l_start, l_stop) = (start, start + oligo)
-    right_coor = (r_start, r_stop) = (stop - oligo, stop)
-    frag_coor = (l_start, r_stop)
-    
-    l_key = create_key(chrom, left_coor, frag_coor, 'L')
-    r_key = create_key(chrom, right_coor, frag_coor, 'R')
-    
-    coor = {
-        'left': {'coor': (l_start, l_stop), 'key': l_key},
-        'right': {'coor': (r_start, r_stop), 'key': r_key},
-    }
-    
-    return coor
+        def get_sequence(seq, *args):
+            return [str(seq[x[0]:x[1]]) for x in args]
+        
+        frag_length = stop - start
+        if frag_length < self.oligo:
+            raise FragmentError('{} is in a fragment that is too small. Skipping.')
+        
+        left_coor = (start, start + self.oligo)
+        right_coor = (stop - self.oligo, stop)
+        frag_coor = (start, stop)
+        
+        left_key = create_key(chrom, left_coor, frag_coor, 'L')
+        right_key = create_key(chrom, right_coor, frag_coor, 'R')
+        
+        if left_key in self.oligo_seqs:
+            raise FragmentError('{} is redundant to another position. Skipping.')
+        
+        chrom_seq = self.genome_seq[chrom]
+        left_seq, right_seq = get_sequence(chrom_seq, *(left_coor, right_coor))
+        
+        self.oligo_seqs[left_key] = left_seq     
+        if frag_length > self.oligo: self.oligo_seqs[right_key] = right_seq
+        
+        return None
 
-class Capture(Tools):
+class Capture(Tools, FragmentMixin):
     """Designs oligos for Capture-C"""
     
     __doc__ += Tools.__doc__
-    
-    def __init__(self):
-        super(Capture, self).__init__()
         
     def gen_oligos(self, bed, enzyme='DpnII', oligo=70):
         r"""Generates oligos flanking restriction fragments that encompass the
@@ -77,52 +89,37 @@ class Capture(Tools):
         """
         
         check_value((oligo,), ('Oligo size',))
+        self._create_attr(oligo)
         
         cut_sites = {}
         cut_size = len(recognition_seq[enzyme])
-        p = re.compile(recognition_seq[enzyme])
+        rec_seq = re.compile(recognition_seq[enzyme])
         
-        print('Loading reference fasta file...')
-        seq_dict = SeqIO.to_dict(SeqIO.parse(self.fa, 'fasta'))
-        for chrom, attr in seq_dict.items():
-            seq = str(attr.seq).upper()
-            cut_sites[x] = [m.start() for m in p.finditer(seq)]
-            cut_sites[x] = np.array(cut_sites[x])
-        print('\t...complete\nGenerating oligos...')
-        
-        with open(bed) as w:
-            for x in w:
-                chrom, start, stop, name = x.strip().split('\t')
+        print('Generating oligos...')
+        for chrom, attr in self.genome_seq.items():
+            chrom_seq = str(attr.seq).upper()
+            cut_sites[chrom] = [cut_site.start() for cut_site
+                                in rec_seq.finditer(chrom_seq)]
+            cut_sites[chrom] = np.array(cut_sites[chrom])
+            
+        with open(bed) as viewpoints:
+            for vp in viewpoints:
+                chrom, vp_start, vp_stop, name = vp.strip().split('\t')
                 
                 if '_' in chrom: continue
                 
-                vp_coor = '{}:{}-{}'.format(chrom, start, stop)
-                start, stop = map(int, (start, stop))
+                vp_coor = '{}:{}-{}'.format(chrom, vp_start, vp_stop)
                 
-                frag_start = cut_sites[chrom][cut_sites[chrom] <= start][-1]
-                frag_stop = cut_sites[chrom][cut_sites[chrom] >= start][0] + cut_size # currently this picks an adjacent fragment if the site is in a cutsite; are we okay with that?
-                frag_length = frag_stop - frag_start
+                vp_start = int(vp_start)
+                frag_start = cut_sites[chrom][cut_sites[chrom] <= vp_start][-1]
+                frag_stop = cut_sites[chrom][cut_sites[chrom] >= vp_start][0] + cut_size # currently this picks an adjacent fragment if the site is in a cutsite; are we okay with that?
                 
-                coors = get_oligo_coor(chrom, oligo, frag_start, frag_stop)
-                
-                if frag_length < oligo:
-                    print('{} ({}) is in a fragment that is too small. '
-                          'Skipping.'.format(vp_coor, name), file=sys.stderr)
+                try:
+                    self._get_oligo_seqs(chrom, frag_start, frag_stop)
+                except FragmentError as e:
+                    frag_id = '{} ({})'.format(vp_coor, name)
+                    print(str(e).format(frag_id), file=sys.stderr)
                     continue
-                
-                chrom_seq = seq_dict[chrom].seq.upper()
-                oligo_seq = get_sequence(chrom_seq, *(coors['left']['coor'],
-                                                      coors['right']['coor']))
-                
-                l_key = coors['left']['key']
-                if l_key in self.oligo_seqs:
-                    print('{} ({}) is redundant to another position'.format(
-                        vp_coor, name), file=sys.stderr)
-                    continue
-                
-                self.oligo_seqs[l_key] = next(oligo_seq)     
-                if frag_len > oligo:
-                    self.oligo_seqs[coors['right']['key']] = next(oligo_seq)
                 
                 frag_key = '{}:{}-{}'.format(chrom, frag_start, frag_stop)
                 self._assoc[frag_key] = '{}{},'.format(
@@ -174,17 +171,14 @@ class Tiled(Tools):
         
         print('Loading reference fasta file...')
         seq_dict = SeqIO.to_dict(SeqIO.parse(self.fa, 'fasta'))
-        seq = seq_dict[chr_name].seq.upper()
+        chrom_seq = seq_dict[chr_name].seq.upper()
         print('\t...complete\nGenerating oligos...')
             
-        if not region:
-            start = 0; stop = len(seq)
-        else:
-            start, stop = map(int, region.split('-'))
+        start, stop = (0, len(chrom_seq)) if not region else map(int, region.split('-'))
         
         p = re.compile(recognition_seq[enzyme])
         pos_list = []
-        for m in p.finditer(str(seq[start:stop])):
+        for m in p.finditer(str(chrom_seq[start:stop])):
             pos_list.append(m.start()+start)
         
         cut_size = len(recognition_seq[enzyme])
@@ -192,30 +186,26 @@ class Tiled(Tools):
         for i in range(len(pos_list)-1):
             j = i + 1
             
-            l_start = pos_list[i]
-            r_stop = pos_list[j]+cut_size 
-            frag_len = r_stop - l_start
+            frag_start = pos_list[i]
+            frag_stop = pos_list[j]+cut_size 
+            frag_length = frag_stop - frag_start
             
-            if (frag_len>=oligo):
-                l_stop = l_start+oligo
-                r_start = r_stop-oligo
-                
-                l_tup = (l_start, l_stop, l_start, r_stop)
-                r_tup = (r_start, r_stop, l_start, r_stop)
-                l_seq = seq[l_start:l_stop]
-                r_seq = seq[r_start:r_stop]
-                
-                self.oligo_seqs['{}:{}-L'.format(chr_name,
-                                                 '-'.join(map(str, l_tup)))
-                               ] = str(l_seq)
-                if frag_len>oligo:
-                    self.oligo_seqs['{}:{}-R'.format(chr_name,
-                                                     '-'.join(map(str, r_tup)))
-                                   ] = str(r_seq)
-            else:
+            if frag_length < oligo:
                 print('The fragment {}:{}-{} is too small to design oligos '
-                      'in. Skipping.'.format(chr_name, l_start, r_stop),
+                      'in. Skipping.'.format(chr_name, frag_start, frag_stop),
                       file=sys.stderr)
+                continue
+            
+            oligo_meta = get_oligo_coor(chrom, oligo, frag_start, frag_stop)
+            
+            left_seq, right_seq = get_sequence(
+                chrom_seq,
+                *(oligo_meta.left['coor'], oligo_meta.right['coor']))
+            
+            self.oligo_seqs[oligo_meta.left['key']] = left_seq
+            if frag_len > oligo:
+                self.oligo_seqs[oligo_meta.right['key']] = right_seq
+                
         
         print('\t...complete.')
         if __name__ != '__main__':
