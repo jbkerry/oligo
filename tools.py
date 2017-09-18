@@ -147,13 +147,13 @@ class Tools(object):
                     next(repeats_file)
                 for line in repeats_file:
                     parts = re.split("\s+", line.strip())
-                    oligo_name = parts[5]
-                    repeat_type = parts[10]
+                    oligo_name = parts[4]
+                    repeat_type = parts[9]
                     fragment_side = re.split("\W+", oligo_name)[5]
                     if len(fragment_side)>1:
                         oligo_name = oligo_name.split('_')[0]
                     
-                    qstart, qstop = map(int, (parts[6:8]))
+                    qstart, qstop = map(int, (parts[5:7]))
                     length = (qstop-qstart) + 1
                     if length > self._oligo_stats[oligo_name]['repeat_length']:
                         self._oligo_stats[oligo_name]['repeat_length'] = length
@@ -241,15 +241,20 @@ class Tools(object):
                 if (frag_start, frag_stop, frag_side) == ('000', '000', 'X'):
                     has_fragment = False
                     frag_start, frag_stop, frag_side = '.' * 3
-                    
-                if self._assoc:
-                    if has_fragment:
-                        coor = '{}:{}-{}'.format(chrom, frag_start, frag_stop)
-                    else:
-                        coor = '{}:{}-{}'.format(chrom, read_start, read_stop)
-                    associations = self._assoc.get(coor, '.')
-                else:
+                
+                try:
+                    self._assoc
+                except AttributeError:
                     associations = '.'
+                else:
+                    if self._assoc:
+                        if has_fragment:
+                            coor = '{}:{}-{}'.format(chrom, frag_start, frag_stop)
+                        else:
+                            coor = '{}:{}-{}'.format(chrom, read_start, read_stop)
+                        associations = self._assoc.get(coor, '.')
+                    else:
+                        associations = '.'
                 
                 keys = ('sequence', 'multimap', 'density', 'repeat_length',
                         'repeat_type', 'GC%')
