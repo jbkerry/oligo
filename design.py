@@ -15,6 +15,7 @@ recognition_seq = {'DpnII': 'GATC',
                    'NlaIII': 'CATG',
                    'HindIII': 'AAGCTT'}
 
+
 def check_value(values, labels):
     for value, label in zip(values, labels):
         if (value<1) | isinstance(value, float):
@@ -24,14 +25,6 @@ def check_value(values, labels):
     else:
         return None
 
-#def create_key(chrom, frag_coor, side, frag=False, *oligo_coor):
-#    if frag:
-#        key = ':'.join((chrom, '-'.join(map(str, (oligo_coor + frag_coor)))))
-#        key = '-'.join((key, side))
-#    
-#        return key
-#    else:
-#        return (':'.join((chrom, '-'.join(map(str, x + frag_coor + (side,))))) for x in oligo_coor)
 def create_key_frag(chrom, oligo_coor, frag_coor, side):
     key = ':'.join((chrom, '-'.join(map(str, (oligo_coor + frag_coor)))))
     key = '-'.join((key, side))
@@ -43,6 +36,15 @@ def get_sequence(seq, *args):
 
 def create_key(chrom, *args):
     return (':'.join((chrom, '-'.join((map(str, x + ('000','000','X')))))) for x in args)
+
+def compile_chr_regex(genome):
+    if genome.startswith('hg'):
+        twenties = '2[0-2]|'
+    elif genome.startswith('mm'):
+        twenties = ''
+    valid_chrom = re.compile('^chr([1-9]|1[0-9]|'+twenties+'X|Y)$')
+    
+    return valid_chrom
 
 class FragmentError(Exception):
     pass
@@ -112,11 +114,16 @@ class Capture(Tools, FragmentMixin):
                                 in rec_seq.finditer(chrom_seq)]
             cut_sites[chrom] = np.array(cut_sites[chrom])
             
+        valid_chrom = compile_chr_regex(self.genome)
+            
         with open(bed) as viewpoints:
             for vp in viewpoints:
                 chrom, vp_start, vp_stop, name = vp.strip().split('\t')
                 
-                if '_' in chrom: continue
+                if not valid_chrom.match(chrom):
+                    print('Unrecognised chromosome {}. Skipping.'.format(
+                        chrom), file=sys.stderr)
+                    continue
                 
                 vp_start = int(vp_start)
                 frag_start = cut_sites[chrom][cut_sites[chrom] <= vp_start][-1]
@@ -238,7 +245,7 @@ class Tiled(Tools, FragmentMixin):
         check_value((step, oligo), ('Step size', 'Oligo size'))
         self._create_attr(oligo)
         
-        if 'chr' not in chrom: chrom = ''.join(('chr'+str(chrom)))
+        if not chrom.startswith('chr'): chrom = ''.join(('chr'+str(chrom)))
         chrom_seq = self.genome_seq[chrom].seq.upper()
             
         start, stop = (0, len(chrom_seq)) if not region else map(int, region.split('-'))
@@ -246,11 +253,9 @@ class Tiled(Tools, FragmentMixin):
         
         print('Generating oligos...')
         coors = [(x, x + oligo) for x in range(start, stop, step)]
-        sequences = get_sequence(seq, *coors)  # this method is better than the line below because the sequences do not have be exploded from their individuals lists before being stored in the dictionary
-        #sequences = [get_sequence(seq, *(x,)) for x in coors]  # slightly faster
+        sequences = get_sequence(seq, *coors)
         keys = create_key(chrom, *coor)
-        #keys = [create_key(chrom, x, ('000', '000'), 'X') for x in coors]
-        self.oligo_seqs = dict(zip(keys, sequences))
+        self.oligo_seqs.update(zip(keys, sequences))
         
         print('\t...complete.')
         if __name__ != '__main__':
@@ -297,13 +302,16 @@ class OffTarget(Tools):
                     ('Step size', 'Oligo size', 'Maximum distance'))
         self._create_attr(oligo)
     
-        oligo_num = math.floor((max_dist-oligo)/step)
+        valid_chrom = compile_chr_regex(self.genome)
         
         with open(bed) as crispr_sites:
-            for cs in crispr_sites:
-                chrom, start, stop, name = cs.strip().split('\t')
+            for site in crispr_sites:
+                chrom, start, stop, name = site.strip().split('\t')
                 
-                if '_' in chrom: continue
+                if not valid_chrom.match(chrom):
+                    print('Unrecognised chromosome {}. Skipping.'.format(
+                        chrom), file=sys.stderr)
+                    continue
                   
                 start, stop = map(int, (start, stop))
                 chrom_seq = self.genome_seq[chrom].seq.upper()
@@ -331,18 +339,18 @@ class OffTarget(Tools):
         return self
 
 if __name__ == '__main__':
-    class_tup = ('Capture', 'Tiled', 'OffTarget')
+    classes = ('Capture', 'Tiled', 'OffTarget')
     try:
         class_arg = sys.argv[1]
-        if class_arg not in class_tup:
+        if class_arg not in classes:
             raise NameError('{} is not a recognised class name, choose from '
                             'one of the following: {}'.format(
                                 class_arg,
-                                ', '.join(class_tup)
+                                ', '.join(classes)
                             ))
     except IndexError:
         raise IndexError('design.py must be followed by one of the following '
-                         'class names: {}'.format(', '.join(class_tup)))
+                         'class names: {}'.format(', '.join(classes)))
     parser = argparse.ArgumentParser()
     
     parser.add_argument(
