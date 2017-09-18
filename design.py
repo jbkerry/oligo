@@ -295,59 +295,34 @@ class OffTarget(Tools):
         
         check_value((step, oligo, max_dist),
                     ('Step size', 'Oligo size', 'Maximum distance'))
-        
-        print('Loading reference fasta file...')
-        seq_dict = SeqIO.to_dict(SeqIO.parse(self.fa, 'fasta'))
-        print('\t...complete\nGenerating oligos...')
+        self._create_attr(oligo)
     
         oligo_num = math.floor((max_dist-oligo)/step)
         
-        with open(bed) as w:
-            for x in w:
-                chr_name, start, stop, name = x.strip().split('\t')
+        with open(bed) as crispr_sites:
+            for cs in crispr_sites:
+                chrom, start, stop, name = cs.strip().split('\t')
                 
-                if '_' in chr_name: continue
-                
-                chr_length = len(seq_dict[chr_name])
+                if '_' in chrom: continue
+                  
                 start, stop = map(int, (start, stop))
-                seq = seq_dict[chr_name].seq.upper()
+                chrom_seq = self.genome_seq[chrom].seq.upper()
+                chrom_length = len(chrom_seq)
                 
-                l_stop = start-10
-                r_start = stop+10
-            
-                counter=1
-                while counter<=oligo_num:
-                    
-                    l_start = l_stop-oligo
-                    l_coor = '{}:{}-{}'.format(chr_name, l_start, l_stop)
-                    r_stop = r_start+oligo
-                    r_coor = '{}:{}-{}'.format(chr_name, r_start, r_stop)
-                    
-                    if l_start<0:
-                        print('Oligo {} for off-target site {} could not be '
-                              'generated because it went beyond the start of '
-                              'the chromosome'.format(l_coor, name),
-                        file=sys.stderr)
-                    else:
-                        l_seq = seq[l_start:l_stop]
-                        self.oligo_seqs['{}-000-000-X'.format(l_coor)] = str(
-                            l_seq)
-                        
-                    if r_stop>chr_length:
-                        print('Oligo {} for off-target site {} could not '
-                              'be generated because it went beyond the end of '
-                              'the chromosome'.format(r_coor, name),
-                        file=sys.stderr)
-                    else:
-                        r_seq = seq[r_start:r_stop]
-                        self.oligo_seqs['{}-000-000-X'.format(r_coor)] = str(
-                            r_seq)
-                    
-                    self._assoc[l_coor] = self._assoc[r_coor] = name
-                    
-                    l_stop-=step
-                    r_start+=step
-                    counter+=1
+                exc_start = start-10
+                exc_stop = stop+10
+                
+                upstream = [(x-oligo, x) for x in
+                    range(start-max_dist+oligo, exc_start+1, step)
+                    if x-oligo>=0]
+                downstream = [(x, x+oligo) for x in
+                    range(exc_stop, stop+max_dist-oligo+1, step)
+                    if x+oligo<=chrom_length]
+                all_coors = upstream+downstream
+                sequences = get_sequence(chrom_seq, *all_coors)
+                keys = list(create_key(chrom, *all_coors))
+                self.oligo_seqs.update(zip(keys, sequences))
+                self._assoc.update({x: name for x in keys})
         
         print('\t...complete.')
         if __name__ != '__main__':
