@@ -240,7 +240,8 @@ class Tools(object):
                 has_fragment = True
                 if (frag_start, frag_stop, frag_side) == ('000', '000', 'X'):
                     has_fragment = False
-                    frag_start, frag_stop, frag_side = '.' * 3
+                    #frag_start, frag_stop, frag_side = '.' * 3
+                    oligo_parts[3:] = '.' * 3
                 
                 try:
                     self._assoc
@@ -317,9 +318,9 @@ class Tools(object):
     def _sort_file(self):
         """Sorts oligo output file"""
         df = pd.read_table('oligo_info.txt', header=0)
-        df['chr'] = [int(x[3:]) for x in df['chr']]
+        #df['chr'] = [int(x[3:]) for x in df['chr']]  # this threw an error for chromosomes X and Y
         df.sort_values(['chr', 'start'], inplace=True)
-        df['chr'] = 'chr' + df['chr'].map(str)
+        #df['chr'] = 'chr' + df['chr'].map(str)
         
         return df
     
