@@ -1,6 +1,6 @@
-#######
-Classes
-#######
+###
+API
+###
 
 .. toctree::
     :maxdepth: 1

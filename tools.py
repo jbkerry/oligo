@@ -62,6 +62,8 @@ class Tools(object):
             print('\t...complete')
             
     def _create_attr(self, oligo):
+        """Creates `oligo`, `oligo_seqs` and `_assoc` attributes"""
+        
         self.oligo = oligo
         self.oligo_seqs = {}
         self._assoc = {}

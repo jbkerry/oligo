@@ -121,15 +121,16 @@ class Capture(Tools, FragmentMixin):
                                 in rec_seq.finditer(chrom_seq)]
             cut_sites[chrom] = np.array(cut_sites[chrom])
             
-        valid_chrom = _compile_chr_regex(self.genome)
+        valid_chroms = _compile_chr_regex(self.genome)
             
         with open(bed) as viewpoints:
             for vp in viewpoints:
                 chrom, vp_start, vp_stop, name = vp.strip().split('\t')
                 
-                if not valid_chrom.match(chrom):
-                    print('Unrecognised chromosome {}. Skipping.'.format(
-                        chrom), file=sys.stderr)
+                try:
+                    _validate_chrom(chrom, valid_chroms)
+                except ChromosomeError as e:
+                    print(str(e).format(chrom), file=sys.stderr)
                     continue
                 
                 vp_start = int(vp_start)

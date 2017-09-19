@@ -1,8 +1,8 @@
 ##################
-oligo.design.Tools
+oligo.tools.Tools
 ##################
 
-.. currentmodule:: design
+.. currentmodule:: tools
 
 .. autoclass:: Tools
     :members:
@@ -10,8 +10,9 @@ oligo.design.Tools
 Private methods
 ===============
 
+.. automethod:: Tools._create_attr
 .. automethod:: Tools._get_gc
-.. automethod:: Tools._get_repeats
-.. automethod:: Tools._write_file
+.. automethod:: Tools._populate_oligo_stats
+.. automethod:: Tools._run_command
 .. automethod:: Tools._sort_file
     

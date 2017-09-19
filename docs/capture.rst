@@ -115,37 +115,37 @@ As well as being run as a full pipeline from the command line, the `design` clas
 The following examples show the order in which the class methods are implemented:
 
 .. code-block:: python
-    :caption: Create a instance of the Capture class
+    :caption: Create an instance of the Capture class
 
     >>> from oligo.design import Capture
     >>> c = Capture(genome='mm9', fa='mm9_genome.fa')
+    Loading reference fasta file...
+        ...complete
     
 .. code-block:: python
     :caption: Generate oligos and write to fasta file
 
     >>> c.gen_oligos(bed='capture_sites.bed').write_oligos()
-    Loading reference fasta file...
-        ...complete
     Generating oligos...
         ...complete.
     Oligos stored in the oligo_seqs attribute
     Wrote oligos to oligo_seqs.fa
     
 .. code-block:: python
-    :caption: Check for repeats and off-target binding of oligos in the fasta file
+    :caption: Check for repeats in oligo sequences and align oligos to genome
 
-    >>> c.check_off_target(s_idx='/mm9/STAR')
-    Checking for repeat sequences in oligos...
-        ...complete
-    Checking off-target binding with STAR...
-        ...complete. Alignments written to oligos_Aligned.out.sam
+    >>> c.detect_repeats().align_to_genome(s_idx='/mm9/STAR')
+    Checking for repeat sequences in oligos, with RepeatMasker...
+        ...complete. Output written to oligo_seqs.fa.out
+    Aligning oligos to the genome, with STAR...
+        ...complete. Output written to oligos_Aligned.out.sam
 
 .. code-block:: python
-    :caption: Output repeats and off-target information
+    :caption: Calculate longest repeat length and number of off-target alignments for each oligo; write to oligo_info.txt
 
-    >>> c.get_density()
-    Density scores calculated
+    >>> c.extract_repeats().calculate_density().write_oligo_info()
     Repeat scores calculated
+    Density scores calculated
     Oligo information written to oligo_info.txt
 
 See :doc:`design.Capture <capture_class>` for more detailed information

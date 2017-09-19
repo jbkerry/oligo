@@ -129,37 +129,37 @@ As well as being run as a full pipeline from the command line, the `design` clas
 The following examples show the order in which the class methods are implemented:
 
 .. code-block:: python
-    :caption: Create a instance of the Tiled class
+    :caption: Create an instance of the Tiled class
     
     >>> from oligo.design import Tiled
     >>> t = Tiled(genome='hg38', fa='hg38_genome.fa', blat=True)
+    Loading reference fasta file...
+        ...complete
     
 .. code-block:: python
     :caption: Generate oligos and write to fasta file
 
     >>> t.gen_oligos_capture(chrom=7, region='100000-120000', enzyme='NlaIII').write_oligos()
-    Loading reference fasta file...
-        ...complete
     Generating oligos...
         ...complete.
     Oligos stored in the oligo_seqs attribute
     Wrote oligos to oligo_seqs.fa
     
 .. code-block:: python
-    :caption: Check for repeats and off-target binding of oligos in the fasta file
+    :caption: Check for repeats in oligo sequences and align oligos to genome
 
-    >>> t.check_off_target()
-    Checking for repeat sequences in oligos...
-        ...complete
-    Checking off-target binding with BLAT...
-        ...complete. Alignments written to blat_out.psl
+    >>> t.detect_repeats().align_to_genome()
+    Checking for repeat sequences in oligos, with RepeatMasker...
+        ...complete. Output written to oligo_seqs.fa.out
+    Aligning oligos to the genome, with BLAT...
+        ...complete. Output written to blat_out.psl
 
 .. code-block:: python
-    :caption: Output repeats and off-target information
+    :caption: Calculate longest repeat length and number of off-target alignments for each oligo; write to oligo_info.txt
 
-    >>> t.get_density()
-    Density scores calculated
+    >>> t.extract_repeats().calculate_density().write_oligo_info()
     Repeat scores calculated
+    Density scores calculated
     Oligo information written to oligo_info.txt
 
 See :doc:`design.Tiled <tiled_class>` for more detailed information

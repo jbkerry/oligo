@@ -13,7 +13,7 @@ oligo
     Capture-C <capture>
     Tiled Capture <tiled>
     CRISPR Off-Target <off_target>
-    classes
+    API <classes>
 
 * :ref:`genindex`
 
