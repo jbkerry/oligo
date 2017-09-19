@@ -8,7 +8,7 @@ The *design.py* module consists of three classes for Capture-C oligo design.
   are instead generated for a user-specified step size, in an adjacent manner.
 * `OffTarget <http://oligo.rtfd.io/en/latest/off_target.html>`_: designs oligos to capture DNA surrounding potential CRISPR off-target cut sites to allow for efficient sequencing to determine off-target activity.
 
-These three classes all generate oligo sequences, based on different underlying behaviours. When run from the command line, *design.py* utilises methods from the `Tools <http://oligo.rtfd.io/en/latest/tools_class.html>`_ class in the `tools.py` module, in a pipeline that checks
+These three classes all generate oligo sequences, based on different underlying behaviours. When run from the command line, *design.py* utilises methods from the `Tools <http://oligo.rtfd.io/en/latest/tools_class.html>`_ class in the *tools.py* module, in a pipeline that checks
 the off-target binding and repeat content of the oligos. This information is output in a file called *oligo_info.txt*; oligo sequences are written to a FASTA file called *oligo_seqs.fa*
 
 **Installation:**
