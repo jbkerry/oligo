@@ -23,4 +23,4 @@ To start using *oligo*, either clone the GitHub repository or download the `late
 
 For full documentation, see http://oligo.readthedocs.io
 
-**The oligo package is currently only available as a pre-release version: 0.1.1a**
+**The oligo package is currently only available as a pre-release version: 0.1.1b**
