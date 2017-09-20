@@ -27,7 +27,8 @@ star_param = '--readFilesIn {} --genomeDir {} --runThreadN 4 --genomeLoad NoShar
              '--limitOutSAMoneReadBytes 400000 --outFileNamePrefix oligos_'
 
 pat = re.compile('^[A-Z]')
-paths = dict((x.strip().split(' = ') for x in open('./config.txt') if pat.match(x)))
+config_path = os.path.join(os.path.dirname(__file__), 'config.txt')
+paths = dict((x.strip().split(' = ') for x in open(config_path) if pat.match(x)))
 
 class Tools(object):
     """
