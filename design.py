@@ -134,8 +134,13 @@ class Capture(Tools, FragmentMixin):
                     continue
                 
                 vp_start = int(vp_start)
-                frag_start = cut_sites[chrom][cut_sites[chrom] <= vp_start][-1]
-                frag_stop = cut_sites[chrom][cut_sites[chrom] >= vp_start][0] + cut_size # currently this picks an adjacent fragment if the site is in a cutsite; are we okay with that?
+                try:
+                    frag_start = cut_sites[chrom][cut_sites[chrom] <= vp_start][-1]
+                    frag_stop = cut_sites[chrom][cut_sites[chrom] > vp_start][0] + cut_size # currently this picks an adjacent fragment if the site is in a cutsite; are we okay with that?
+                except IndexError:
+                    print('Viewpoint {} is not in a closed fragment. '
+                          'Skipping.'.format(name))
+                    continue
                 
                 try:
                     self._get_fragment_seqs(chrom, frag_start, frag_stop)
