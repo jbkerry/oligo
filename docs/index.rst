@@ -17,6 +17,6 @@ oligo
 
 * :ref:`genindex`
 
-For questions related to `oligo`, email jon.kerry@imm.ox.ac.uk
+For questions related to `oligo`, email jonbkerry@gmail.com
 
 To report a bug, open an issue on the GitHub page: https://github.com/jbkerry/oligo/issues
