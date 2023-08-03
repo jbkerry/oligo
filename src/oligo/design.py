@@ -3,13 +3,12 @@
 from __future__ import print_function, division
 
 import argparse
-import math
 import re
 import sys
 
 import numpy as np  # >=1.7
 
-from tools import Tools
+from oligo.tools import Tools
 
 recognition_seq = {'DpnII': 'GATC',
                    'NlaIII': 'CATG',
