@@ -11,7 +11,7 @@ from .wrappers import run_capture, run_tiled, run_off_target
 @click.pass_context
 def cli(ctx, version, config):
     if version:
-        click.echo(f"oligo v{metadata.version('oligo')}")
+        click.echo(f"oligo v{metadata.version('oligo-capture')}")
     elif ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
 
