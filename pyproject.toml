@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "oligo"
+name = "oligo-capture"
 version = "0.2.0"
 description = "A tool for designing oligos for DNA capture"
 authors = ["Jon Kerry <jonbkerry@gmail.com>"]
@@ -7,6 +7,9 @@ license = "GPL-3.0-only"
 readme = "README.rst"
 repository = "https://github.com/jbkerry/oligo"
 documentation = "https://oligo.readthedocs.io/"
+packages = [
+    { include = "oligo", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -15,6 +18,7 @@ numpy = "^1.21.0"
 pysam = "^0.21.0"
 biopython = "^1.60"
 click = "^8.1.6"
+h5py = "^3.9.0"
 
 
 [tool.poetry.group.dev.dependencies]
