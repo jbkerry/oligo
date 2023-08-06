@@ -24,6 +24,11 @@ h5py = "^3.9.0"
 [tool.poetry.group.dev.dependencies]
 pybedtools = "^0.9.0"
 
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.1.2"
+numpydoc = "^1.5.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
