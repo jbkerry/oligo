@@ -23,6 +23,7 @@ from unittest.mock import MagicMock
 from datetime import datetime
 
 sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../src'))
 
 class Mock(MagicMock):
     @classmethod
