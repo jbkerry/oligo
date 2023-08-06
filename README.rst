@@ -1,5 +1,6 @@
+####################
 Capture Oligo Design
-====================
+####################
 
 The *design.py* module consists of three classes for Capture-C oligo design.
 
@@ -11,9 +12,46 @@ The *design.py* module consists of three classes for Capture-C oligo design.
 These three classes all generate oligo sequences, based on different underlying behaviours. When run from the command line, *design.py* uses methods from the `Tools <http://oligo.rtfd.io/en/latest/tools_class.html>`_ class in the *tools.py* module, in a pipeline that checks
 the off-target binding and repeat content of the oligos. This information is output in a file called *oligo_info.txt*; oligo sequences are written to a FASTA file called *oligo_seqs.fa*
 
-**Installation:**
+Installation
+============
+Local
+-----
 
-To start using *oligo*, either clone the GitHub repository or download the `latest release <https://github.com/jbkerry/oligo/releases>`_.
+To install ``oligo`` on your local machine, it is recommended to first create a new Python environment ( >=3.8 ) using your preferred method e.g. ``conda``, ``pyenv`` etc. Once the new environment is activated, install ``oligo``
+via ``pip``. Note that the package is called ``oligo`` but has a published name of ``oligo-capture`` to ensure it had a unique name in the public repository. 
+
+.. code-block:: bash
+
+  $ pip install oligo-capture
+
+Ensure it has installed correctly by running the following command and verifying that you see the installed version in the standard output
+
+.. code-block:: bash
+
+  $ python -m oligo --version
+  oligo v0.2.0
+
+``oligo`` can be run with one of three subcommands
+
++----------------+------------+
+| ``capture``    | Header 2   |
++----------------+------------+
+| ``tiled``      | column 2   |
++----------------+------------+
+| ``off-target`` | ...        |
++----------------+------------+
+
+The subcommand follows the ``oligo`` command and options for the subcommand are then specified afterwards.
+Below, is an example using the ``off-target`` subcommand:
+
+.. code-block:: bash
+
+  $ python -m oligo off-target -f /path/to/human/genome.fa -g hg38 
+
+Docker
+------
+
+put here
 
 **Requires:**
 
