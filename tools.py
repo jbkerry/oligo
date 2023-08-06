@@ -17,7 +17,7 @@ species = {'mm9': 'Mus musculus',
            'hg19': 'Homo sapiens',
            'hg38': 'Homo sapiens'}
 
-repeat_param = '-noint -s -species {} {}'
+repeat_param = '-noint -s -species "{}" {}'
 blat_param = '-stepSize=5 -minScore=10 -minIdentity=0 -repMatch=999999'
 star_param = '--readFilesIn {} --genomeDir {} --runThreadN 4 --genomeLoad NoSharedMemory ' \
              '--outFilterMultimapScoreRange 1000 --outFilterMultimapNmax ' \
