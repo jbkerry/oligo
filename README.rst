@@ -22,5 +22,3 @@ To start using *oligo*, either clone the GitHub repository or download the `late
 * `STAR <https://github.com/alexdobin/STAR>`_ or `BLAT <https://genome.ucsc.edu/FAQ/FAQblat.html>`_
 
 For full documentation, see http://oligo.readthedocs.io
-
-**The oligo package is currently only available as a pre-release version: 0.1.1b**
