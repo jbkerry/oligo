@@ -11,11 +11,11 @@ import pandas as pd  # >=0.17
 import pysam  # >=0.8
 from Bio import SeqIO  # >=1.60
 
-species = {'mm9': 'mouse',
-           'mm10': 'mouse',
-           'hg18': 'human',
-           'hg19': 'human',
-           'hg38': 'human'}
+species = {'mm9': 'Mus musculus',
+           'mm10': 'Mus musculus',
+           'hg18': 'Homo sapiens',
+           'hg19': 'Homo sapiens',
+           'hg38': 'Homo sapiens'}
 
 repeat_param = '-noint -s -species {} {}'
 blat_param = '-stepSize=5 -minScore=10 -minIdentity=0 -repMatch=999999'
