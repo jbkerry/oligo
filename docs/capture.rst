@@ -26,7 +26,7 @@ If the fragment length exactly equals the oligo length, only one oligo will be g
 Usage
 =====
 
-When run from the command line, `design.py Capture` takes the following parameters:
+When run from the command line, ``oligo capture`` takes the following parameters:
 
 .. option:: -h, --help
     
@@ -69,12 +69,12 @@ Below are examples using the `Capture` pipeline for different scenarios
 .. code-block:: bash
     :caption: 50bp oligos for NlaIII fragments in hg19 build, using STAR to check off-target binding
 
-    $ python design.py Capture -f ~/hg19/Sequence/genome.fa -g hg19 -b viewpoints.bed -o 50 -e NlaIII -s ~/hg19/STAR/
+    $ python -m oligo capture -f ~/hg19/Sequence/genome.fa -g hg19 -b viewpoints.bed -o 50 -e NlaIII -s ~/hg19/STAR/
     
 .. code-block:: bash
     :caption: 70bp oligos for HindIII fragments in mm10 build, using BLAT to check off-target binding
 
-    $ python design.py Capture -f ~/mm10/Sequence/genome.fa -g mm10 -b mouse_viewpoints.bed -e HindIII --blat
+    $ python -m oligo capture -f ~/mm10/Sequence/genome.fa -g mm10 -b mouse_viewpoints.bed -e HindIII --blat
 
 Specifics
 ---------
