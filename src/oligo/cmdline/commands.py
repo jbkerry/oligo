@@ -7,14 +7,15 @@ from .wrappers import run_capture, run_tiled, run_off_target
 
 @click.group(invoke_without_command=True)
 @click.option("--version", is_flag=True)
-@click.option("--config", "-cfg", type=click.Path(exists=True))
+@click.option("--config", "-cfg", type=click.Path(exists=True), required=True)
 @click.pass_context
 def cli(ctx, version, config):
     if version:
         click.echo(f"oligo v{metadata.version('oligo-capture')}")
     elif ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
-    ctx.obj["CONFIG"] = config
+    else:
+        ctx.obj["CONFIG"] = config
 
 def common_options(f):
     @click.option(

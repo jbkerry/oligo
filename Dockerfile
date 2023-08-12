@@ -33,6 +33,7 @@ COPY --from=builder /usr/local/TRF-4.09.1 ./TRF-4.09.1
 
 COPY docker/humans.hmm .
 COPY docker/mouse.hmm .
+COPY config.txt .
 
 RUN apt-get update && apt-get install -y hmmer build-essential libcurl4
 
@@ -47,4 +48,7 @@ RUN pip install --upgrade pip \
 RUN cd RepeatMasker \
     && perl configure -trf_prgm /usr/local/TRF-4.09.1/build/src/trf -hmmer_dir /usr/bin -default_search_engine hmmer
 
-ENTRYPOINT ["/usr/local/RepeatMasker/RepeatMasker"]
+RUN mkdir /results
+WORKDIR /results
+
+ENTRYPOINT ["python", "-m", "oligo", "-cfg", "/usr/local/config.txt"]
