@@ -1,12 +1,10 @@
-#!/usr/bin/env python
-
 from __future__ import print_function, division
 
 import argparse
 import re
 import sys
 
-import numpy as np  # >=1.7
+import numpy as np
 
 from oligo.tools import Tools
 

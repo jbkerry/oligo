@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from __future__ import print_function, division
 
 from collections import namedtuple
@@ -7,9 +5,9 @@ import os
 import re
 import subprocess
 
-import pandas as pd  # >=0.17
-import pysam  # >=0.8
-from Bio import SeqIO  # >=1.60
+import pandas as pd
+import pysam
+from Bio import SeqIO
 
 species = {'mm9': 'Mus musculus',
            'mm10': 'Mus musculus',
@@ -27,8 +25,6 @@ star_param = '--readFilesIn {} --genomeDir {} --runThreadN 4 --genomeLoad NoShar
              '--limitOutSAMoneReadBytes 400000 --outFileNamePrefix oligos_'
 
 pat = re.compile('^[A-Z]')
-config_path = os.path.join(os.path.dirname(__file__), '../../config.txt')
-paths = dict((x.strip().split(' = ') for x in open(config_path) if pat.match(x)))
 
 class Tools(object):
     """
@@ -52,9 +48,10 @@ class Tools(object):
         
     """
     
-    def __init__(self, genome, fa, blat=False):
+    def __init__(self, genome, fa, config_path, blat=False):
         self.genome = genome
         self.fa = fa
+        self.paths = dict((x.strip().split(' = ') for x in open(config_path) if pat.match(x)))
         self.blat = blat
         self.fasta = 'oligo_seqs.fa'
         if self.__class__.__name__ != 'Tools':
@@ -278,7 +275,7 @@ class Tools(object):
         CmdOptions = namedtuple('CmdOptions', ['paths_key', 'exe', 'name',
                                                'log_file', 'output_file'])           
         run_options = CmdOptions._make(options)
-        path = os.path.join(paths[run_options.paths_key], run_options.exe)
+        path = os.path.join(self.paths[run_options.paths_key], run_options.exe)
         print('{} with {}...'.format(msg, run_options.name))
         log = open(run_options.log_file, 'w')
         subprocess.call(' '.join((path, cmd)), shell=True, stdout=log,

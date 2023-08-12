@@ -14,6 +14,7 @@ def cli(ctx, version, config):
         click.echo(f"oligo v{metadata.version('oligo-capture')}")
     elif ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
+    ctx.obj["CONFIG"] = config
 
 def common_options(f):
     @click.option(
@@ -78,9 +79,10 @@ def final_common_options(f):
     help="Name of restriction enzyme, default=DpnII"
 )
 @final_common_options
-def capture(**kwargs):
+@click.pass_context
+def capture(ctx, **kwargs):
     click.echo('capture')
-    run_capture(**kwargs)
+    run_capture(ctx.obj["CONFIG"], **kwargs)
 
 @cli.command()
 @common_options
@@ -124,9 +126,10 @@ def capture(**kwargs):
     ),
 )
 @final_common_options
-def tiled(**kwargs):
+@click.pass_context
+def tiled(ctx, **kwargs):
     click.echo('tiled')
-    run_tiled(**kwargs)
+    run_tiled(ctx.obj["CONFIG"], **kwargs)
 
 @cli.command("off-target")
 @common_options
@@ -152,5 +155,7 @@ def tiled(**kwargs):
     help="The maximum distance away from the off-target site to design oligos to, default=200"
 )
 @final_common_options
-def off_target(**kwargs):
-    run_off_target(**kwargs)
+@click.pass_context
+def off_target(ctx, **kwargs):
+    click.echo('off-target')
+    run_off_target(ctx.obj["CONFIG"], **kwargs)
