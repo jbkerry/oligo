@@ -66,7 +66,47 @@ See `<http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/blat/>`_ for more de
 Docker
 ------
 
-put here
+Due to ``oligo`` requiring various third-party software, it can instead be run from a pre-made Docker image that has everything needed already installed. This should make the setup much
+easier for users as well as reducing the need to install lots of software on their local machines. Running via Docker is obviously less flexible in terms of the configuration of the
+third-party software but has been built with the most common use cases in mind and reducing the image size to as small as possible, without losing any of requirements ``oligo`` uses from
+the third-party software.
+
+First pull the latest oligo image onto your local machine:
+
+.. code-block:: bash
+
+  $ docker pull jbkerry/oligo:0.2.0-alpha
+
+The docker entrypoint is set to run ``oligo`` with the config file already set up to point to the install executables of BLAT and RepeatMasker so users can run the image, starting with
+the ``oligo`` sub-command that is required.
+
+#TODO: mounting directories
+
+The example command used above is shown again below but this time, using the Docker image:
+
+.. code-block:: bash
+
+  $ docker run -v /local/path/oligo_results:/results -v /local/human:/genome jbkerry/oligo:0.2.0-alpha off-target -f /genome/genome.fa -g hg38
+
+Installation specifics
+^^^^^^^^^^^^^^^^^^^^^^
+Below is a list of the versions and alterations that have been made to the standard installs of third-party software for the ``oligo`` Docker image:
+  * RepeatMasker v4.1.5
+  
+    * Dfam.h5 library has been replace with an HMM matrix containing only mouse- and human-specific transposable elements* in order to reduce the size of the Docker image
+  * HMMER v3.3.2
+  * Tandem Repeat Finder v4.09.1
+  * BLAT v37.x1
+  
+These HMM matrices were generated with the following two commands (``famdb.py`` comes bundled with the latest versions of RepeatMasker):
+
+.. code-block:: bash
+
+  $ ./famdb.py -i Libraries/RepeatMaskerLib.h5 families --format hmm 'Homo sapiens' --include-class-in-name >humans.hmm
+  $ ./famdb.py -i Libraries/RepeatMaskerLib.h5 families --format hmm 'Mus musculus' --include-class-in-name >mouse.hmm
+
+The Dockerfile in the ``oligo`` GitHub repository can be referenced for details of the how the Docker imges was built. Some reference data files that get copied into the image at build
+time are not present in the repository but can be provided to the user if needed.
 
 Usage
 =====
