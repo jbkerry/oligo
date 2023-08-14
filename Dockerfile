@@ -38,6 +38,7 @@ COPY config.txt .
 RUN apt-get update && apt-get install -y hmmer build-essential libcurl4
 
 ENV PERL5LIB="$PERL5LIB:/usr/local/RepeatMasker"
+ENV USE_CUSTOM_RM_LIB=true
 
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV

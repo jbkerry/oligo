@@ -9,13 +9,12 @@ import pandas as pd
 import pysam
 from Bio import SeqIO
 
-species = {'mm9': 'Mus musculus',
-           'mm10': 'Mus musculus',
-           'hg18': 'Homo sapiens',
-           'hg19': 'Homo sapiens',
-           'hg38': 'Homo sapiens'}
 
-repeat_param = '-noint -s -species "{}" {}'
+GENOME_MAP = {
+    "mm": {"species": "Mus musculus", "docker_lib_file": "/usr/local/mouse.hmm"},
+    "hg": {"species": "Homo sapiens", "docker_lib_file": "/usr/local/humans.hmm"},
+}
+
 blat_param = '-stepSize=5 -minScore=10 -minIdentity=0 -repMatch=999999'
 star_param = '--readFilesIn {} --genomeDir {} --runThreadN 4 --genomeLoad NoSharedMemory ' \
              '--outFilterMultimapScoreRange 1000 --outFilterMultimapNmax ' \
@@ -82,7 +81,11 @@ class Tools(object):
         
         options = ('RM_PATH', 'RepeatMasker', 'RepeatMasker',
                    'rm_log.txt', ''.join((self.fasta, '.out')))
-        cmd = repeat_param.format(species[self.genome.lower()], self.fasta)
+        genome_id = self.genome.lower()[:2]
+        cmd = f"-noint -s -species {GENOME_MAP[genome_id]['species']} "
+        if os.getenv("USE_CUSTOM_RM_LIB"):
+            cmd += f"-lib {GENOME_MAP[genome_id]['docker_lib_file']} "
+        cmd += f"{self.fasta}"
         msg = 'Checking for repeat sequences in oligos,'
         
         self._run_command(options, cmd, msg)
