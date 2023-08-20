@@ -26,12 +26,45 @@ the off-target binding and repeat content of the oligos. This information is out
 **Example**
 
 The subcommand follows the ``oligo`` command and options for the subcommand are then specified afterwards. Note that the config text file, specifying paths to the installed RepeatMasker,
-BLAT and STAR directories (see `Dependencies`_) must be specified between ``oligo`` and the chosen subcommand. 
-Below, is an example using the ``off-target`` subcommand:
+BLAT and STAR directories (see `Dependencies`_) must be specified between ``oligo`` and the chosen subcommand, with the ``-cfg`` argument. An example config file can be viewed
+`here <https://github.com/jbkerry/oligo/blob/main/config.txt>`_. Below, is an example using the ``off-target`` subcommand:
 
 .. code-block:: bash
 
   $ python -m oligo -cfg ./config.txt off-target -f /path/to/human/genome.fa -g hg38 -b ./off_target_sites.bed -o 100 -t 50 -m 300 --blat 
+
+**Command-line help**
+
+The ``oligo`` options and subcommands can be run with the ``--help`` flag from the command-line:
+
+.. code-block:: bash
+
+  $ python -m oligo --help
+    Usage: python -m oligo [OPTIONS] COMMAND [ARGS]...
+
+    Options:
+      --version
+      -cfg, --config PATH  [required]
+      --help               Show this message and exit.
+
+    Commands:
+      capture
+      off-target
+      tiled
+
+For options specific to each subcommand, run ``oligo`` with the desired subcommand, followed by ``--help``. Note that you will need to provide the ``-cfg`` flag for this to work:
+
+.. code-block:: bash
+
+  $ python -m oligo -cfg ./config.txt off-target --help
+    Usage: python -m oligo off-target [OPTIONS]
+
+    Options:
+      -f, --fasta PATH                Path to reference genome fasta.  [required]
+      (etc.)
+
+For full documentation on each of the subcommands and how each of their options affects the run, see the full documentation at http://oligo.readthedocs.io, where each subcommand
+has its own detailed documentation page, as well as there being using information regarding the oligo output file and how best to make use of it.
 
 Installation
 ============
@@ -60,7 +93,7 @@ Before running the full ``oligo`` pipeline you will need to install RepeatMasker
 
 *RepeatMasker*
   ``oligo`` uses RepeatMasker (RM) to determine if oligos contain simple sequence repeats as these can reduce the efficiency of the oligo for targeted capture. Follow the instructions
-  on `RepeatMasker home page <http://www.repeatmasker.org/>`_ for installing RM on your local system. The most recent version of RM that ``oligo`` has been tested with is v4.1.5. As detailed
+  on `RepeatMasker home page <http://www.repeatmasker.org/RepeatMasker/>`_ for installing RM on your local system. The most recent version of RM that ``oligo`` has been tested with is v4.1.5. As detailed
   on the RM home page, its installation depends on a Sequence Search Engine (it is recommended to use **HMMER** for ``oligo``) and Tandem Repeat Finder (TRF). For the Repeat Database, RM ships
   with the curated set of Dfam 3.7 Transposable Elements which is sufficient but users are free to use the full set if required; further instructions are on the RM home page.
 
@@ -80,6 +113,11 @@ Before running the full ``oligo`` pipeline you will need to install RepeatMasker
   $ rsync -aP rsync://hgdownload.soe.ucsc.edu/genome/admin/exe/linux.x86_64/blat/ ./
 
 See `<http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/blat/>`_ for more details.
+
+.. highlights::
+
+  Please note, that as specified on its website, "the Blat source and executables are freely available for academic, nonprofit and personal use. Commercial licensing information is
+  available on the Kent Informatics website (http://www.kentinformatics.com/)". Ensure that you are adhering to this licence agreement if you are using ``oligo`` with ``--blat`` enabled.
 
 *STAR*
   As an alternative to BLAT, ``oligo`` allows users to use the Spliced Transcripts Alignment to a Reference (STAR) alignment program for increased speed when determining multiple binding
@@ -108,7 +146,7 @@ You can also specify a version if needed. The Docker image versions match the ol
   $ docker pull jbkerry/oligo:0.2.0
 
 The docker entrypoint is set to run ``oligo`` with the config file already set up to point to the install executables of BLAT and RepeatMasker so users can run the image, starting with
-the ``oligo`` sub-command that is required.
+the ``oligo`` subcommand that is required.
 
 In order for your BED file and reference genome FASTA files to be accessible to the Docker container, your local directories with these files must be mounted into the Docker container
 using the ``-v`` option when you call the ``docker run`` command on the image. The Docker image runs the ``oligo`` command from a top-level directory called ``/results`` and stores
