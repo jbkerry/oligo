@@ -14,6 +14,7 @@ GENOME_MAP = {
     "mm": {"species": "Mus musculus", "docker_lib_file": "/usr/local/mouse.hmm"},
     "hg": {"species": "Homo sapiens", "docker_lib_file": "/usr/local/humans.hmm"},
 }
+USE_CUSTOM_RM_LIB = os.getenv("USE_CUSTOM_RM_LIB") in ("true", "1")
 
 blat_param = '-stepSize=5 -minScore=10 -minIdentity=0 -repMatch=999999'
 star_param = '--readFilesIn {} --genomeDir {} --runThreadN 4 --genomeLoad NoSharedMemory ' \
@@ -82,9 +83,11 @@ class Tools(object):
         options = ('RM_PATH', 'RepeatMasker', 'RepeatMasker',
                    'rm_log.txt', ''.join((self.fasta, '.out')))
         genome_id = self.genome.lower()[:2]
-        cmd = f"-noint -s -species {GENOME_MAP[genome_id]['species']} "
-        if os.getenv("USE_CUSTOM_RM_LIB"):
+        cmd = f"-noint -s "
+        if USE_CUSTOM_RM_LIB:
             cmd += f"-lib {GENOME_MAP[genome_id]['docker_lib_file']} "
+        else:
+            cmd += f"-species {GENOME_MAP[genome_id]['species']} "
         cmd += f"{self.fasta}"
         msg = 'Checking for repeat sequences in oligos,'
         
@@ -142,7 +145,8 @@ class Tools(object):
             self._oligo_stats
         except AttributeError:
             self._populate_oligo_stats()
-        
+
+        # TODO: detect existence of .fa.out file here and echo the RM log contents if not found
         with open('.'.join((self.fasta, 'out'))) as repeats_file:
             if len(repeats_file.readlines())>1:
                 repeats_file.seek(0)

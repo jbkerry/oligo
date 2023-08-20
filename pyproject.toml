@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "oligo-capture"
-version = "0.2.dev1"
+version = "0.2.dev3"
 description = "A tool for designing oligos for DNA capture"
 authors = ["Jon Kerry <jonbkerry@gmail.com>"]
 license = "GPL-3.0-only"
