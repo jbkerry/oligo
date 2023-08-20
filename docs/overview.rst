@@ -8,7 +8,11 @@ Capture Oligo Design
 ``oligo`` provides functionality to automate primer design for DNA capture experiments, providing the user with details about efficiency of the primers generated.
 
 .. include:: ../README.rst
-    :lines: 11-65,68-
+    :start-line: 11
+    :end-line: 65
+
+.. include:: ../README.rst
+    :start-line: 68
 
 .. important::
 

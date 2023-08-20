@@ -35,7 +35,7 @@ BLAT and STAR directories (see `Dependencies`_) must be specified between ``olig
 
 **Command-line help**
 
-The ``oligo`` options and subcommands can be run with the ``--help`` flag from the command-line:
+The ``oligo`` options and subcommands can be viewed with the ``--help`` flag from the command-line:
 
 .. code-block:: bash
 
