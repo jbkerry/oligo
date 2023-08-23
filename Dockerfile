@@ -44,7 +44,7 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN pip install --upgrade pip \
-    && pip install oligo-capture==0.2.dev3
+    && pip install oligo-capture==0.2b1
 
 RUN cd RepeatMasker \
     && perl configure -trf_prgm /usr/local/TRF-4.09.1/build/src/trf -hmmer_dir /usr/bin -default_search_engine hmmer
