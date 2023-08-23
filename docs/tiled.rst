@@ -87,12 +87,12 @@ Below are examples using the `Tiled` pipeline for different scenarios
 .. code-block:: bash
     :caption: 120bp tiled for DpnII fragments in hg38 for the whole of chromsome 18, using STAR to check off-target binding
 
-    $ python -m oligo capture -f ~/hg38/Sequence/genome.fa -g hg38 -c 18 -o 120 -s ~/hg38/STAR/
+    $ python -m oligo -cfg ./config.txt tiled -f ~/hg38/Sequence/genome.fa -g hg38 -c 18 -o 120 -s ~/hg38/STAR/
     
 .. code-block:: bash
     :caption: 50bp oligos across the region 10,150,000 to 10,200,000 on chromosome X of mm9, with adjacent oligos separated by a gap of 10bp, using BLAT to check off-target binding
 
-    $ python -m oligo tiled --contig -f ~/mm9/Sequence/genome.fa -g mm9 -c X -r 10150000-10200000 -o 50 -t 60 --blat
+    $ python -m oligo -cfg ./config.txt tiled --contig -f ~/mm9/Sequence/genome.fa -g mm9 -c X -r 10150000-10200000 -o 50 -t 60 --blat
     
 Specifics
 ---------
@@ -132,7 +132,7 @@ The following examples show the order in which the class methods are implemented
     :caption: Create an instance of the Tiled class
     
     >>> from oligo.design import Tiled
-    >>> t = Tiled(genome='hg38', fa='hg38_genome.fa', blat=True)
+    >>> t = Tiled(genome='hg38', fa='hg38_genome.fa', config_path="config.txt", blat=True)
     Loading reference fasta file...
         ...complete
     

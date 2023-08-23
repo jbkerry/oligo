@@ -6,6 +6,10 @@ For full documentation, see http://oligo.readthedocs.io
 
 ``oligo`` provides functionality to automate oligo (bait) design for DNA capture experiments, providing the user with details about capture efficiency of the sequences generated.
 
+.. highlights:: 
+  Since version 0.2, oligo provides a more efficient installation process and provides the user with the option of running the tool via a Docker image. This version is still
+  in a pre-release beta phase. For the older format of oligo, please use version 0.1.2. Documentation specific for v0.1.2 can be found here https://oligo.readthedocs.io/en/0.1.2/.
+
 .. contents:: Table of Contents
    :depth: 2
 
@@ -27,7 +31,7 @@ Ensure it has installed correctly by running the following command and verifying
 .. code-block:: bash
 
   $ python -m oligo --version
-  oligo v0.2.0
+  oligo v0.2b1
 
 Before running the full ``oligo`` pipeline you will need to install RepeatMasker and either BLAT or STAR, depending on how you intend to run ``oligo`` (see below for more details)
 
@@ -79,7 +83,7 @@ Docker
 Due to ``oligo`` requiring various third-party software, it can instead be run from a pre-built Docker image that has everything needed already installed. This should make the setup much
 easier for users as well as reducing the need to install lots of software on their local machines. Running via Docker is obviously less flexible in terms of the configuration of the
 third-party software but has been built with the most common use cases in mind and reducing the image size to as small as possible, without losing any of requirements ``oligo`` uses from
-the third-party software.
+the third-party software. **Currently the Docker image only supports running oligo with BLAT, not STAR.**
 
 First pull the latest oligo image onto your local machine:
 
@@ -91,7 +95,7 @@ You can also specify a version if needed. The Docker image versions match the ol
 
 .. code-block:: bash
 
-  $ docker pull jbkerry/oligo:0.2.0
+  $ docker pull jbkerry/oligo:0.2b1
 
 The docker entrypoint is set to run ``oligo`` with the config file already set up to point to the install executables of BLAT and RepeatMasker so users can run the image, starting with
 the ``oligo`` subcommand that is required (see the Usage_ section for more details).

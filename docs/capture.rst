@@ -69,12 +69,12 @@ Below are examples using the `Capture` pipeline for different scenarios
 .. code-block:: bash
     :caption: 50bp oligos for NlaIII fragments in hg19 build, using STAR to check off-target binding
 
-    $ python -m oligo capture -f ~/hg19/Sequence/genome.fa -g hg19 -b viewpoints.bed -o 50 -e NlaIII -s ~/hg19/STAR/
+    $ python -m oligo -cfg ./config.txt capture -f ~/hg19/Sequence/genome.fa -g hg19 -b viewpoints.bed -o 50 -e NlaIII -s ~/hg19/STAR/
     
 .. code-block:: bash
     :caption: 70bp oligos for HindIII fragments in mm10 build, using BLAT to check off-target binding
 
-    $ python -m oligo capture -f ~/mm10/Sequence/genome.fa -g mm10 -b mouse_viewpoints.bed -e HindIII --blat
+    $ python -m oligo -cfg ./config.txt capture -f ~/mm10/Sequence/genome.fa -g mm10 -b mouse_viewpoints.bed -e HindIII --blat
 
 Specifics
 ---------
@@ -118,7 +118,7 @@ The following examples show the order in which the class methods are implemented
     :caption: Create an instance of the Capture class
 
     >>> from oligo.design import Capture
-    >>> c = Capture(genome='mm9', fa='mm9_genome.fa')
+    >>> c = Capture(genome='mm9', fa='mm9_genome.fa', config_path="config.txt")
     Loading reference fasta file...
         ...complete
     

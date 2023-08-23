@@ -11,11 +11,13 @@ Capture Oligo Design
     :start-line: 11
     :end-line: 192
 
+More detailed usage information for each of the subcommads can be found in the individual pages, via the navigation on the left.
+
 Pipeline Schematic
 ==================
 
-A schematic of the pipeline workflows is shown below. More detailed usage information for each of the subcommads can be found in the individual pages,
-via the navigation on the left.
+A schematic of the pipeline workflows is shown below. The `tools.Tools <http://oligo.rtfd.io/en/latest/tools_class.html>`_ class is where the RepeatMasker and BLAT or STAR
+software is run to determine the off-target alignments as as the simple sequence repeats of each generated oligo.
 
 .. figure:: _static/oligo_flow.png
     
