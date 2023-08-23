@@ -9,63 +9,6 @@ For full documentation, see http://oligo.readthedocs.io
 .. contents:: Table of Contents
    :depth: 2
 
-
-Usage
-=====
-
-``oligo`` can be run with one of three subcommands
-
-* `capture <http://oligo.rtfd.io/en/latest/capture.html>`_: designs oligos for a standard Capture-C experiment. The user supplies a list of viewpoint coordinates, and oligos are generated adjacent to the flanking recognition sequence of a specified restriction enzyme.
-* `tiled <http://oligo.rtfd.io/en/latest/tiled.html>`_: designs oligos for multiple adjacent restriction fragments across a specified region of a chromosome, or for the entire chromosome. If ``tiled`` is run in contiguous mode, oligos are generated independent of restriction fragments and
-  are instead generated for a user-specified step size, in an adjacent manner.
-* `off-target <http://oligo.rtfd.io/en/latest/off_target.html>`_: designs oligos to capture DNA surrounding potential CRISPR off-target cut sites to allow for efficient sequencing to determine off-target activity.
-
-These subcommands all generate oligo sequences, based on different underlying behaviours. Methods from the `Tools <http://oligo.rtfd.io/en/latest/tools_class.html>`_ class in the ``oligo.tools`` module are then used to check
-the off-target binding and repeat content of the oligos. This information is output in a file called *oligo_info.txt*; oligo sequences are written to a FASTA file called *oligo_seqs.fa*
-
-**Example**
-
-The subcommand follows the ``oligo`` command and options for the subcommand are then specified afterwards. Note that the config text file, specifying paths to the installed RepeatMasker,
-BLAT and STAR directories (see `Dependencies`_) must be specified between ``oligo`` and the chosen subcommand, with the ``-cfg`` argument. An example config file can be viewed
-`here <https://github.com/jbkerry/oligo/blob/main/config.txt>`_. Below, is an example using the ``off-target`` subcommand:
-
-.. code-block:: bash
-
-  $ python -m oligo -cfg ./config.txt off-target -f /path/to/human/genome.fa -g hg38 -b ./off_target_sites.bed -o 100 -t 50 -m 300 --blat 
-
-**Command-line help**
-
-The ``oligo`` options and subcommands can be viewed with the ``--help`` flag from the command-line:
-
-.. code-block:: bash
-
-  $ python -m oligo --help
-    Usage: python -m oligo [OPTIONS] COMMAND [ARGS]...
-
-    Options:
-      --version
-      -cfg, --config PATH  [required]
-      --help               Show this message and exit.
-
-    Commands:
-      capture
-      off-target
-      tiled
-
-For options specific to each subcommand, run ``oligo`` with the desired subcommand, followed by ``--help``. Note that you will need to provide the ``-cfg`` flag for this to work:
-
-.. code-block:: bash
-
-  $ python -m oligo -cfg ./config.txt off-target --help
-    Usage: python -m oligo off-target [OPTIONS]
-
-    Options:
-      -f, --fasta PATH                Path to reference genome fasta.  [required]
-      (etc.)
-
-For full documentation on each of the subcommands and how each of their options affects the run, see the full documentation at http://oligo.readthedocs.io, where each subcommand
-has its own detailed documentation page, as well as there being using information regarding the oligo output file and how best to make use of it.
-
 Installation
 ============
 Local
@@ -86,10 +29,15 @@ Ensure it has installed correctly by running the following command and verifying
   $ python -m oligo --version
   oligo v0.2.0
 
+Before running the full ``oligo`` pipeline you will need to install RepeatMasker and either BLAT or STAR, depending on how you intend to run ``oligo`` (see below for more details)
+
 Dependencies
 ^^^^^^^^^^^^
 
-Before running the full ``oligo`` pipeline you will need to install RepeatMasker and either BLAT or STAR, depending on how you intend to run ``oligo`` (see below for more details)
+.. highlights:: 
+
+  Since running oligo locally requires a number of third-party software to be installed, users might find it less hassle to run ``oligo``
+  via the Docker image, if this option is available to them. See the Docker_ section for more details.
 
 *RepeatMasker*
   ``oligo`` uses RepeatMasker (RM) to determine if oligos contain simple sequence repeats as these can reduce the efficiency of the oligo for targeted capture. Follow the instructions
@@ -146,25 +94,25 @@ You can also specify a version if needed. The Docker image versions match the ol
   $ docker pull jbkerry/oligo:0.2.0
 
 The docker entrypoint is set to run ``oligo`` with the config file already set up to point to the install executables of BLAT and RepeatMasker so users can run the image, starting with
-the ``oligo`` subcommand that is required.
+the ``oligo`` subcommand that is required (see the Usage_ section for more details).
 
 In order for your BED file and reference genome FASTA files to be accessible to the Docker container, your local directories with these files must be mounted into the Docker container
 using the ``-v`` option when you call the ``docker run`` command on the image. The Docker image runs the ``oligo`` command from a top-level directory called ``/results`` and stores
 all of its output files here. In order to see them on your local machine after the run has finished, you will need to mount a local directory where you want to store the results, to
 this ``/results`` directory. Again, this mount with the ``-v`` option needs to be done at the image runtime.
 
-The example ``oligo`` command used above is shown again below but this time using the Docker image:
+For example, running the ``oligo`` command with the ``off-target`` subcommand might look something like this with the Docker image:
 
 .. code-block:: bash
 
-  $ docker run -v /local/path/oligo_results:/results -v /local/human:/genome jbkerry/oligo:latest off-target -f /genome/genome.fa -g hg38
+  $ docker run -v /local/path/oligo_results:/results -v /local/human:/genome jbkerry/oligo:latest off-target -f /genome/genome.fa -g hg38 -b ./off_target_sites.bed -o 100 -t 50 -m 300 --blat
 
 With this command, the output results will appear in the example local directory of ``/local/path/oligo_results``. Note that this example command is using the Linux filepath
 format (i.e., ``/.../``) for the local directories. On Windows (not using WSL) the mounting would look like this:
 
 .. code-block:: bash
 
-  $ docker run -v C:\local\path\oligo_results:/results -v C:\local\human:/genome jbkerry/oligo:latest off-target -f /genome/genome.fa -g hg38
+  $ docker run -v C:\local\path\oligo_results:/results -v C:\local\human:/genome jbkerry/oligo:latest off-target -f /genome/genome.fa -g hg38 -b ./off_target_sites.bed -o 100 -t 50 -m 300 --blat
 
 Because the docker image is built on top of a Debian Linux image, the paths that local directories get mounted to in the container (i.e. the right-hand side of the ``:`` for 
 the ``-v`` options) still need to use the Linux filepath format, even when running from a Windows machine.
@@ -188,3 +136,59 @@ The HMM matrices were generated with the following two commands, run from with t
 
 The Dockerfile in the ``oligo`` GitHub repository can be referenced for details of the how the Docker image was built. Some reference data files that get copied into the image at build
 time are not present in the repository but can be provided to the user if needed.
+
+Usage
+=====
+
+``oligo`` can be run with one of three subcommands
+
+* `capture <http://oligo.rtfd.io/en/latest/capture.html>`_: designs oligos for a standard Capture-C experiment. The user supplies a list of viewpoint coordinates, and oligos are generated adjacent to the flanking recognition sequence of a specified restriction enzyme.
+* `tiled <http://oligo.rtfd.io/en/latest/tiled.html>`_: designs oligos for multiple adjacent restriction fragments across a specified region of a chromosome, or for the entire chromosome. If ``tiled`` is run in contiguous mode, oligos are generated independent of restriction fragments and
+  are instead generated for a user-specified step size, in an adjacent manner.
+* `off-target <http://oligo.rtfd.io/en/latest/off_target.html>`_: designs oligos to capture DNA surrounding potential CRISPR off-target cut sites to allow for efficient sequencing to determine off-target activity.
+
+These subcommands all generate oligo sequences, based on different underlying behaviours. Methods from the `Tools <http://oligo.rtfd.io/en/latest/tools_class.html>`_ class in the ``oligo.tools`` module are then used to check
+the off-target binding and repeat content of the oligos. This information is output in a file called *oligo_info.txt*; oligo sequences are written to a FASTA file called *oligo_seqs.fa*
+
+**Example**
+
+The subcommand follows the ``oligo`` command and options for the subcommand are then specified afterwards. Note that the config text file, specifying paths to the installed RepeatMasker,
+BLAT and STAR directories (see `Dependencies`_) must be specified between ``oligo`` and the chosen subcommand, with the ``-cfg`` argument. An example config file can be viewed
+`here <https://github.com/jbkerry/oligo/blob/main/config.txt>`_. Below, is an example using the ``off-target`` subcommand:
+
+.. code-block:: bash
+
+  $ python -m oligo -cfg ./config.txt off-target -f /path/to/human/genome.fa -g hg38 -b ./off_target_sites.bed -o 100 -t 50 -m 300 --blat 
+
+**Command-line help**
+
+The ``oligo`` options and subcommands can be viewed with the ``--help`` flag from the command-line:
+
+.. code-block:: bash
+
+  $ python -m oligo --help
+    Usage: python -m oligo [OPTIONS] COMMAND [ARGS]...
+
+    Options:
+      --version
+      -cfg, --config PATH  [required]
+      --help               Show this message and exit.
+
+    Commands:
+      capture
+      off-target
+      tiled
+
+For options specific to each subcommand, run ``oligo`` with the desired subcommand, followed by ``--help``. Note that you will need to provide the ``-cfg`` flag for this to work:
+
+.. code-block:: bash
+
+  $ python -m oligo -cfg ./config.txt off-target --help
+    Usage: python -m oligo off-target [OPTIONS]
+
+    Options:
+      -f, --fasta PATH                Path to reference genome fasta.  [required]
+      (etc.)
+
+For full documentation on each of the subcommands and how each of their options affects the run, see the full documentation at http://oligo.readthedocs.io. There you will find
+a detailed documentation page for each of the subcommads, as well as information regarding the oligo output file and how best to make use of it.

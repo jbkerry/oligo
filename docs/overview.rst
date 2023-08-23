@@ -9,16 +9,13 @@ Capture Oligo Design
 
 .. include:: ../README.rst
     :start-line: 11
-    :end-line: 65
+    :end-line: 192
 
-.. include:: ../README.rst
-    :start-line: 68
+Pipeline Schematic
+==================
 
-.. important::
-
-    Paths to directories containing executables for STAR, BLAT and RepeatMasker must be set in the `config.txt` file before using the pipelines
-
-More detailed usage information can be found in the individual pages, via the navigation on the left. A schematic of the pipeline workflows is shown below.
+A schematic of the pipeline workflows is shown below. More detailed usage information for each of the subcommads can be found in the individual pages,
+via the navigation on the left.
 
 .. figure:: _static/oligo_flow.png
     
