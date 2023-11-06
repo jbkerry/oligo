@@ -2,8 +2,10 @@ name: Docker Image CI
 
 on:
   push:
+    branches:
+      - "setup_github_actions"
     tags:
-    - "*"
+      - "*"
 
 jobs:
 
