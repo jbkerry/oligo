@@ -82,7 +82,6 @@ def final_common_options(f):
 @final_common_options
 @click.pass_context
 def capture(ctx, **kwargs):
-    click.echo('capture')
     run_capture(ctx.obj["CONFIG"], **kwargs)
 
 @cli.command()
@@ -129,7 +128,6 @@ def capture(ctx, **kwargs):
 @final_common_options
 @click.pass_context
 def tiled(ctx, **kwargs):
-    click.echo('tiled')
     run_tiled(ctx.obj["CONFIG"], **kwargs)
 
 @cli.command("off-target")
@@ -158,5 +156,4 @@ def tiled(ctx, **kwargs):
 @final_common_options
 @click.pass_context
 def off_target(ctx, **kwargs):
-    click.echo('off-target')
     run_off_target(ctx.obj["CONFIG"], **kwargs)
