@@ -7,8 +7,9 @@ For full documentation, see http://oligo.readthedocs.io
 ``oligo`` provides functionality to automate oligo (bait) design for DNA capture experiments, providing the user with details about capture efficiency of the sequences generated.
 
 .. highlights:: 
-  Since version 0.2, oligo provides a more efficient installation process and provides the user with the option of running the tool via a Docker image. This version is still
-  in a pre-release beta phase. For the older format of oligo, please use version 0.1.2. Documentation specific for v0.1.2 can be found here https://oligo.readthedocs.io/en/0.1.2/.
+  Since version 0.2, oligo provides a more efficient installation process and provides the user with the option of running the tool via a Docker image. This version is not compatible
+  with running the scripts in versions prior 0.2 due to the new installation process. For the older format of oligo, please use version 0.1.2. Documentation specific for v0.1.2 can be
+  found here https://oligo.readthedocs.io/en/0.1.2/.
 
 .. contents:: Table of Contents
    :depth: 2
