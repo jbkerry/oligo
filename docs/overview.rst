@@ -2,14 +2,22 @@
 Overview
 ########
 
+Capture Oligo Design
+====================
+
+``oligo`` provides functionality to automate primer design for DNA capture experiments, providing the user with details about efficiency of the primers generated.
+
 .. include:: ../README.rst
-    :end-before: For full documentation
+    :start-line: 15
+    :end-line: 196
 
-.. important::
+More detailed usage information for each of the subcommads can be found in the individual pages, via the navigation on the left.
 
-    Paths to directories containing executables for STAR, BLAT and RepeatMasker must be set in the `config.txt` file before using the pipelines
+Pipeline Schematic
+==================
 
-More detailed usage information can be found in the individual pages, via the navigation on the left. A schematic of the pipeline workflows is shown below.
+A schematic of the pipeline workflows is shown below. The `tools.Tools <http://oligo.rtfd.io/en/latest/tools_class.html>`_ class is where the RepeatMasker and BLAT or STAR
+software is run to determine the off-target alignments as as the simple sequence repeats of each generated oligo.
 
 .. figure:: _static/oligo_flow.png
     

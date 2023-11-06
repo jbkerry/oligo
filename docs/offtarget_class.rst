@@ -2,7 +2,7 @@
 oligo.design.OffTarget
 ######################
 
-.. currentmodule:: design
+.. py:currentmodule:: oligo.design
 
 .. autoclass:: OffTarget
     :members:

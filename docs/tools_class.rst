@@ -2,7 +2,7 @@
 oligo.tools.Tools
 ##################
 
-.. currentmodule:: tools
+.. py:currentmodule:: oligo.tools
 
 .. autoclass:: Tools
     :members:

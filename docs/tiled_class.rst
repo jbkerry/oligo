@@ -2,7 +2,7 @@
 oligo.design.Tiled
 ##################
 
-.. currentmodule:: design
+.. py:currentmodule:: oligo.design
 
 .. autoclass:: Tiled
     :members:

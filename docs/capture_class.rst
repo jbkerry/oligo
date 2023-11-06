@@ -2,7 +2,7 @@
 oligo.design.Capture
 ####################
 
-.. currentmodule:: design
+.. py:currentmodule:: oligo.design
 
 .. autoclass:: Capture
     :members:
