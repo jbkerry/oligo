@@ -2,9 +2,8 @@ FROM python:3.9 as builder
 
 WORKDIR /usr/local
 
-COPY docker/RepeatMasker-4.1.5.tar.gz .
-
-RUN tar -xvzf RepeatMasker-4.1.5.tar.gz --exclude=RepeatMasker/Libraries/Dfam.h5
+RUN wget https://www.repeatmasker.org/RepeatMasker/RepeatMasker-4.1.5.tar.gz \
+    && tar -xvzf RepeatMasker-4.1.5.tar.gz --exclude=RepeatMasker/Libraries/Dfam.h5
 
 COPY docker/Dfam.h5 /usr/local/RepeatMasker/Libraries/Dfam.h5
 

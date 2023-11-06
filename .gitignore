@@ -4,4 +4,4 @@ __pycache__/
 .python-version
 .vscode/
 dist/
-docker/
+docker/*.tar.gz
