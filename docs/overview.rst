@@ -9,7 +9,7 @@ Capture Oligo Design
 
 .. include:: ../README.rst
     :start-line: 15
-    :end-line: 192
+    :end-line: 196
 
 More detailed usage information for each of the subcommads can be found in the individual pages, via the navigation on the left.
 

@@ -114,7 +114,7 @@ For example, running the ``oligo`` command with the ``off-target`` subcommand mi
 With this command, the output results will appear in the example local directory of ``/local/path/oligo_results``. Note that this example command is using the Linux filepath
 format (i.e., ``/.../``) for the local directories. On Windows (not using WSL) the mounting would look like this:
 
-.. code-block:: bash
+.. code-block::
 
   $ docker run -v C:\local\path\oligo_results:/results -v C:\local\human:/genome jbkerry/oligo:latest off-target -f /genome/genome.fa -g hg38 -b ./off_target_sites.bed -o 100 -t 50 -m 300 --blat
 
@@ -195,4 +195,4 @@ For options specific to each subcommand, run ``oligo`` with the desired subcomma
       (etc.)
 
 For full documentation on each of the subcommands and how each of their options affects the run, see the full documentation at http://oligo.readthedocs.io. There you will find
-a detailed documentation page for each of the subcommads, as well as information regarding the oligo output file and how best to make use of it.
+a detailed documentation page for each of the subcommands, as well as information regarding the oligo output file and how best to make use of it.
