@@ -31,7 +31,7 @@ Ensure it has installed correctly by running the following command and verifying
 .. code-block:: bash
 
   $ python -m oligo --version
-  oligo v0.2b1
+  oligo v0.2
 
 Before running the full ``oligo`` pipeline you will need to install RepeatMasker and either BLAT or STAR, depending on how you intend to run ``oligo`` (see below for more details)
 
@@ -91,11 +91,11 @@ First pull the latest oligo image onto your local machine:
 
   $ docker pull jbkerry/oligo:latest
 
-You can also specify a version if needed. The Docker image versions match the oligo package version i.e., jbkerry/oligo:0.2.0 will be running ``oligo`` v0.2.0:
+You can also specify a version if needed. The Docker image versions match the oligo package version i.e., jbkerry/oligo:0.2 will be running ``oligo`` v0.2:
 
 .. code-block:: bash
 
-  $ docker pull jbkerry/oligo:0.2b1
+  $ docker pull jbkerry/oligo:0.2
 
 The docker entrypoint is set to run ``oligo`` with the config file already set up to point to the install executables of BLAT and RepeatMasker so users can run the image, starting with
 the ``oligo`` subcommand that is required (see the Usage_ section for more details).
