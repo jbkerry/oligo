@@ -2,18 +2,21 @@ import functools
 from importlib import metadata
 
 import click
+from click.exceptions import MissingParameter
 
 from .wrappers import run_capture, run_tiled, run_off_target
 
 @click.group(invoke_without_command=True)
 @click.option("--version", is_flag=True)
-@click.option("--config", "-cfg", type=click.Path(exists=True), required=True)
+@click.option("--config", "-cfg", type=click.Path(exists=True))
 @click.pass_context
 def cli(ctx, version, config):
     if version:
         click.echo(f"oligo v{metadata.version('oligo-capture')}")
     elif ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
+    elif not config:
+        raise MissingParameter(param_type="option '--config' / '-cfg'")
     else:
         ctx.obj["CONFIG"] = config
 
