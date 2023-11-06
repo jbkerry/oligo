@@ -1,15 +1,12 @@
-#!/usr/bin/env python
-
 from __future__ import print_function, division
 
 import argparse
-import math
 import re
 import sys
 
-import numpy as np  # >=1.7
+import numpy as np
 
-from tools import Tools
+from oligo.tools import Tools
 
 recognition_seq = {'DpnII': 'GATC',
                    'NlaIII': 'CATG',
@@ -360,192 +357,11 @@ class OffTarget(Tools):
             self.genome)
 
 if __name__ == '__main__':
-    classes = ('Capture', 'Tiled', 'OffTarget')
-    try:
-        class_arg = sys.argv[1]
-        if class_arg not in classes:
-            raise NameError('{} is not a recognised class name, choose from '
-                            'one of the following: {}'.format(
-                                class_arg,
-                                ', '.join(classes)
-                            ))
-    except IndexError:
-        raise IndexError('design.py must be followed by one of the following '
-                         'class names: {}'.format(', '.join(classes)))
+
     parser = argparse.ArgumentParser()
-    
-    parser.add_argument(
-        '-f',
-        '--fasta',
-        type = str,
-        help = 'Path to reference genome fasta.',
-        required = True,
-    )
-    parser.add_argument(
-        '-g',
-        '--genome',
-        type = str,
-        choices = ['mm9', 'mm10', 'hg18', 'hg19', 'hg38'],
-        help = 'Genome build',
-        required = True,
-    )
-    
-    if class_arg == 'Capture': 
-        parser.add_argument(
-            '-b',
-            '--bed',
-            type = str,
-            help = 'Path to bed file with capture viewpoint coordinates',
-            required = True,
-        )
-        parser.add_argument(
-            '-e',
-            '--enzyme',
-            type = str,
-            choices = ['DpnII', 'NlaIII', 'HindIII'],
-            help = 'Name of restriction enzyme, default=DpnII',
-            default = 'DpnII',
-            required = False,
-        )
-    elif class_arg == 'Tiled': 
-        parser.add_argument(
-            '-c',
-            '--chr',
-            type = str,
-            help = 'Chromosome number/letter on which to design the oligos.',
-            required = True,
-        )
-        parser.add_argument(
-            '-r',
-            '--region',
-            type = str,
-            help = 'The region in which to design the oligos; must be in the' \
-                   ' format \'start-stop\' e.g. 10000-20000. Omit this ' \
-                   'option to design oligos across the entire chromosome.',
-            required = False,
-        )
-        parser.add_argument(
-            '--contig',
-            action = 'store_true',
-            help = 'Run in contiguous mode (restriciton enzyme independent).',
-            required = False,
-        )
-        parser.add_argument(
-            '-e',
-            '--enzyme',
-            type = str,
-            choices = ['DpnII', 'NlaIII', 'HindIII'],
-            help = 'Name of restriction enzyme, default=DpnII. Omit this ' \
-                   'option if running in contiguous mode (--contig)',
-            default = 'DpnII',
-            required = False,
-        )
-        parser.add_argument(
-            '-t',
-            '--step_size',
-            type = int,
-            help = 'Step size (in bp) between adjacent oligos when running ' \
-                   'in contiguous mode (--contig), default=70. Omit this option if ' \
-                   'you are not using the --contig flag',
-            default = 70,
-            required = False,
-        )
-    elif class_arg == 'OffTarget':
-        parser.add_argument(
-            '-b',
-            '--bed',
-            type = str,
-            help = 'Path to bed file with off-target coordinates',
-            required = True,
-        )
-        parser.add_argument(
-            '-t',
-            '--step_size',
-            type = int,
-            help = 'Step size (in bp) between adjacent oligos, default=10',
-            default = 10,
-            required = False,
-        )
-        parser.add_argument(
-            '-m',
-            '--max_dist',
-            type = int,
-            help = 'The maximum distance away from the off-target site to ' \
-                   'design oligos to, default=200',
-            default = 200,
-            required = False,
-        )
-    
-    parser.add_argument(
-        '-o',
-        '--oligo',
-        type = int,
-        help = 'The size (in bp) of the oligo to design, default=70',
-        default = 70,
-        required = False,
-    )
-    parser.add_argument(
-        '-s',
-        '--star_index',
-        type = str,
-        help = 'Path to STAR index directory. Omit this option if running ' \
-               'with BLAT (--blat)',
-        required = False,
-    )
-    parser.add_argument(
-        '--blat',
-        action = 'store_true',
-        help = 'Detect off-targets using BLAT instead of STAR.',
-        required = False,
-    )
-    parser.add_argument(
-        '--test_fasta',
-        action = 'store_true',
-        help = argparse.SUPPRESS,
-        required = False,
-    )
     
     args = parser.parse_args(sys.argv[2:])
     
     if not args.blat and not args.star_index:
         msg = '-s/--star_index argument is required if --blat is not selected'
         parser.error(msg)
-    
-    if class_arg == 'Capture':
-        c = Capture(genome=args.genome, fa=args.fasta, blat=args.blat)
-        c.gen_oligos(
-            bed = args.bed,
-            enzyme = args.enzyme,
-            oligo = args.oligo,
-        )
-    elif class_arg == 'Tiled':
-        c = Tiled(genome=args.genome, fa=args.fasta, blat=args.blat)
-        if args.contig:
-            c.gen_oligos_contig(
-                chrom = args.chr,
-                region = args.region,
-                step = args.step_size,
-                oligo = args.oligo
-            )
-        else:
-            c.gen_oligos_capture(
-                chrom = args.chr,
-                region = args.region,
-                enzyme = args.enzyme,
-                oligo = args.oligo
-            )
-    elif class_arg == 'OffTarget':
-        c = OffTarget(genome=args.genome, fa=args.fasta, blat=args.blat)
-        c.gen_oligos(
-            bed = args.bed,
-            step = args.step_size,
-            max_dist = args.max_dist,
-            oligo = args.oligo,
-        )
-        
-    c.write_fasta()
-    if not args.test_fasta:    
-        c.detect_repeats().align_to_genome(s_idx=args.star_index)
-        c.extract_repeats().calculate_density().write_oligo_info()
-    
-

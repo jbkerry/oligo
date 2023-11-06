@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "oligo-capture"
+version = "0.2b1"
+description = "A tool for designing oligos for DNA capture"
+authors = ["Jon Kerry <jonbkerry@gmail.com>"]
+license = "GPL-3.0-only"
+readme = "README.rst"
+repository = "https://github.com/jbkerry/oligo"
+documentation = "https://oligo.readthedocs.io/"
+packages = [
+    { include = "oligo", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pandas = "^2.0.0"
+numpy = "^1.21.0"
+pysam = "^0.21.0"
+biopython = "^1.60"
+click = "^8.1.6"
+h5py = "^3.9.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pybedtools = "^0.9.0"
+
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.1.2"
+numpydoc = "^1.5.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
