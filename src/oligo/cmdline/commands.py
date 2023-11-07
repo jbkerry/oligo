@@ -107,6 +107,12 @@ def capture(ctx, **kwargs):
     ),
 )
 @click.option(
+    "--bed",
+    "-b",
+    type=click.Path(exists=True),
+    help="Path to bed file with capture viewpoint coordinates"
+)
+@click.option(
     "--contig",
     is_flag=True,
     help="Run in contiguous mode (restriciton enzyme independent)."

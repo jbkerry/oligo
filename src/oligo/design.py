@@ -224,7 +224,7 @@ class Tiled(Tools, FragmentMixin):
         
         return self
     
-    def gen_oligos_contig(self, chrom, region='', step=70, oligo=70):
+    def gen_oligos_contig(self, chrom, region='', bed=None, step=70, oligo=70):
         """Designs adjacent oligos based on a user-defined step size,
         across a specified region of a chromosome, or for the entire
         chromosome.
@@ -236,6 +236,8 @@ class Tiled(Tools, FragmentMixin):
         region : str, optional
             The region of the chromosome to design oligos, e.g.
             10000-20000; omit this option to design oligos over the
+        bed : Path, optional
+            The path to the bed file containing the coordinates within which tiled oligos will be generated
         step : int, optional
             The step size, or how close adjacent oligos should be, default=70;
             for end-to-end oligos, set `step` to equal `oligo`
@@ -252,28 +254,37 @@ class Tiled(Tools, FragmentMixin):
         self : object
         
         """
-        
+
+
         _check_value((step, oligo), ('Step size', 'Oligo size'))
         self._create_attr(oligo)
-        
-        if not chrom.startswith('chr'): chrom = ''.join(('chr'+str(chrom)))
-        chrom_seq = self.genome_seq[chrom].seq.upper()
-            
-        start, stop = (0, len(chrom_seq)) if not region else map(
-            int, region.split('-'))
-        stop = stop - oligo
-        
-        print('Generating oligos...')
-        coors = [(x, x + oligo) for x in range(start, stop+1, step)]
-        sequences = _get_sequence(chrom_seq, *coors)
-        keys = _create_key(chrom, *coors)
-        self.oligo_seqs.update(zip(keys, sequences))
-        
+        if bed:
+            with open(bed) as tiling_sites:
+                for site in tiling_sites:
+                    chrom, start, stop, _ = site.strip().split('\t')
+                    self._gen_seqs(chrom, "-".join((start, stop)), oligo, step)
+        else:
+            self._gen_seqs(chrom, region, oligo, step)
+
         print('\t...complete.')
         if __name__ != '__main__':
             print('Oligos stored in the oligo_seqs attribute')
         
         return self
+
+    def _gen_seqs(self, chrom, region, oligo, step):
+        if not chrom.startswith('chr'): chrom = ''.join(('chr' + str(chrom)))
+        chrom_seq = self.genome_seq[chrom].seq.upper()
+
+        start, stop = (0, len(chrom_seq)) if not region else map(
+            int, region.split('-'))
+        stop = stop - oligo
+
+        print('Generating oligos...')
+        coors = [(x, x + oligo) for x in range(start, stop + 1, step)]
+        sequences = _get_sequence(chrom_seq, *coors)
+        keys = _create_key(chrom, *coors)
+        self.oligo_seqs.update(zip(keys, sequences))
     
     def __str__(self):
         
