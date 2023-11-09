@@ -9,20 +9,17 @@ def run_capture(config, genome, fasta, bed, enzyme, oligo, blat, star_index):
     )
     determine_oligo_density(c, star_index)
 
-def run_tiled(config, genome, fasta, chrom, region, bed, contig, enzyme, step_size, oligo, blat, star_index):
+def run_tiled(config, genome, fasta, bed, contig, enzyme, step_size, oligo, blat, star_index):
     c = Tiled(genome=genome, fa=fasta, config_path=config, blat=blat)
     if contig:
         c.gen_oligos_contig(
-            chrom=chrom,
-            region=region,
             bed=bed,
             step=step_size,
             oligo=oligo
         )
     else:
         c.gen_oligos_capture(
-            chrom=chrom,
-            region=region,
+            bed=bed,
             enzyme=enzyme,
             oligo=oligo
         )

@@ -35,6 +35,13 @@ def common_options(f):
         help="Genome build",
         required=True,
     )
+    @click.option(
+        "--bed",
+        "-b",
+        required=True,
+        type=click.Path(exists=True),
+        help="Path to bed file with capture viewpoint coordinates"
+    )
     @functools.wraps(f)
     def wrapper_common_options(*args, **kwargs):
         return f(*args, **kwargs)
@@ -69,13 +76,6 @@ def final_common_options(f):
 @cli.command()
 @common_options
 @click.option(
-    "--bed",
-    "-b",
-    required=True,
-    type=click.Path(exists=True),
-    help="Path to bed file with capture viewpoint coordinates"
-)
-@click.option(
     "--enzyme",
     "-e",
     type=click.Choice(['DpnII', 'NlaIII', 'HindIII']),
@@ -90,32 +90,9 @@ def capture(ctx, **kwargs):
 @cli.command()
 @common_options
 @click.option(
-    "--chr",
-    "-c",
-    "chrom",
-    required=True,
-    type=click.STRING,
-    help="Chromosome number/letter on which to design the oligos.",
-)
-@click.option(
-    "--region",
-    "-r",
-    type=click.STRING,
-    help=(
-        "The region in which to design the oligos; must be in the format 'start-stop' e.g. 10000-20000. Omit this "
-        "option to design oligos across the entire chromosome."
-    ),
-)
-@click.option(
-    "--bed",
-    "-b",
-    type=click.Path(exists=True),
-    help="Path to bed file with capture viewpoint coordinates"
-)
-@click.option(
     "--contig",
     is_flag=True,
-    help="Run in contiguous mode (restriciton enzyme independent)."
+    help="Run in contiguous mode (restriction enzyme independent)."
 )
 @click.option(
     "--enzyme",
@@ -141,13 +118,6 @@ def tiled(ctx, **kwargs):
 
 @cli.command("off-target")
 @common_options
-@click.option(
-    "--bed",
-    "-b",
-    required=True,
-    type=click.Path(exists=True),
-    help="Path to bed file with capture viewpoint coordinates"
-)
 @click.option(
     "--step-size",
     "-t",
