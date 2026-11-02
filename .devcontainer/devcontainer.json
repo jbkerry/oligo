@@ -1,6 +1,8 @@
 {
   "name": "oligo",
-  "image": "mcr.microsoft.com/devcontainers/python:3.9-bookworm",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
   "hostRequirements": {
     "cpus": 2,
     "memory": "8gb"
