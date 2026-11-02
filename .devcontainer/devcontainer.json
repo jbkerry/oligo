@@ -1,0 +1,9 @@
+{
+  "name": "oligo",
+  "image": "mcr.microsoft.com/devcontainers/python:3.9",
+  "hostRequirements": { "cpus": 2, "memory": "8gb" },
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": {}
+  },
+  "postCreateCommand": "curl -fsSL https://claude.ai/install.sh | bash; curl -fsSL https://releases.herdr.dev/core/install.sh | sh; grep -q '.local/bin' ~/.profile || echo 'export PATH=\"$HOME/.local/bin:$PATH\"' >> ~/.profile"
+}
